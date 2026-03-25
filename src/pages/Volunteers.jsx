@@ -1,63 +1,79 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
+import API from "../services/api";
 
 const Volunteers = () => {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [area, setArea] = useState("");
+  const [zone, setZone] = useState("");
+  const [skills, setSkills] = useState("");
+
   const [volunteers, setVolunteers] = useState([]);
+  const [error, setError] = useState("");
 
-  const navigate = useNavigate();
+  // 🔥 Load from backend
+  const loadVolunteers = async () => {
+    try {
+      const res = await API.get("/volunteers");
+      setVolunteers(res.data || []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-  // ✅ LOAD from localStorage (ONLY ONCE)
   useEffect(() => {
-    const loadVolunteers = () => {
-      const stored = localStorage.getItem("volunteers");
-      if (stored) {
-        setVolunteers(JSON.parse(stored));
-      }
-    };
-
     loadVolunteers();
 
-    window.addEventListener("focus", loadVolunteers);
-
-    return () => {
-      window.removeEventListener("focus", loadVolunteers);
-    };
+    const interval = setInterval(loadVolunteers, 5000);
+    return () => clearInterval(interval);
   }, []);
 
-  // ✅ ADD volunteer (correct + synced)
-  const handleSubmit = (e) => {
+  // 🔥 Register volunteer
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
 
-    if (!name || !phone || !area) {
-      alert("Fill all fields");
+    if (!name || !phone) {
+      setError("Name and phone are required");
       return;
     }
 
-    const newVolunteer = {
-      id: Date.now(),
-      name,
-      phone,
-      area,
-      status: "Available",
-      verified: false,
-    };
+    try {
+      await API.post("/volunteers", {
+        name,
+        phone_number: phone,
+        zone,
+        skills: skills ? skills.split(",") : [],
+      });
 
-    setVolunteers((prev) => {
-      const updated = [...prev, newVolunteer];
+      setName("");
+      setPhone("");
+      setZone("");
+      setSkills("");
 
-      // 🔥 SAVE immediately (correct way)
-      localStorage.setItem("volunteers", JSON.stringify(updated));
+      loadVolunteers(); // refresh instantly
+    } catch (err) {
+      console.error(err);
 
-      return updated;
-    });
+      if (err.response?.data?.detail) {
+        setError(err.response.data.detail);
+      } else {
+        setError("Failed to add volunteer");
+      }
+    }
+  };
 
-    setName("");
-    setPhone("");
-    setArea("");
+  // 🔥 Update trust tier
+  const updateTrust = async (id, tier) => {
+    try {
+      await API.patch(`/volunteers/${id}/trust`, {
+        trust_tier: tier,
+      });
+
+      loadVolunteers();
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
@@ -78,17 +94,26 @@ const Volunteers = () => {
 
           <input
             className="w-full mb-3 p-2 border rounded"
-            placeholder="Phone"
+            placeholder="Phone (+91...)"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
           />
 
           <input
             className="w-full mb-3 p-2 border rounded"
-            placeholder="Area"
-            value={area}
-            onChange={(e) => setArea(e.target.value)}
+            placeholder="Zone (optional)"
+            value={zone}
+            onChange={(e) => setZone(e.target.value)}
           />
+
+          <input
+            className="w-full mb-3 p-2 border rounded"
+            placeholder="Skills (comma separated)"
+            value={skills}
+            onChange={(e) => setSkills(e.target.value)}
+          />
+
+          {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
 
           <button className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
             Add Volunteer
@@ -107,31 +132,35 @@ const Volunteers = () => {
               className="bg-white p-4 rounded-xl shadow hover:shadow-md transition"
             >
               <h3 className="font-semibold">{v.name}</h3>
-              <p className="text-gray-500">{v.phone}</p>
-              <p className="text-gray-500">{v.area}</p>
+              <p className="text-gray-500">{v.phone_number}</p>
+              <p className="text-gray-400 text-sm">Zone: {v.zone || "-"}</p>
 
-              <span className="text-sm text-green-600 mt-2 inline-block">
-                {v.status}
+              {/* Stats */}
+              <div className="text-xs mt-2 text-gray-500">
+                ✔ Completed: {v.completions} <br />❌ No-shows: {v.no_shows}
+              </div>
+
+              {/* Trust badge */}
+              <span className="text-xs mt-2 inline-block px-2 py-1 rounded bg-gray-200">
+                {v.trust_tier}
               </span>
 
-              {/* VERIFY BUTTON */}
-              {v.verified ? (
+              {/* Actions */}
+              <div className="mt-3 flex gap-2">
                 <button
-                  disabled
-                  className="mt-3 w-full bg-gray-300 text-gray-600 p-2 rounded"
-                >
-                  Verified ✅
-                </button>
-              ) : (
-                <button
-                  className="mt-3 w-full bg-purple-500 text-white p-2 rounded hover:bg-purple-600"
-                  onClick={() =>
-                    navigate("/verify", { state: { volunteerId: v.id } })
-                  }
+                  className="flex-1 bg-green-500 text-white p-1 rounded"
+                  onClick={() => updateTrust(v.id, "FIELD_VERIFIED")}
                 >
                   Verify
                 </button>
-              )}
+
+                <button
+                  className="flex-1 bg-yellow-500 text-white p-1 rounded"
+                  onClick={() => updateTrust(v.id, "ID_VERIFIED")}
+                >
+                  ID Check
+                </button>
+              </div>
             </div>
           ))}
         </div>
