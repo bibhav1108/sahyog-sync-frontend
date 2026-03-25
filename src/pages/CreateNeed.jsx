@@ -1,42 +1,55 @@
 import { useState } from "react";
 import Layout from "../components/Layout";
 import { useNavigate } from "react-router-dom";
+import API from "../services/api";
 
 const CreateNeed = () => {
-  const [type, setType] = useState("");
-  const [quantity, setQuantity] = useState("");
-  const [address, setAddress] = useState("");
-  const [urgency, setUrgency] = useState("Medium");
-  const [deadline, setDeadline] = useState("");
-
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const [type, setType] = useState("FOOD");
+  const [description, setDescription] = useState("");
+  const [quantity, setQuantity] = useState("");
+  const [pickupAddress, setPickupAddress] = useState("");
+  const [urgency, setUrgency] = useState("MEDIUM");
+  const [deadline, setDeadline] = useState("");
 
-    if (!type || !quantity || !address || !deadline) {
-      alert("Fill all fields");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    if (!type || !description || !quantity || !pickupAddress) {
+      setError("All fields are required");
       return;
     }
 
-    const newNeed = {
-      id: Date.now(),
-      type,
-      quantity,
-      address,
-      urgency,
-      deadline,
-      status: "Open",
-      createdAt: Date.now(),
-    };
+    try {
+      setLoading(true);
 
-    const stored = JSON.parse(localStorage.getItem("needs")) || [];
-    const updated = [newNeed, ...stored];
+      await API.post("/needs", {
+        type, // MUST be: FOOD, WATER, etc.
+        description,
+        quantity,
+        pickup_address: pickupAddress,
+        urgency, // MUST be: LOW, MEDIUM, HIGH
+        pickup_deadline: deadline || null,
+      });
 
-    localStorage.setItem("needs", JSON.stringify(updated));
+      alert("Need created successfully!");
+      navigate("/dashboard");
+    } catch (err) {
+      console.error(err);
 
-    alert("Need created!");
-    navigate("/dashboard");
+      if (err.response?.data?.detail) {
+        setError(err.response.data.detail);
+      } else {
+        setError("Failed to create need");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -46,74 +59,75 @@ const CreateNeed = () => {
           <h2 className="text-xl font-bold mb-6">Create Need</h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Type */}
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Type of Need
-              </label>
-              <input
-                className="w-full p-2 border rounded"
-                placeholder="e.g. Food, Clothes"
-                value={type}
-                onChange={(e) => setType(e.target.value)}
-              />
-            </div>
+            {/* TYPE */}
+            <select
+              className="w-full p-2 border rounded"
+              value={type}
+              onChange={(e) => setType(e.target.value)}
+            >
+              <option value="FOOD">Food</option>
+              <option value="WATER">Water</option>
+              <option value="KIT">Kit</option>
+              <option value="BLANKET">Blanket</option>
+              <option value="MEDICAL">Medical</option>
+              <option value="VEHICLE">Vehicle</option>
+              <option value="OTHER">Other</option>
+            </select>
 
-            {/* Quantity */}
-            <div>
-              <label className="block text-sm font-medium mb-1">Quantity</label>
-              <input
-                className="w-full p-2 border rounded"
-                placeholder="e.g. 50 meals"
-                value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
-              />
-            </div>
+            {/* DESCRIPTION */}
+            <textarea
+              className="w-full p-2 border rounded"
+              placeholder="Describe the need"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
 
-            {/* Address */}
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Pickup Address
-              </label>
-              <textarea
-                className="w-full p-2 border rounded"
-                placeholder="Enter full address"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-              />
-            </div>
+            {/* QUANTITY */}
+            <input
+              className="w-full p-2 border rounded"
+              placeholder="e.g. 50 packets"
+              value={quantity}
+              onChange={(e) => setQuantity(e.target.value)}
+            />
 
-            {/* Urgency */}
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Urgency Level
-              </label>
-              <select
-                className="w-full p-2 border rounded"
-                value={urgency}
-                onChange={(e) => setUrgency(e.target.value)}
-              >
-                <option value="Low">Low</option>
-                <option value="Medium">Medium</option>
-                <option value="High">High</option>
-              </select>
-            </div>
+            {/* ADDRESS */}
+            <textarea
+              className="w-full p-2 border rounded"
+              placeholder="Pickup address"
+              value={pickupAddress}
+              onChange={(e) => setPickupAddress(e.target.value)}
+            />
 
-            {/* Deadline */}
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Pickup Deadline
-              </label>
-              <input
-                type="datetime-local"
-                className="w-full p-2 border rounded"
-                value={deadline || ""}
-                onChange={(e) => setDeadline(e.target.value)}
-              />
-            </div>
+            {/* URGENCY */}
+            <select
+              className="w-full p-2 border rounded"
+              value={urgency}
+              onChange={(e) => setUrgency(e.target.value)}
+            >
+              <option value="LOW">Low</option>
+              <option value="MEDIUM">Medium</option>
+              <option value="HIGH">High</option>
+            </select>
 
-            <button className="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600">
-              Create Need
+            {/* DEADLINE */}
+            <input
+              type="datetime-local"
+              className="w-full p-2 border rounded"
+              value={deadline}
+              onChange={(e) => setDeadline(e.target.value)}
+            />
+
+            {/* ERROR */}
+            {error && (
+              <p className="text-red-500 text-sm text-center">{error}</p>
+            )}
+
+            {/* BUTTON */}
+            <button
+              disabled={loading}
+              className="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600"
+            >
+              {loading ? "Creating..." : "Create Need"}
             </button>
           </form>
         </div>
