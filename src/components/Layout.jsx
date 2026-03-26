@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import API from "../services/api";
 
 const Layout = ({ children }) => {
@@ -10,23 +10,46 @@ const Layout = ({ children }) => {
   const [volunteers, setVolunteers] = useState([]);
   const [selectedVol, setSelectedVol] = useState({});
 
+  // 🔒 Prevent overlapping calls
+  const loadingRef = useRef({
+    volunteers: false,
+    notifications: false,
+  });
+
   // 🔥 Load needs
   const loadNotifications = async () => {
+    if (loadingRef.current.notifications) return;
+    loadingRef.current.notifications = true;
+
     try {
       const res = await API.get("/needs");
-      setNotifications((res.data || []).slice(0, 5));
+
+      const filtered = (res.data || []).filter((n) => n.status !== "COMPLETED");
+
+      setNotifications(filtered.slice(0, 5));
     } catch (err) {
-      console.error("Failed to load needs", err);
+      if (err.code !== "ERR_CANCELED") {
+        console.error("Failed to load needs", err);
+      }
+    } finally {
+      loadingRef.current.notifications = false;
     }
   };
 
   // 🔥 Load volunteers
   const loadVolunteers = async () => {
+    if (loadingRef.current.volunteers) return;
+    loadingRef.current.volunteers = true;
+
     try {
       const res = await API.get("/volunteers");
       setVolunteers(res.data || []);
     } catch (err) {
-      console.error("Failed to load volunteers", err);
+      if (err.code !== "ERR_CANCELED") {
+        console.error("Failed to load volunteers", err);
+      }
+    } finally {
+      loadingRef.current.volunteers = false;
     }
   };
 
@@ -86,6 +109,7 @@ const Layout = ({ children }) => {
         <nav className="flex flex-col gap-3">
           <Link to="/dashboard">Dashboard</Link>
           <Link to="/create">Create Need</Link>
+          <Link to="/surplus">Surplus Alerts</Link>
           <Link to="/volunteers">Volunteers</Link>
         </nav>
       </div>
@@ -101,7 +125,6 @@ const Layout = ({ children }) => {
                 key={n.id}
                 className="p-3 rounded-xl bg-gray-50 shadow-sm border hover:shadow-md transition"
               >
-                {/* Top row */}
                 <div className="flex justify-between items-center mb-1">
                   <p className="text-sm font-semibold">{n.type}</p>
 
@@ -118,22 +141,18 @@ const Layout = ({ children }) => {
                   </span>
                 </div>
 
-                {/* Status */}
                 <span className="text-[10px] px-2 py-0.5 rounded bg-gray-200">
                   {n.status}
                 </span>
 
                 <p className="text-xs text-gray-500 mt-1">{n.quantity}</p>
-
                 <p className="text-xs text-gray-400 truncate">
                   {n.pickup_address}
                 </p>
-
                 <p className="text-[10px] text-gray-300 mt-1">
                   {new Date(n.created_at).toLocaleTimeString()}
                 </p>
 
-                {/* Volunteer dropdown */}
                 <select
                   className="w-full mt-2 p-1 border rounded text-xs"
                   value={selectedVol[n.id] || ""}
@@ -146,22 +165,20 @@ const Layout = ({ children }) => {
                 >
                   <option value="">Select Volunteer</option>
                   {volunteers
-                    .filter((v) => v.whatsapp_active)
+                    .filter((v) => v.telegram_active)
                     .map((v) => (
                       <option key={v.id} value={v.id}>
-                        {v.name}
+                        {v.name} ✅
                       </option>
                     ))}
                 </select>
 
-                {/* Warning */}
-                {volunteers.filter((v) => v.whatsapp_active).length === 0 && (
+                {volunteers.filter((v) => v.telegram_active).length === 0 && (
                   <p className="text-xs text-red-500 mt-1">
-                    No WhatsApp-active volunteers
+                    No Telegram-connected volunteers
                   </p>
                 )}
 
-                {/* Assign button */}
                 <button
                   disabled={n.status === "DISPATCHED"}
                   onClick={() => handleDispatch(n.id)}
