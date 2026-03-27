@@ -1,17 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../../services/api";
-import PublicNavbar from "../../components/PublicNavbar";
 
 const Register = () => {
   const navigate = useNavigate();
 
-  // Org
   const [orgName, setOrgName] = useState("");
   const [orgPhone, setOrgPhone] = useState("");
   const [orgEmail, setOrgEmail] = useState("");
 
-  // Admin
   const [adminName, setAdminName] = useState("");
   const [adminEmail, setAdminEmail] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
@@ -50,8 +47,6 @@ const Register = () => {
       alert(res.data.message || "Registered successfully!");
       navigate("/login");
     } catch (err) {
-      console.error(err);
-
       if (err.response?.data?.detail) {
         setError(err.response.data.detail);
       } else {
@@ -63,71 +58,147 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <PublicNavbar />
+    <div className="min-h-screen flex bg-gray-100">
+      {/* LEFT SIDE */}
+      <div className="hidden lg:flex w-1/2 bg-indigo-700 text-white p-12 flex-col justify-between relative overflow-hidden">
+        <div>
+          <h1 className="text-5xl font-extrabold leading-tight">
+            Bridging Surplus <br /> to Social Impact
+          </h1>
+          <p className="mt-6 text-lg text-indigo-200 max-w-md">
+            Join a smart logistics network built for NGOs and community
+            responders.
+          </p>
+        </div>
 
-      <div className="flex flex-1 items-center justify-center px-4">
-        <div className="w-full max-w-lg bg-white p-6 rounded-2xl shadow-md">
-          <h2 className="text-2xl font-bold mb-6 text-center">
-            Register Your NGO
-          </h2>
+        <div className="grid grid-cols-2 gap-6">
+          <div className="bg-white/10 p-6 rounded-xl backdrop-blur">
+            <p className="text-2xl font-bold">4.2k+</p>
+            <p className="text-sm text-indigo-200">Active Partners</p>
+          </div>
+          <div className="bg-white/10 p-6 rounded-xl backdrop-blur">
+            <p className="text-2xl font-bold">120 Tons</p>
+            <p className="text-sm text-indigo-200">Goods Redistributed</p>
+          </div>
+        </div>
+      </div>
 
-          <form onSubmit={handleRegister} className="space-y-4">
-            {/* ORG INFO */}
-            <h3 className="font-semibold text-gray-700">Organization Info</h3>
+      {/* RIGHT SIDE */}
+      <div className="flex w-full lg:w-1/2 items-center justify-center p-6">
+        <div className="w-full max-w-xl bg-white p-10 rounded-2xl shadow-xl">
+          <h2 className="text-3xl font-bold text-indigo-700">Create Account</h2>
+          <p className="text-gray-500 text-sm mt-2 mb-8">
+            Start making a difference
+          </p>
 
-            <input
-              type="text"
-              placeholder="Organization Name"
-              value={orgName}
-              onChange={(e) => setOrgName(e.target.value)}
-              className="w-full p-2 border rounded focus:ring-2 focus:ring-green-400"
-            />
+          <form onSubmit={handleRegister} className="space-y-6">
+            {/* ORG */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder=" "
+                  value={orgName}
+                  onChange={(e) => setOrgName(e.target.value)}
+                  className="peer w-full p-4 rounded-xl bg-gray-100 focus:ring-2 focus:ring-indigo-400 outline-none"
+                />
+                <label
+                  className="absolute left-4 top-4 text-gray-500 text-sm transition-all 
+                  peer-focus:-top-2 peer-focus:text-xs peer-focus:bg-white peer-focus:px-1
+                  peer-not-placeholder-shown:-top-2 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:bg-white peer-not-placeholder-shown:px-1"
+                >
+                  NGO Name
+                </label>
+              </div>
 
-            <input
-              type="text"
-              placeholder="Organization Phone"
-              value={orgPhone}
-              onChange={(e) => setOrgPhone(e.target.value)}
-              className="w-full p-2 border rounded focus:ring-2 focus:ring-green-400"
-            />
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder=" "
+                  value={orgPhone}
+                  onChange={(e) => setOrgPhone(e.target.value)}
+                  className="peer w-full p-4 rounded-xl bg-gray-100 focus:ring-2 focus:ring-indigo-400 outline-none"
+                />
+                <label
+                  className="absolute left-4 top-4 text-gray-500 text-sm transition-all 
+                  peer-focus:-top-2 peer-focus:text-xs peer-focus:bg-white peer-focus:px-1
+                  peer-not-placeholder-shown:-top-2 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:bg-white peer-not-placeholder-shown:px-1"
+                >
+                  Phone
+                </label>
+              </div>
+            </div>
 
-            <input
-              type="email"
-              placeholder="Organization Email"
-              value={orgEmail}
-              onChange={(e) => setOrgEmail(e.target.value)}
-              className="w-full p-2 border rounded focus:ring-2 focus:ring-green-400"
-            />
+            <div className="relative">
+              <input
+                type="email"
+                placeholder=" "
+                value={orgEmail}
+                onChange={(e) => setOrgEmail(e.target.value)}
+                className="peer w-full p-4 rounded-xl bg-gray-100 focus:ring-2 focus:ring-indigo-400 outline-none"
+              />
+              <label
+                className="absolute left-4 top-4 text-gray-500 text-sm transition-all 
+                peer-focus:-top-2 peer-focus:text-xs peer-focus:bg-white peer-focus:px-1
+                peer-not-placeholder-shown:-top-2 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:bg-white peer-not-placeholder-shown:px-1"
+              >
+                Organization Email
+              </label>
+            </div>
 
-            {/* ADMIN INFO */}
-            <h3 className="font-semibold text-gray-700 mt-4">
-              Coordinator Info
-            </h3>
+            {/* ADMIN */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder=" "
+                  value={adminName}
+                  onChange={(e) => setAdminName(e.target.value)}
+                  className="peer w-full p-4 rounded-xl bg-gray-100 focus:ring-2 focus:ring-indigo-400 outline-none"
+                />
+                <label
+                  className="absolute left-4 top-4 text-gray-500 text-sm transition-all 
+                  peer-focus:-top-2 peer-focus:text-xs peer-focus:bg-white peer-focus:px-1
+                  peer-not-placeholder-shown:-top-2 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:bg-white peer-not-placeholder-shown:px-1"
+                >
+                  Your Name
+                </label>
+              </div>
 
-            <input
-              type="text"
-              placeholder="Your Name"
-              value={adminName}
-              onChange={(e) => setAdminName(e.target.value)}
-              className="w-full p-2 border rounded focus:ring-2 focus:ring-green-400"
-            />
+              <div className="relative">
+                <input
+                  type="email"
+                  placeholder=" "
+                  value={adminEmail}
+                  onChange={(e) => setAdminEmail(e.target.value)}
+                  className="peer w-full p-4 rounded-xl bg-gray-100 focus:ring-2 focus:ring-indigo-400 outline-none"
+                />
+                <label
+                  className="absolute left-4 top-4 text-gray-500 text-sm transition-all 
+                  peer-focus:-top-2 peer-focus:text-xs peer-focus:bg-white peer-focus:px-1
+                  peer-not-placeholder-shown:-top-2 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:bg-white peer-not-placeholder-shown:px-1"
+                >
+                  Your Email
+                </label>
+              </div>
+            </div>
 
-            <input
-              type="email"
-              placeholder="Your Email"
-              value={adminEmail}
-              onChange={(e) => setAdminEmail(e.target.value)}
-              className="w-full p-2 border rounded focus:ring-2 focus:ring-green-400"
-            />
-
-            <input
-              type="password"
-              placeholder="Password (min 8 chars)"
-              value={adminPassword}
-              onChange={(e) => setAdminPassword(e.target.value)}
-              className="w-full p-2 border rounded focus:ring-2 focus:ring-green-400"
-            />
+            <div className="relative">
+              <input
+                type="password"
+                placeholder=" "
+                value={adminPassword}
+                onChange={(e) => setAdminPassword(e.target.value)}
+                className="peer w-full p-4 rounded-xl bg-gray-100 focus:ring-2 focus:ring-indigo-400 outline-none"
+              />
+              <label
+                className="absolute left-4 top-4 text-gray-500 text-sm transition-all 
+                peer-focus:-top-2 peer-focus:text-xs peer-focus:bg-white peer-focus:px-1
+                peer-not-placeholder-shown:-top-2 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:bg-white peer-not-placeholder-shown:px-1"
+              >
+                Password
+              </label>
+            </div>
 
             {/* ERROR */}
             {error && (
@@ -138,17 +209,17 @@ const Register = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600 transition disabled:opacity-50"
+              className="w-full py-4 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-bold rounded-xl shadow-lg hover:scale-[1.01] active:scale-[0.98] transition"
             >
-              {loading ? "Registering..." : "Register"}
+              {loading ? "Registering..." : "Register Organization"}
             </button>
           </form>
 
-          <p className="text-sm text-center mt-4">
+          <p className="text-sm text-center mt-6">
             Already have an account?{" "}
             <span
               onClick={() => navigate("/login")}
-              className="text-green-600 font-medium cursor-pointer"
+              className="text-indigo-600 font-medium cursor-pointer"
             >
               Login
             </span>
