@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import Layout from "../components/Layout";
 import API from "../services/api";
 
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
@@ -7,7 +6,6 @@ import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 const Dashboard = () => {
   const [needs, setNeeds] = useState([]);
 
-  // 🔥 Load needs from backend
   const loadNeeds = async () => {
     try {
       const res = await API.get("/needs");
@@ -19,28 +17,22 @@ const Dashboard = () => {
 
   useEffect(() => {
     loadNeeds();
-
     const interval = setInterval(loadNeeds, 5000);
-
     return () => clearInterval(interval);
   }, []);
 
-  // default center (Lucknow)
   const center = [26.8467, 80.9462];
 
   return (
-    <Layout>
-      <h2 className="text-2xl font-bold mb-6">Dashboard</h2>
-
-      <div className="h-[500px] w-full rounded-xl overflow-hidden shadow">
-        <MapContainer center={center} zoom={6} className="h-full w-full">
+    <div className="w-full h-[calc(100vh-6rem)]">
+      <div className="w-full h-full rounded-2xl border border-white/40 bg-white/70 backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.05)] overflow-hidden relative z-0">
+        <MapContainer center={center} zoom={6} className="h-full w-full z-0">
           <TileLayer
             attribution="&copy; OpenStreetMap"
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
 
           {needs.map((need) => {
-            // TEMP: fake coords (until backend stores location)
             const lat = 24 + Math.random() * 6;
             const lng = 78 + Math.random() * 6;
 
@@ -60,7 +52,7 @@ const Dashboard = () => {
           })}
         </MapContainer>
       </div>
-    </Layout>
+    </div>
   );
 };
 
