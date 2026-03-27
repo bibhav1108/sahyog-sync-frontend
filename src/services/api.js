@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "https://sahyog-setu-backend.onrender.com/",
+  baseURL: "https://sahyog-setu-backend.onrender.com/api/v1/",
 });
 
 API.interceptors.request.use((config) => {
