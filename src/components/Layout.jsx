@@ -1,22 +1,30 @@
-import { Link, useLocation } from "react-router-dom";
-import { useState, useEffect, useRef } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
 import API from "../services/api";
+
+const NAV_ITEMS = [
+  { to: "/dashboard", label: "Overview", icon: "dashboard" },
+  { to: "/needs", label: "Active Needs", icon: "emergency" },
+  { to: "/volunteers", label: "Volunteers", icon: "groups" },
+  { to: "/dispatches", label: "Dispatch History", icon: "history" },
+  { to: "/inventory", label: "Inventory", icon: "inventory_2" },
+];
 
 const Layout = ({ children }) => {
   const location = useLocation();
+  const navigate = useNavigate();
 
-  const [showNotifications, setShowNotifications] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(true);
+  const [panelWidth, setPanelWidth] = useState(340);
+  const [isDragging, setIsDragging] = useState(false);
+
   const [notifications, setNotifications] = useState([]);
-  const [volunteers, setVolunteers] = useState([]);
-  const [selectedVol, setSelectedVol] = useState({});
 
-  // 🔒 Prevent overlapping calls
   const loadingRef = useRef({
-    volunteers: false,
     notifications: false,
   });
 
-  // 🔥 Load needs
+  // 🔥 LOAD ALERTS (ONLY OPEN NEEDS)
   const loadNotifications = async () => {
     if (loadingRef.current.notifications) return;
     loadingRef.current.notifications = true;
@@ -24,202 +32,191 @@ const Layout = ({ children }) => {
     try {
       const res = await API.get("/needs");
 
-      const filtered = (res.data || []).filter((n) => n.status !== "COMPLETED");
+      const filtered = (res.data || [])
+        .filter((n) => n.status === "OPEN")
+        .slice(0, 6);
 
-      setNotifications(filtered.slice(0, 5));
+      setNotifications(filtered);
     } catch (err) {
-      if (err.code !== "ERR_CANCELED") {
-        console.error("Failed to load needs", err);
-      }
+      console.error(err);
     } finally {
       loadingRef.current.notifications = false;
     }
   };
 
-  // 🔥 Load volunteers
-  const loadVolunteers = async () => {
-    if (loadingRef.current.volunteers) return;
-    loadingRef.current.volunteers = true;
-
-    try {
-      const res = await API.get("/volunteers");
-      setVolunteers(res.data || []);
-    } catch (err) {
-      if (err.code !== "ERR_CANCELED") {
-        console.error("Failed to load volunteers", err);
-      }
-    } finally {
-      loadingRef.current.volunteers = false;
-    }
-  };
-
-  // 🔥 Dispatch function
-  const handleDispatch = async (needId) => {
-    const volunteerId = selectedVol[needId];
-
-    if (!volunteerId) {
-      alert("Select a volunteer first");
-      return;
-    }
-
-    try {
-      const res = await API.post("/dispatches", {
-        need_id: needId,
-        volunteer_id: Number(volunteerId),
-      });
-
-      alert(res.data.message || "Dispatch created!");
-
-      loadNotifications(); // refresh
-    } catch (err) {
-      console.error(err);
-
-      if (err.response?.data?.detail) {
-        alert(err.response.data.detail);
-      } else {
-        alert("Dispatch failed");
-      }
-    }
-  };
-
-  // 🔥 Initial load + auto refresh
   useEffect(() => {
     loadNotifications();
-    loadVolunteers();
 
-    const interval = setInterval(() => {
-      loadNotifications();
-      loadVolunteers();
-    }, 5000);
-
+    const interval = setInterval(loadNotifications, 5000);
     return () => clearInterval(interval);
   }, []);
 
-  // 🔥 Auto open notifications on dashboard
+  // 🔥 RESIZE PANEL
   useEffect(() => {
-    setShowNotifications(location.pathname === "/dashboard");
-  }, [location.pathname]);
+    const handleMove = (e) => {
+      if (!isDragging) return;
+
+      const newWidth = window.innerWidth - e.clientX;
+      if (newWidth > 260 && newWidth < 520) {
+        setPanelWidth(newWidth);
+      }
+    };
+
+    const stopDragging = () => setIsDragging(false);
+
+    window.addEventListener("mousemove", handleMove);
+    window.addEventListener("mouseup", stopDragging);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMove);
+      window.removeEventListener("mouseup", stopDragging);
+    };
+  }, [isDragging]);
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
-      {/* Sidebar */}
-      <div className="w-64 bg-white shadow-lg p-5">
-        <h1 className="text-xl font-bold mb-6">Sahyog Setu</h1>
-
-        <nav className="flex flex-col gap-3">
-          <Link to="/dashboard">Dashboard</Link>
-          <Link to="/create">Create Need</Link>
-          <Link to="/surplus">Surplus Alerts</Link>
-          <Link to="/volunteers">Volunteers</Link>
-        </nav>
-      </div>
-
-      {/* 🔔 Notifications Panel */}
-      {showNotifications && (
-        <div className="w-72 bg-white border-r p-4 flex flex-col gap-3">
-          <h2 className="font-semibold mb-2">Notifications</h2>
-
-          {notifications.length > 0 ? (
-            notifications.map((n) => (
-              <div
-                key={n.id}
-                className="p-3 rounded-xl bg-gray-50 shadow-sm border hover:shadow-md transition"
-              >
-                <div className="flex justify-between items-center mb-1">
-                  <p className="text-sm font-semibold">{n.type}</p>
-
-                  <span
-                    className={`text-[10px] px-2 py-0.5 rounded ${
-                      n.urgency === "HIGH"
-                        ? "bg-red-100 text-red-600"
-                        : n.urgency === "MEDIUM"
-                          ? "bg-yellow-100 text-yellow-600"
-                          : "bg-green-100 text-green-600"
-                    }`}
-                  >
-                    {n.urgency}
-                  </span>
-                </div>
-
-                <span className="text-[10px] px-2 py-0.5 rounded bg-gray-200">
-                  {n.status}
-                </span>
-
-                <p className="text-xs text-gray-500 mt-1">{n.quantity}</p>
-                <p className="text-xs text-gray-400 truncate">
-                  {n.pickup_address}
-                </p>
-                <p className="text-[10px] text-gray-300 mt-1">
-                  {new Date(n.created_at).toLocaleTimeString()}
-                </p>
-
-                <select
-                  className="w-full mt-2 p-1 border rounded text-xs"
-                  value={selectedVol[n.id] || ""}
-                  onChange={(e) =>
-                    setSelectedVol((prev) => ({
-                      ...prev,
-                      [n.id]: e.target.value,
-                    }))
-                  }
-                >
-                  <option value="">Select Volunteer</option>
-                  {volunteers
-                    .filter((v) => v.telegram_active)
-                    .map((v) => (
-                      <option key={v.id} value={v.id}>
-                        {v.name} ✅
-                      </option>
-                    ))}
-                </select>
-
-                {volunteers.filter((v) => v.telegram_active).length === 0 && (
-                  <p className="text-xs text-red-500 mt-1">
-                    No Telegram-connected volunteers
-                  </p>
-                )}
-
-                <button
-                  disabled={n.status === "DISPATCHED"}
-                  onClick={() => handleDispatch(n.id)}
-                  className={`w-full mt-2 text-xs p-1 rounded ${
-                    n.status === "DISPATCHED"
-                      ? "bg-gray-300 text-gray-500"
-                      : "bg-blue-500 text-white hover:bg-blue-600"
-                  }`}
-                >
-                  {n.status === "DISPATCHED" ? "Assigned" : "Assign Volunteer"}
-                </button>
-              </div>
-            ))
-          ) : (
-            <p className="text-gray-400 text-sm">No notifications</p>
-          )}
+    <div className="min-h-screen bg-[#f7f9fc] text-[#191c1e] antialiased">
+      {/* SIDEBAR */}
+      <aside className="fixed left-0 top-0 z-50 flex h-screen w-64 flex-col border-r border-white/40 bg-white/70 p-6 shadow backdrop-blur-2xl">
+        <div className="mb-10 flex justify-center">
+          <img src="/sahyog_setu.png" className="w-36" />
         </div>
-      )}
 
-      {/* Main */}
-      <div className="flex-1 p-6">
-        <div className="flex justify-between mb-6">
-          <button
-            className="bg-gray-200 px-4 py-2 rounded"
-            onClick={() => setShowNotifications(!showNotifications)}
+        <nav className="flex-1 space-y-2 text-sm font-medium">
+          {NAV_ITEMS.map((item) => {
+            const active = location.pathname === item.to;
+
+            return (
+              <Link
+                key={item.to}
+                to={item.to}
+                className={`flex items-center gap-3 rounded-xl px-4 py-3 ${
+                  active
+                    ? "bg-indigo-50 text-indigo-700"
+                    : "text-slate-500 hover:bg-slate-100"
+                }`}
+              >
+                <span className="material-symbols-outlined">{item.icon}</span>
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* 🔥 KEEP YOUR BUTTONS */}
+        <div className="mt-auto space-y-4">
+          <Link
+            to="/create"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 py-3 text-white font-semibold"
           >
-            🔔 Toggle Notifications
-          </button>
+            <span className="material-symbols-outlined">add_circle</span>
+            Create Relief Request
+          </Link>
 
           <button
-            className="bg-red-500 text-white px-4 py-2 rounded-lg"
             onClick={() => {
-              localStorage.removeItem("token");
+              localStorage.clear();
               window.location.href = "/login";
             }}
+            className="w-full text-sm text-red-500 hover:underline"
           >
             Logout
           </button>
         </div>
+      </aside>
 
-        {children}
+      {/* TOP BAR */}
+      <header
+        className="fixed top-0 z-40 flex h-20 items-center justify-between px-8 bg-white/70 backdrop-blur border-b"
+        style={{ left: "16rem", right: 0 }}
+      >
+        {/* SEARCH */}
+        <div className="flex-1 max-w-xl relative">
+          <span className="material-symbols-outlined absolute left-3 top-2 text-slate-400">
+            search
+          </span>
+          <input
+            className="w-full pl-10 pr-3 py-2 rounded-xl bg-gray-100 text-sm outline-none"
+            placeholder="Search..."
+          />
+        </div>
+
+        {/* NOTIFICATIONS */}
+        <button
+          onClick={() => setShowNotifications((prev) => !prev)}
+          className="relative p-2 text-slate-600"
+        >
+          <span className="material-symbols-outlined">notifications</span>
+
+          {notifications.length > 0 && (
+            <span className="absolute right-1 top-1 h-4 w-4 bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center">
+              {notifications.length}
+            </span>
+          )}
+        </button>
+      </header>
+
+      {/* MAIN */}
+      <main style={{ marginLeft: "16rem", paddingTop: "5rem" }}>
+        <div className="p-6">{children}</div>
+      </main>
+
+      {/* 🔔 NOTIFICATION PANEL */}
+      <div
+        className="fixed right-0 top-20 z-50 h-[calc(100vh-5rem)] bg-white shadow-lg border-l"
+        style={{
+          width: showNotifications ? panelWidth : 0,
+          transition: "width 0.25s ease",
+        }}
+      >
+        <div className="p-4 space-y-3 overflow-y-auto h-full">
+          {notifications.length === 0 ? (
+            <p className="text-sm text-slate-500">No notifications</p>
+          ) : (
+            notifications.map((n) => {
+              const isHigh = n.urgency === "HIGH";
+              const isMedium = n.urgency === "MEDIUM";
+
+              return (
+                <div
+                  key={n.id}
+                  onClick={() => {
+                    navigate("/needs", {
+                      state: { highlightId: n.id },
+                    });
+                    setShowNotifications(false);
+                  }}
+                  className={`cursor-pointer rounded-xl p-3 border-l-4 transition hover:scale-[1.02] ${
+                    isHigh
+                      ? "bg-red-100 border-red-500"
+                      : isMedium
+                        ? "bg-yellow-100 border-yellow-500"
+                        : "bg-blue-100 border-blue-500"
+                  }`}
+                >
+                  <p className="text-sm font-semibold">
+                    {isHigh
+                      ? "🚨 High Priority Need"
+                      : isMedium
+                        ? "⚠️ Medium Priority Need"
+                        : "ℹ️ New Need"}
+                  </p>
+
+                  <p className="text-xs mt-1 text-slate-700">{n.description}</p>
+
+                  <p className="text-[11px] mt-1 text-slate-500">
+                    {n.type} • {n.pickup_address}
+                  </p>
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* DRAG HANDLE */}
+        <div
+          onMouseDown={() => setIsDragging(true)}
+          className="absolute left-0 top-0 h-full w-[4px] cursor-ew-resize"
+        />
       </div>
     </div>
   );
