@@ -5,7 +5,6 @@ import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import Volunteers from "./pages/Volunteers";
 import Landing from "./pages/Landing";
-import Verify from "./pages/Verify";
 import Surplus from "./pages/surplus";
 import Inventory from "./pages/Inventory";
 import Layout from "./components/Layout";
@@ -43,15 +42,6 @@ function App() {
           element={
             <Layout>
               <Volunteers />
-            </Layout>
-          }
-        />
-
-        <Route
-          path="/verify"
-          element={
-            <Layout>
-              <Verify />
             </Layout>
           }
         />
