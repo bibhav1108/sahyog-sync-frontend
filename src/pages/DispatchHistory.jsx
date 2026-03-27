@@ -8,13 +8,13 @@ const DispatchHistory = () => {
   const loadDispatches = async () => {
     try {
       setLoading(true);
-      const res = await API.get("/dispatches");
 
-      console.log("DISPATCHES:", res.data); // 🔥 debug
+      // 🔥 fetch only COMPLETED directly from backend (cleaner)
+      const res = await API.get("/dispatches?status=COMPLETED");
 
-      const filtered = (res.data || []).filter((d) => d.status === "COMPLETED");
+      console.log("DISPATCHES:", res.data);
 
-      setDispatches(filtered);
+      setDispatches(res.data || []);
     } catch (err) {
       console.error("Failed to load dispatches", err);
     } finally {
@@ -36,11 +36,29 @@ const DispatchHistory = () => {
         <p>No completed dispatches</p>
       ) : (
         dispatches.map((d) => (
-          <div key={d.id} className="p-4 bg-white rounded shadow">
-            <p>{d.need?.type}</p>
-            <p>{d.need?.description}</p>
-            <p>{d.volunteer?.name}</p>
-            <p>{d.status}</p>
+          <div key={d.id} className="p-4 bg-white rounded shadow space-y-1">
+            <p>
+              <span className="font-medium">Dispatch ID:</span> {d.id}
+            </p>
+            <p>
+              <span className="font-medium">Need ID:</span> {d.need_id}
+            </p>
+            <p>
+              <span className="font-medium">Volunteer ID:</span>{" "}
+              {d.volunteer_id}
+            </p>
+            <p>
+              <span className="font-medium">Status:</span>{" "}
+              <span className="text-green-600 font-semibold">{d.status}</span>
+            </p>
+            <p>
+              <span className="font-medium">Completed At:</span>{" "}
+              {new Date(d.created_at).toLocaleString()}
+            </p>
+            <p>
+              <span className="font-medium">OTP Used:</span>{" "}
+              {d.otp_used ? "Yes" : "No"}
+            </p>
           </div>
         ))
       )}
