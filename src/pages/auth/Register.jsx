@@ -73,12 +73,12 @@ const Register = () => {
 
         <div className="grid grid-cols-2 gap-6">
           <div className="bg-white/10 p-6 rounded-xl backdrop-blur">
-            <p className="text-2xl font-bold">4.2k+</p>
-            <p className="text-sm text-indigo-200">Active Partners</p>
+            {/* <p className="text-2xl font-bold">4.2k+</p>
+            <p className="text-sm text-indigo-200">Active Partners</p> */}
           </div>
           <div className="bg-white/10 p-6 rounded-xl backdrop-blur">
-            <p className="text-2xl font-bold">120 Tons</p>
-            <p className="text-sm text-indigo-200">Goods Redistributed</p>
+            {/* <p className="text-2xl font-bold">120 Tons</p>
+            <p className="text-sm text-indigo-200">Goods Redistributed</p> */}
           </div>
         </div>
       </div>
