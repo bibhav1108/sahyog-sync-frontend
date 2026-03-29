@@ -380,7 +380,7 @@ const Landing = () => {
           <div className="max-w-7xl mx-auto grid md:grid-cols-3 gap-12 text-center">
             <div className="space-y-2">
               <div className="text-6xl font-bold tracking-tighter text-emerald-300">
-                45%
+                0%
               </div>
               <div className="text-indigo-200 font-medium uppercase tracking-widest text-xs">
                 Reduction in Waste
@@ -389,7 +389,7 @@ const Landing = () => {
 
             <div className="space-y-2">
               <div className="text-6xl font-bold tracking-tighter text-emerald-300">
-                12m
+                0m
               </div>
               <div className="text-indigo-200 font-medium uppercase tracking-widest text-xs">
                 Avg Response Time
@@ -398,7 +398,7 @@ const Landing = () => {
 
             <div className="space-y-2">
               <div className="text-6xl font-bold tracking-tighter text-emerald-300">
-                3.2M
+                0
               </div>
               <div className="text-indigo-200 font-medium uppercase tracking-widest text-xs">
                 Resources Allocated
