@@ -9,12 +9,17 @@ const DispatchHistory = () => {
     try {
       setLoading(true);
 
-      // 🔥 fetch only COMPLETED directly from backend (cleaner)
-      const res = await API.get("/dispatches?status=COMPLETED");
+      // ✅ FIXED endpoint
+      const res = await API.get("/marketplace/dispatches/");
 
       console.log("DISPATCHES:", res.data);
 
-      setDispatches(res.data || []);
+      // ✅ filter completed on frontend
+      const completed = (res.data || []).filter(
+        (d) => d.status === "COMPLETED",
+      );
+
+      setDispatches(completed);
     } catch (err) {
       console.error("Failed to load dispatches", err);
     } finally {
@@ -40,21 +45,33 @@ const DispatchHistory = () => {
             <p>
               <span className="font-medium">Dispatch ID:</span> {d.id}
             </p>
+
             <p>
-              <span className="font-medium">Need ID:</span> {d.need_id}
+              <span className="font-medium">Volunteer:</span> {d.volunteer_name}
             </p>
+
             <p>
-              <span className="font-medium">Volunteer ID:</span>{" "}
-              {d.volunteer_id}
+              <span className="font-medium">Item:</span> {d.item_type}
             </p>
+
+            <p>
+              <span className="font-medium">Quantity:</span> {d.item_quantity}
+            </p>
+
+            <p>
+              <span className="font-medium">Pickup:</span> {d.pickup_address}
+            </p>
+
             <p>
               <span className="font-medium">Status:</span>{" "}
               <span className="text-green-600 font-semibold">{d.status}</span>
             </p>
+
             <p>
               <span className="font-medium">Completed At:</span>{" "}
               {new Date(d.created_at).toLocaleString()}
             </p>
+
             <p>
               <span className="font-medium">OTP Used:</span>{" "}
               {d.otp_used ? "Yes" : "No"}
