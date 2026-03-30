@@ -5,7 +5,8 @@ import API from "../services/api";
 const NAV_ITEMS = [
   { to: "/dashboard", label: "Overview", icon: "dashboard" },
   { to: "/needs", label: "Active Needs", icon: "emergency" },
-  { to: "/surplus", label: "Alerts", icon: "notifications_active" },
+  { to: "/marketplace", label: "Marketplace", icon: "notifications_active" },
+  { to: "/campaigns", label: "Mission Control", icon: "rocket_launch" },
   { to: "/volunteers", label: "Volunteers", icon: "groups" },
   { to: "/dispatches", label: "Dispatch History", icon: "history" },
   { to: "/inventory", label: "Inventory", icon: "inventory_2" },
@@ -15,7 +16,7 @@ const Layout = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [showNotifications, setShowNotifications] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(true);
   const [panelWidth, setPanelWidth] = useState(340);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -58,7 +59,7 @@ const Layout = ({ children }) => {
     loadingRef.current.notifications = true;
 
     try {
-      const res = await API.get("/needs/surplus-alerts");
+      const res = await API.get("/marketplace/needs/alerts");
 
       const sorted = (res.data || []).sort(
         (a, b) => new Date(b.created_at) - new Date(a.created_at),
@@ -130,20 +131,11 @@ const Layout = ({ children }) => {
     };
   }, [isDragging]);
 
-  // Close dropdowns on outside click
+  // Close dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (e) => {
-      // Handle Org Dropdown
       if (!e.target.closest("[data-org-dropdown]")) {
         setOrgMenuOpen(false);
-      }
-      
-      // Handle Notification Panel (if not clicking toggle or panel itself)
-      if (
-        !e.target.closest("[data-notifications-panel]") && 
-        !e.target.closest("[data-notifications-toggle]")
-      ) {
-        setShowNotifications(false);
       }
     };
 
@@ -164,7 +156,7 @@ const Layout = ({ children }) => {
           <div
             key={t.toastId}
             onClick={() => {
-              navigate("/surplus");
+              navigate("/marketplace");
               setToasts((prev) => prev.filter((x) => x.toastId !== t.toastId));
             }}
             className="cursor-pointer bg-white shadow-xl border-l-4 border-purple-500 rounded-xl p-4 w-80"
@@ -260,12 +252,8 @@ const Layout = ({ children }) => {
         <div className="flex items-center gap-4">
           {/* Notifications with count */}
           <button
-            data-notifications-toggle
-            onClick={() => {
-              setShowNotifications((prev) => !prev);
-              setOrgMenuOpen(false);
-            }}
-            className="relative p-2 text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+            onClick={() => setShowNotifications((prev) => !prev)}
+            className="relative p-2 text-slate-600"
           >
             <span className="material-symbols-outlined">
               notifications_active
@@ -282,10 +270,7 @@ const Layout = ({ children }) => {
           {org && (
             <div className="relative" data-org-dropdown>
               <button
-                onClick={() => {
-                  setOrgMenuOpen((prev) => !prev);
-                  setShowNotifications(false);
-                }}
+                onClick={() => setOrgMenuOpen((prev) => !prev)}
                 className="flex items-center gap-3 rounded-xl px-3 py-2 hover:bg-slate-100"
               >
                 <div className="flex h-9 w-9 items-center justify-center rounded-full bg-purple-600 font-semibold text-white">
@@ -353,7 +338,6 @@ const Layout = ({ children }) => {
 
       {/* Notification panel */}
       <div
-        data-notifications-panel
         className="fixed right-0 top-20 z-50 h-[calc(100vh-5rem)] bg-white shadow-lg border-l"
         style={{
           width: showNotifications ? panelWidth : 0,
@@ -368,12 +352,12 @@ const Layout = ({ children }) => {
               <div
                 key={a.id}
                 onClick={() => {
-                  navigate("/surplus");
+                  navigate("/marketplace");
                   setShowNotifications(false);
                 }}
                 className="cursor-pointer rounded-xl border-l-4 border-purple-500 bg-purple-100 p-3 transition hover:scale-[1.02]"
               >
-                <p className="text-sm font-semibold">📦 Surplus Alert</p>
+                <p className="text-sm font-semibold">📦 Donor Alert</p>
                 <p className="mt-1 text-xs text-slate-700">{a.message_body}</p>
                 <p className="mt-1 text-[10px] text-slate-400">
                   {new Date(a.created_at).toLocaleTimeString()}
