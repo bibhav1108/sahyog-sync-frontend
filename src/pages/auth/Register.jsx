@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../../services/api";
+import logo from "../../assets/logo.png";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -47,158 +48,92 @@ const Register = () => {
       alert(res.data.message || "Registered successfully!");
       navigate("/login");
     } catch (err) {
-      if (err.response?.data?.detail) {
-        setError(err.response.data.detail);
-      } else {
-        setError("Registration failed");
-      }
+      setError(err.response?.data?.detail || "Registration failed");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex bg-gray-100">
-      {/* LEFT SIDE */}
-      <div className="hidden lg:flex w-1/2 bg-indigo-700 text-white p-12 flex-col justify-between relative overflow-hidden">
-        <div>
-          <h1 className="text-5xl font-extrabold leading-tight">
-            Bridging Surplus <br /> to Social Impact
-          </h1>
-          <p className="mt-6 text-lg text-indigo-200 max-w-md">
-            Join a smart logistics network built for NGOs and community
-            responders.
-          </p>
+    <div className="min-h-screen bg-surface flex">
+      {/* ================= LEFT PANEL ================= */}
+      <div className="hidden lg:flex w-1/2 px-12 py-16 flex-col justify-between relative overflow-hidden">
+        {/* subtle background */}
+        <div className="absolute top-[-10%] right-[-10%] w-[400px] h-[400px] bg-primary/10 blur-[100px] rounded-full" />
+
+        <div className="relative z-10 space-y-10">
+          <div className="flex items-center gap-3">
+            <img src={logo} className="h-10" />
+            <span className="text-xl font-outfit font-bold text-primary">
+              Sahyog Sync
+            </span>
+          </div>
+
+          <div className="space-y-6">
+            <h1 className="text-5xl font-outfit font-extrabold leading-tight">
+              Start Coordinating <br /> Resources Better
+            </h1>
+
+            <p className="text-on_surface_variant max-w-md">
+              Create your organization account and begin managing resources,
+              volunteers, and operations from one place.
+            </p>
+          </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-6">
-          <div className="bg-white/10 p-6 rounded-xl backdrop-blur">
-            {/* <p className="text-2xl font-bold">4.2k+</p>
-            <p className="text-sm text-indigo-200">Active Partners</p> */}
-          </div>
-          <div className="bg-white/10 p-6 rounded-xl backdrop-blur">
-            {/* <p className="text-2xl font-bold">120 Tons</p>
-            <p className="text-sm text-indigo-200">Goods Redistributed</p> */}
-          </div>
+        {/* decorative cards */}
+        <div className="grid grid-cols-2 gap-6 relative z-10">
+          <div className="bg-surface/60 backdrop-blur-glass p-6 rounded-xl shadow-soft" />
+          <div className="bg-surface/60 backdrop-blur-glass p-6 rounded-xl shadow-soft" />
         </div>
       </div>
 
-      {/* RIGHT SIDE */}
-      <div className="flex w-full lg:w-1/2 items-center justify-center p-6">
-        <div className="w-full max-w-xl bg-white p-10 rounded-2xl shadow-xl">
-          <h2 className="text-3xl font-bold text-indigo-700">Create Account</h2>
-          <p className="text-gray-500 text-sm mt-2 mb-8">
-            Start making a difference
+      {/* ================= FORM ================= */}
+      <div className="flex w-full lg:w-1/2 items-center justify-center px-6 py-16">
+        <div className="w-full max-w-xl bg-surface_lowest p-10 rounded-xl shadow-soft">
+          <h2 className="text-3xl font-outfit font-extrabold text-primary">
+            Create Account
+          </h2>
+
+          <p className="text-on_surface_variant text-sm mt-2 mb-8">
+            Register your organization to get started
           </p>
 
           <form onSubmit={handleRegister} className="space-y-6">
             {/* ORG */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder=" "
-                  value={orgName}
-                  onChange={(e) => setOrgName(e.target.value)}
-                  className="peer w-full p-4 rounded-xl bg-gray-100 focus:ring-2 focus:ring-indigo-400 outline-none"
-                />
-                <label
-                  className="absolute left-4 top-4 text-gray-500 text-sm transition-all 
-                  peer-focus:-top-2 peer-focus:text-xs peer-focus:bg-white peer-focus:px-1
-                  peer-[:not(:placeholder-shown)]:-top-2 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:bg-white peer-[:not(:placeholder-shown)]:px-1"
-                >
-                  NGO Name
-                </label>
-              </div>
-
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder=" "
-                  value={orgPhone}
-                  onChange={(e) => setOrgPhone(e.target.value)}
-                  className="peer w-full p-4 rounded-xl bg-gray-100 focus:ring-2 focus:ring-indigo-400 outline-none"
-                />
-                <label
-                  className="absolute left-4 top-4 text-gray-500 text-sm transition-all 
-                  peer-focus:-top-2 peer-focus:text-xs peer-focus:bg-white peer-focus:px-1
-                  peer-[:not(:placeholder-shown)]:-top-2 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:bg-white peer-[:not(:placeholder-shown)]:px-1"
-                >
-                  Phone
-                </label>
-              </div>
+            <div className="grid md:grid-cols-2 gap-6">
+              <Input label="NGO Name" value={orgName} setValue={setOrgName} />
+              <Input label="Phone" value={orgPhone} setValue={setOrgPhone} />
             </div>
 
-            <div className="relative">
-              <input
-                type="email"
-                placeholder=" "
-                value={orgEmail}
-                onChange={(e) => setOrgEmail(e.target.value)}
-                className="peer w-full p-4 rounded-xl bg-gray-100 focus:ring-2 focus:ring-indigo-400 outline-none"
-              />
-              <label
-                className="absolute left-4 top-4 text-gray-500 text-sm transition-all 
-                peer-focus:-top-2 peer-focus:text-xs peer-focus:bg-white peer-focus:px-1
-                peer-[:not(:placeholder-shown)]:-top-2 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:bg-white peer-[:not(:placeholder-shown)]:px-1"
-              >
-                Organization Email
-              </label>
-            </div>
+            <Input
+              label="Organization Email"
+              value={orgEmail}
+              setValue={setOrgEmail}
+              type="email"
+            />
 
             {/* ADMIN */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder=" "
-                  value={adminName}
-                  onChange={(e) => setAdminName(e.target.value)}
-                  className="peer w-full p-4 rounded-xl bg-gray-100 focus:ring-2 focus:ring-indigo-400 outline-none"
-                />
-                <label
-                  className="absolute left-4 top-4 text-gray-500 text-sm transition-all 
-                  peer-focus:-top-2 peer-focus:text-xs peer-focus:bg-white peer-focus:px-1
-                  peer-[:not(:placeholder-shown)]:-top-2 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:bg-white peer-[:not(:placeholder-shown)]:px-1"
-                >
-                  Your Name
-                </label>
-              </div>
-
-              <div className="relative">
-                <input
-                  type="email"
-                  placeholder=" "
-                  value={adminEmail}
-                  onChange={(e) => setAdminEmail(e.target.value)}
-                  className="peer w-full p-4 rounded-xl bg-gray-100 focus:ring-2 focus:ring-indigo-400 outline-none"
-                />
-                <label
-                  className="absolute left-4 top-4 text-gray-500 text-sm transition-all 
-                  peer-focus:-top-2 peer-focus:text-xs peer-focus:bg-white peer-focus:px-1
-                  peer-[:not(:placeholder-shown)]:-top-2 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:bg-white peer-[:not(:placeholder-shown)]:px-1"
-                >
-                  Your Email
-                </label>
-              </div>
-            </div>
-
-            <div className="relative">
-              <input
-                type="password"
-                placeholder=" "
-                value={adminPassword}
-                onChange={(e) => setAdminPassword(e.target.value)}
-                className="peer w-full p-4 rounded-xl bg-gray-100 focus:ring-2 focus:ring-indigo-400 outline-none"
+            <div className="grid md:grid-cols-2 gap-6">
+              <Input
+                label="Your Name"
+                value={adminName}
+                setValue={setAdminName}
               />
-              <label
-                className="absolute left-4 top-4 text-gray-500 text-sm transition-all 
-                peer-focus:-top-2 peer-focus:text-xs peer-focus:bg-white peer-focus:px-1
-                peer-[:not(:placeholder-shown)]:-top-2 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:bg-white peer-[:not(:placeholder-shown)]:px-1"
-              >
-                Password
-              </label>
+              <Input
+                label="Your Email"
+                value={adminEmail}
+                setValue={setAdminEmail}
+                type="email"
+              />
             </div>
+
+            <Input
+              label="Password"
+              value={adminPassword}
+              setValue={setAdminPassword}
+              type="password"
+            />
 
             {/* ERROR */}
             {error && (
@@ -209,7 +144,7 @@ const Register = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-4 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-bold rounded-xl shadow-lg hover:scale-[1.01] active:scale-[0.98] transition"
+              className="w-full py-4 bg-primaryGradient text-white font-bold rounded-lg shadow-soft hover:opacity-90 transition"
             >
               {loading ? "Registering..." : "Register Organization"}
             </button>
@@ -219,7 +154,7 @@ const Register = () => {
             Already have an account?{" "}
             <span
               onClick={() => navigate("/login")}
-              className="text-indigo-600 font-medium cursor-pointer"
+              className="text-primary font-medium cursor-pointer"
             >
               Login
             </span>
@@ -229,5 +164,25 @@ const Register = () => {
     </div>
   );
 };
+
+/* 🔥 CLEAN INPUT COMPONENT */
+const Input = ({ label, value, setValue, type = "text" }) => (
+  <div className="relative">
+    <input
+      type={type}
+      value={value}
+      onChange={(e) => setValue(e.target.value)}
+      placeholder=" "
+      className="peer w-full p-4 rounded-lg bg-surface_high focus:outline-none focus:ring-2 focus:ring-primary/40"
+    />
+    <label
+      className="absolute left-4 top-4 text-on_surface_variant text-sm transition-all
+      peer-focus:-top-2 peer-focus:text-xs peer-focus:bg-surface_lowest peer-focus:px-1
+      peer-not-placeholder-shown:-top-2 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:bg-surface_lowest peer-not-placeholder-shown:px-1"
+    >
+      {label}
+    </label>
+  </div>
+);
 
 export default Register;
