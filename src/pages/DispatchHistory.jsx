@@ -11,9 +11,9 @@ const DispatchHistory = () => {
       setLoading(true);
 
       const res = await API.get("/marketplace/dispatches/");
-      const completed = (res.data || []).filter(
-        (d) => d.status === "COMPLETED",
-      );
+      const completed = (res.data || [])
+        .filter((d) => d.status === "COMPLETED")
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
       setDispatches(completed);
     } catch (err) {
@@ -28,116 +28,101 @@ const DispatchHistory = () => {
   }, []);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* HEADER */}
       <div>
-        <h1 className="text-xl font-semibold">Dispatch History</h1>
-        <p className="text-sm text-slate-500">
-          Completed deliveries and records
+        <h1 className="text-2xl font-bold">Dispatch Timeline</h1>
+        <p className="text-sm text-on_surface_variant">
+          Completed deliveries and execution logs
         </p>
       </div>
 
-      {/* 🔥 TABLE */}
-      <div className="bg-white rounded-xl shadow overflow-hidden">
-        {loading ? (
-          <div className="p-6 text-center space-y-2">
-            <div className="animate-pulse text-slate-400">
-              Loading dispatch history...
-            </div>
-            <div className="h-1 bg-slate-200 rounded overflow-hidden">
-              <div className="h-full bg-indigo-500 animate-progress"></div>
-            </div>
-          </div>
-        ) : dispatches.length === 0 ? (
-          <div className="p-6 text-center text-slate-500">
-            No completed dispatches yet
-          </div>
-        ) : (
-          <div className="max-h-[500px] overflow-y-auto">
-            <table className="w-full text-sm">
-              {/* HEADER */}
-              <thead className="bg-slate-50 text-slate-500 text-xs sticky top-0 z-10">
-                <tr>
-                  <th className="text-left px-4 py-3">Description</th>
-                  <th className="text-left px-4 py-3">Volunteer</th>
-                  <th className="text-left px-4 py-3">Pickup</th>
-                  <th className="text-left px-4 py-3">Time</th>
-                  <th className="text-left px-4 py-3">OTP</th>
-                  <th className="text-left px-4 py-3">Status</th>
-                </tr>
-              </thead>
+      {/* CONTENT */}
+      {loading ? (
+        <p className="text-center p-10">Loading...</p>
+      ) : dispatches.length === 0 ? (
+        <p className="text-center p-10 text-on_surface_variant">
+          No completed dispatches
+        </p>
+      ) : (
+        <div className="relative pl-6 border-l border-surface_high space-y-6">
+          {dispatches.map((d) => (
+            <div key={d.id} className="relative">
+              {/* DOT */}
+              <div className="absolute -left-[10px] top-2 w-4 h-4 bg-primary rounded-full" />
 
-              <tbody className="divide-y">
-                {dispatches.map((d) => (
-                  <>
-                    {/* MAIN ROW */}
-                    <tr
-                      key={d.id}
-                      onClick={() =>
-                        setExpanded(expanded === d.id ? null : d.id)
-                      }
-                      className="hover:bg-slate-50 transition cursor-pointer animate-slide-in"
-                    >
-                      <td className="px-4 py-3 max-w-[250px]">
-                        <p className="font-medium truncate">
-                          {d.description ||
-                            `${d.item_type} • ${d.item_quantity}`}
+              {/* CARD */}
+              <div
+                onClick={() => setExpanded(expanded === d.id ? null : d.id)}
+                className="bg-surface_high p-5 rounded-xl cursor-pointer hover:scale-[1.01] transition"
+              >
+                {/* TOP */}
+                <div className="flex justify-between items-start gap-3">
+                  {/* TITLE */}
+                  <div className="flex-1">
+                    {d.description ? (
+                      <p className="font-semibold leading-snug line-clamp-2">
+                        {d.description}
+                      </p>
+                    ) : (
+                      <div>
+                        <p className="font-semibold text-on_surface_variant">
+                          {d.item_type}
                         </p>
-                        <p className="text-xs text-slate-500">#{d.id}</p>
-                      </td>
-
-                      <td className="px-4 py-3">{d.volunteer_name}</td>
-
-                      <td className="px-4 py-3 max-w-[200px] truncate text-slate-500">
-                        {d.pickup_address}
-                      </td>
-
-                      <td className="px-4 py-3 text-slate-500">
-                        {new Date(d.created_at).toLocaleString()}
-                      </td>
-
-                      <td className="px-4 py-3">
-                        <span
-                          className={`text-xs px-2 py-1 rounded-full ${
-                            d.otp_used
-                              ? "bg-indigo-100 text-indigo-700"
-                              : "bg-slate-100 text-slate-500"
-                          }`}
-                        >
-                          {d.otp_used ? "Used" : "Not Used"}
-                        </span>
-                      </td>
-
-                      <td className="px-4 py-3">
-                        <span className="px-2 py-1 text-xs rounded-full bg-emerald-100 text-emerald-700">
-                          Completed
-                        </span>
-                      </td>
-                    </tr>
-
-                    {/* 🔥 EXPANDED DETAILS */}
-                    {expanded === d.id && (
-                      <tr className="bg-slate-50">
-                        <td colSpan="6" className="px-4 py-3 text-sm space-y-1">
-                          <p>
-                            📦 Item: {d.item_type} ({d.item_quantity})
-                          </p>
-                          <p>📍 Pickup: {d.pickup_address}</p>
-                          <p>
-                            🕒 Created:{" "}
-                            {new Date(d.created_at).toLocaleString()}
-                          </p>
-                          {d.description && <p>📝 Notes: {d.description}</p>}
-                        </td>
-                      </tr>
+                        <p className="text-xs text-on_surface_variant">
+                          Qty: {d.item_quantity}
+                        </p>
+                      </div>
                     )}
-                  </>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+
+                    <p className="text-xs text-on_surface_variant mt-1">
+                      #{d.id} • {d.volunteer_name}
+                    </p>
+                  </div>
+
+                  {/* STATUS */}
+                  <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">
+                    Completed
+                  </span>
+                </div>
+
+                {/* META */}
+                <div className="mt-3 flex flex-wrap gap-3 text-xs text-on_surface_variant">
+                  <span>📍 {d.pickup_address}</span>
+                  <span>🕒 {new Date(d.created_at).toLocaleString()}</span>
+
+                  <span
+                    className={`px-2 py-1 rounded ${
+                      d.otp_used
+                        ? "bg-primary/10 text-primary"
+                        : "bg-surface text-on_surface_variant"
+                    }`}
+                  >
+                    OTP {d.otp_used ? "Used" : "Unused"}
+                  </span>
+                </div>
+
+                {/* EXPANDED */}
+                {expanded === d.id && (
+                  <div className="mt-4 pt-4 border-t text-sm space-y-2">
+                    {!d.description && (
+                      <>
+                        <p>📦 Item: {d.item_type}</p>
+                        <p>📊 Quantity: {d.item_quantity}</p>
+                      </>
+                    )}
+
+                    <p>📍 Pickup: {d.pickup_address}</p>
+                    <p>🕒 Created: {new Date(d.created_at).toLocaleString()}</p>
+
+                    {d.description && <p>📝 Notes: {d.description}</p>}
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
