@@ -3,268 +3,440 @@ import API from "../services/api";
 
 const Campaigns = () => {
   const [campaigns, setCampaigns] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [creating, setCreating] = useState(false);
-  const [completingId, setCompletingId] = useState(null);
-  const [showForm, setShowForm] = useState(false);
-  const [expanded, setExpanded] = useState(null);
+  const [inventory, setInventory] = useState([]);
+  const [filterType, setFilterType] = useState("ALL");
 
+  const [selectedCampaign, setSelectedCampaign] = useState(null);
+  const [pool, setPool] = useState([]);
+  const [loadingPool, setLoadingPool] = useState(false);
+
+  const [showForm, setShowForm] = useState(false);
+
+  // FORM STATE
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [location, setLocation] = useState("");
+  const [type, setType] = useState("OTHER");
+  const [targetQuantity, setTargetQuantity] = useState("");
+  const [items, setItems] = useState([{ key: "", value: "" }]);
+  const [volunteersRequired, setVolunteersRequired] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
-  const [volunteers, setVolunteers] = useState(2);
+  const [location, setLocation] = useState("");
+  const [skills, setSkills] = useState("");
 
+  // ================= LOAD =================
   const loadCampaigns = async () => {
     try {
-      setLoading(true);
       const res = await API.get("/campaigns/");
       setCampaigns(res.data || []);
     } catch (err) {
       console.error(err);
-      setCampaigns([]);
-    } finally {
-      setLoading(false);
     }
   };
 
-  const createCampaign = async () => {
-    if (!name) return alert("Name required");
-
+  const loadInventory = async () => {
     try {
-      setCreating(true);
-
-      await API.post("/campaigns/", {
-        name,
-        description,
-        volunteers_required: volunteers,
-        location_address: location || null,
-        start_time: startTime || null,
-        end_time: endTime || null,
-      });
-
-      setShowForm(false);
-
-      setTimeout(() => {
-        loadCampaigns();
-      }, 300);
-
-      setName("");
-      setDescription("");
-      setLocation("");
-      setStartTime("");
-      setEndTime("");
-      setVolunteers(2);
+      const res = await API.get("/inventory/");
+      setInventory(res.data || []);
     } catch (err) {
       console.error(err);
-    } finally {
-      setCreating(false);
     }
-  };
-
-  const completeCampaign = async (id) => {
-    try {
-      setCompletingId(id);
-      await API.post(`/campaigns/${id}/complete`);
-      loadCampaigns();
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setCompletingId(null);
-    }
-  };
-
-  const getStatusColor = (status) => {
-    if (status === "COMPLETED") return "bg-green-100 text-green-700";
-    if (status === "ACTIVE") return "bg-blue-100 text-blue-700";
-    return "bg-yellow-100 text-yellow-700";
   };
 
   useEffect(() => {
     loadCampaigns();
+    loadInventory();
   }, []);
 
+  // ================= CREATE =================
+  const createCampaign = async () => {
+    const formattedItems = {};
+
+    items.forEach((i) => {
+      if (!i.key || !i.value) return;
+
+      const qty = Number(i.value);
+      if (isNaN(qty) || qty <= 0) return;
+
+      if (formattedItems[i.key]) {
+        formattedItems[i.key] += qty;
+      } else {
+        formattedItems[i.key] = qty;
+      }
+    });
+
+    if (Object.keys(formattedItems).length === 0) {
+      alert("Add at least one valid item");
+      return;
+    }
+
+    try {
+      await API.post("/campaigns/", {
+        name,
+        description,
+        type,
+        target_quantity: targetQuantity,
+        items: formattedItems,
+        volunteers_required: Number(volunteersRequired) || 0,
+        start_time: startTime || null,
+        end_time: endTime || null,
+        location_address: location || null,
+        required_skills: skills ? skills.split(",").map((s) => s.trim()) : [],
+      });
+
+      setShowForm(false);
+      setName("");
+      setDescription("");
+      setTargetQuantity("");
+      setItems([{ key: "", value: "" }]);
+      setVolunteersRequired("");
+      setStartTime("");
+      setEndTime("");
+      setLocation("");
+      setSkills("");
+      setType("OTHER");
+
+      loadCampaigns();
+    } catch (err) {
+      console.error(err.response?.data);
+      alert(err.response?.data?.detail || "Error creating campaign");
+    }
+  };
+
+  // ================= DETAILS =================
+  const openDetails = async (campaign) => {
+    setSelectedCampaign(campaign);
+
+    try {
+      setLoadingPool(true);
+      const res = await API.get(`/campaigns/${campaign.id}/pool`);
+      setPool(res.data || []);
+    } catch {
+      setPool([]);
+    } finally {
+      setLoadingPool(false);
+    }
+  };
+
+  const approve = async (campaignId, volId) => {
+    await API.post(`/campaigns/${campaignId}/approve-volunteer/${volId}`);
+    openDetails(selectedCampaign);
+  };
+
+  const completeCampaign = async (id) => {
+    await API.post(`/campaigns/${id}/complete`);
+    setSelectedCampaign(null);
+    loadCampaigns();
+  };
+
+  const getStatusStyle = (s) => {
+    if (s === "ACTIVE") return "bg-blue-100 text-blue-700";
+    if (s === "COMPLETED") return "bg-green-100 text-green-700";
+    if (s === "PLANNED") return "bg-yellow-100 text-yellow-700";
+    return "bg-gray-200";
+  };
+
+  // ================= UI =================
   return (
-    <div className="space-y-6">
+    <div className="p-6 space-y-8">
       {/* HEADER */}
       <div className="flex justify-between items-center">
-        <h1 className="text-xl font-semibold">Mission Control</h1>
+        <h1 className="text-3xl font-bold text-indigo-700">
+          Campaign Intelligence
+        </h1>
 
-        <button
-          onClick={() => setShowForm(true)}
-          className="bg-indigo-600 hover:bg-indigo-700 active:scale-95 transition text-white px-4 py-2 rounded"
-        >
-          + Start Campaign
-        </button>
+        <div className="flex gap-3">
+          {/* FILTER */}
+          <select
+            value={filterType}
+            onChange={(e) => setFilterType(e.target.value)}
+            className="border p-2 rounded-lg"
+          >
+            <option value="ALL">All</option>
+            <option value="HEALTH">Health</option>
+            <option value="EDUCATION">Education</option>
+            <option value="BASIC_NEEDS">Basic Needs</option>
+            <option value="AWARENESS">Awareness</option>
+            <option value="EMERGENCY">Emergency</option>
+            <option value="ENVIRONMENT">Environment</option>
+            <option value="SKILLS">Skills</option>
+            <option value="OTHER">Other</option>
+          </select>
+
+          <button
+            onClick={() => setShowForm(true)}
+            className="bg-indigo-600 text-white px-6 py-3 rounded-xl"
+          >
+            + Launch Campaign
+          </button>
+        </div>
       </div>
 
-      {/* 🔥 MODAL */}
-      {showForm && (
-        <div className="fixed inset-0 bg-black/40 animate-fade-in flex items-center justify-center z-50">
-          <div className="bg-white w-full max-w-lg p-6 rounded shadow space-y-4 animate-slide-in">
-            <div className="flex justify-between">
-              <h2 className="font-semibold text-lg">Create Campaign</h2>
-              <button onClick={() => setShowForm(false)}>✕</button>
+      {/* GRID */}
+      <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+        {campaigns
+          .filter((c) => filterType === "ALL" || c.type === filterType)
+          .map((c) => (
+            <div key={c.id} className="bg-white rounded-2xl p-6 shadow">
+              <div className="flex justify-between mb-2">
+                <span className="font-bold">{c.name}</span>
+                <span
+                  className={`px-2 py-1 text-xs rounded ${getStatusStyle(c.status)}`}
+                >
+                  {c.status}
+                </span>
+              </div>
+
+              <p className="text-sm text-gray-500 mb-2">{c.description}</p>
+
+              <div className="text-xs mb-1">🏷 Type: {c.type || "OTHER"}</div>
+              <div className="text-xs mb-1">
+                🎯 Goal: {c.target_quantity || "N/A"}
+              </div>
+              <div className="text-xs mb-1">
+                📍 {c.location_address || "No location"}
+              </div>
+              <div className="text-xs mb-2">
+                👥 Required: {c.volunteers_required}
+              </div>
+
+              {c.items && (
+                <div className="text-xs mb-2">
+                  {Object.entries(c.items).map(([k, v]) => (
+                    <div key={k}>
+                      {v} {k}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <button
+                onClick={() => openDetails(c)}
+                className="text-indigo-600 text-sm font-semibold"
+              >
+                View Details →
+              </button>
+            </div>
+          ))}
+      </div>
+
+      {/* DETAILS MODAL */}
+      {selectedCampaign && (
+        <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-xl w-full max-w-xl space-y-4">
+            <h2 className="text-lg font-bold">{selectedCampaign.name}</h2>
+
+            <p className="text-sm text-gray-500">
+              {selectedCampaign.description}
+            </p>
+
+            <div className="text-xs">🏷 {selectedCampaign.type}</div>
+            <div className="text-xs">
+              📍 {selectedCampaign.location_address}
             </div>
 
-            <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Campaign Name"
-              className="border p-2 w-full rounded"
-            />
-
-            <input
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Description"
-              className="border p-2 w-full rounded"
-            />
-
-            <input
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              placeholder="Location"
-              className="border p-2 w-full rounded"
-            />
-
-            <div className="grid grid-cols-2 gap-3">
-              <input
-                type="datetime-local"
-                value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
-                className="border p-2 rounded"
-              />
-
-              <input
-                type="datetime-local"
-                value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
-                className="border p-2 rounded"
-              />
+            <div className="text-xs">
+              🧠 Skills:{" "}
+              {selectedCampaign?.required_skills?.length
+                ? selectedCampaign.required_skills.join(", ")
+                : "General"}
             </div>
 
-            <input
-              type="number"
-              value={volunteers}
-              onChange={(e) => setVolunteers(Number(e.target.value))}
-              className="border p-2 w-full rounded"
-            />
+            {/* POOL */}
+            <div>
+              <h3 className="font-semibold text-sm mb-2">Volunteer Pool</h3>
+
+              {loadingPool ? (
+                <p>Loading...</p>
+              ) : pool.length === 0 ? (
+                <p className="text-gray-400 text-sm">No volunteers yet</p>
+              ) : (
+                pool.map((v) => (
+                  <div
+                    key={v.volunteer_id}
+                    className="flex justify-between items-center border p-2 rounded mb-2"
+                  >
+                    <div>
+                      <p className="text-sm font-medium">{v.volunteer_name}</p>
+                      <p className="text-xs text-gray-400">
+                        {v.skills?.join(", ") || "No skills"}
+                      </p>
+                    </div>
+
+                    <button
+                      onClick={() =>
+                        approve(selectedCampaign.id, v.volunteer_id)
+                      }
+                      className="bg-green-600 text-white px-3 py-1 text-xs rounded"
+                    >
+                      Approve
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
 
             <button
-              onClick={createCampaign}
-              disabled={creating}
-              className={`w-full py-2 rounded text-white flex items-center justify-center gap-2 ${
-                creating
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-indigo-600 hover:bg-indigo-700"
-              }`}
+              onClick={() => completeCampaign(selectedCampaign.id)}
+              className="w-full bg-indigo-600 text-white py-2 rounded"
             >
-              {creating && (
-                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-              )}
-              {creating ? "Creating..." : "Create Campaign"}
+              Mark Completed
+            </button>
+
+            <button
+              onClick={() => setSelectedCampaign(null)}
+              className="w-full text-gray-500 text-sm"
+            >
+              Close
             </button>
           </div>
         </div>
       )}
 
-      {/* 🔥 TABLE */}
-      <div className="bg-white rounded shadow overflow-hidden">
-        {loading ? (
-          <div className="p-6 text-center space-y-2">
-            <div className="animate-pulse text-slate-400">
-              Loading campaigns...
-            </div>
-            <div className="h-1 bg-slate-200 rounded overflow-hidden">
-              <div className="h-full bg-indigo-500 animate-progress"></div>
-            </div>
+      {/* CREATE FORM */}
+      {showForm && (
+        <div className="fixed inset-0 bg-black/40 flex justify-center items-start pt-24 z-50 overflow-y-auto">
+          <div className="bg-white p-6 rounded-2xl shadow-xl w-full max-w-lg space-y-4 mb-10">
+            <h2 className="font-bold text-xl text-indigo-700">
+              Create Campaign
+            </h2>
+
+            <input
+              className="input"
+              placeholder="Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+            <input
+              className="input"
+              placeholder="Description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+
+            <select
+              value={type}
+              onChange={(e) => setType(e.target.value)}
+              className="input"
+            >
+              <option value="HEALTH">Health</option>
+              <option value="EDUCATION">Education</option>
+              <option value="BASIC_NEEDS">Basic Needs</option>
+              <option value="AWARENESS">Awareness</option>
+              <option value="EMERGENCY">Emergency</option>
+              <option value="ENVIRONMENT">Environment</option>
+              <option value="SKILLS">Skills</option>
+              <option value="OTHER">Other</option>
+            </select>
+
+            <input
+              className="input"
+              placeholder="Goal (e.g. 100 meals)"
+              value={targetQuantity}
+              onChange={(e) => setTargetQuantity(e.target.value)}
+            />
+
+            <input
+              type="datetime-local"
+              className="input"
+              value={startTime}
+              onChange={(e) => setStartTime(e.target.value)}
+            />
+            <input
+              type="datetime-local"
+              className="input"
+              value={endTime}
+              onChange={(e) => setEndTime(e.target.value)}
+            />
+
+            <input
+              className="input"
+              placeholder="Location"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+            />
+            <input
+              className="input"
+              placeholder="Required Skills (comma separated)"
+              value={skills}
+              onChange={(e) => setSkills(e.target.value)}
+            />
+            <input
+              className="input"
+              placeholder="Volunteers Required"
+              value={volunteersRequired}
+              onChange={(e) => setVolunteersRequired(e.target.value)}
+            />
+
+            <p className="text-sm font-semibold text-gray-600">
+              Item Breakdown
+            </p>
+
+            {items.map((i, idx) => (
+              <div key={idx} className="flex gap-2">
+                <select
+                  value={i.key}
+                  onChange={(e) => {
+                    const updated = [...items];
+                    updated[idx].key = e.target.value;
+                    setItems(updated);
+                  }}
+                  className="input w-1/2"
+                >
+                  <option value="">Select Item</option>
+                  {inventory.map((inv) => (
+                    <option key={inv.id} value={inv.item_name}>
+                      {inv.item_name} ({inv.quantity} {inv.unit})
+                    </option>
+                  ))}
+                </select>
+
+                <input
+                  type="number"
+                  placeholder="Qty"
+                  value={i.value}
+                  onChange={(e) => {
+                    const updated = [...items];
+                    updated[idx].value = e.target.value;
+                    setItems(updated);
+                  }}
+                  className="input w-1/2"
+                />
+              </div>
+            ))}
+
+            <button
+              onClick={() => setItems([...items, { key: "", value: "" }])}
+              className="text-indigo-600 text-sm"
+            >
+              + Add Item
+            </button>
+
+            <button
+              onClick={createCampaign}
+              className="w-full bg-indigo-600 text-white py-2 rounded-lg"
+            >
+              Create Campaign
+            </button>
+
+            <button
+              onClick={() => setShowForm(false)}
+              className="w-full text-gray-500 text-sm"
+            >
+              Cancel
+            </button>
           </div>
-        ) : campaigns.length === 0 ? (
-          <div className="p-6 text-center text-slate-500">No campaigns yet</div>
-        ) : (
-          <table className="w-full text-sm">
-            <thead className="bg-slate-100 text-left">
-              <tr>
-                <th className="p-3">Name</th>
-                <th>Description</th>
-                <th>Status</th>
-                <th>Location</th>
-                <th>Volunteers</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
+        </div>
+      )}
 
-            <tbody>
-              {campaigns.map((c) => (
-                <>
-                  <tr
-                    key={c.id}
-                    onClick={() => setExpanded(expanded === c.id ? null : c.id)}
-                    className="border-t hover:bg-slate-50 transition cursor-pointer animate-slide-in"
-                  >
-                    <td className="p-3 font-medium">{c.name}</td>
-
-                    <td className="max-w-xs truncate">{c.description}</td>
-
-                    <td>
-                      <span
-                        className={`px-2 py-1 text-xs rounded-full ${getStatusColor(
-                          c.status,
-                        )}`}
-                      >
-                        {c.status}
-                      </span>
-                    </td>
-
-                    <td>{c.location_address || "-"}</td>
-
-                    <td>{c.volunteers_required}</td>
-
-                    <td>
-                      {c.status !== "COMPLETED" && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            completeCampaign(c.id);
-                          }}
-                          className="text-green-600 hover:underline"
-                        >
-                          {completingId === c.id ? "Completing..." : "Complete"}
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-
-                  {/* 🔥 EXPANDED DETAILS */}
-                  {expanded === c.id && (
-                    <tr className="bg-slate-50">
-                      <td colSpan="6" className="p-4 text-sm space-y-1">
-                        <p>
-                          📅 Start:{" "}
-                          {c.start_time
-                            ? new Date(c.start_time).toLocaleString()
-                            : "-"}
-                        </p>
-                        <p>
-                          ⏳ End:{" "}
-                          {c.end_time
-                            ? new Date(c.end_time).toLocaleString()
-                            : "-"}
-                        </p>
-                        <p>
-                          🕒 Created: {new Date(c.created_at).toLocaleString()}
-                        </p>
-                      </td>
-                    </tr>
-                  )}
-                </>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+      <style>{`
+        .input {
+          border: 1px solid #ddd;
+          padding: 10px;
+          width: 100%;
+          border-radius: 10px;
+        }
+      `}</style>
     </div>
   );
 };
