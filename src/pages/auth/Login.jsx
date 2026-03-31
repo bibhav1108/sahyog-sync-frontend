@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../../services/api";
+import logo from "../../assets/logo.png";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -41,128 +42,121 @@ const Login = () => {
 
       navigate("/dashboard");
     } catch (err) {
-      if (err.response?.data?.detail) {
-        setError(err.response.data.detail);
-      } else {
-        setError("Login failed");
-      }
+      setError(err.response?.data?.detail || "Login failed");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#f7f9fc] relative overflow-hidden px-4">
-      {/* BACKGROUND */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[45%] h-[45%] rounded-full bg-indigo-400/20 blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[45%] h-[45%] rounded-full bg-purple-400/20 blur-[120px]" />
-      </div>
+    <div className="min-h-screen bg-surface flex items-center justify-center px-6 relative overflow-hidden">
+      {/* background glow */}
+      <div className="absolute top-[-10%] right-[-10%] w-[400px] h-[400px] bg-primary/10 blur-[100px] rounded-full" />
 
-      {/* CARD */}
-      <div className="relative z-10 w-full max-w-md">
-        <div className="bg-white/80 backdrop-blur-xl rounded-2xl border border-white/40 shadow-[0_20px_60px_-10px_rgba(0,0,0,0.1)] px-8 py-10">
+      <div className="w-full max-w-md relative z-10">
+        {/* CARD */}
+        <div className="bg-surface_lowest p-10 rounded-xl shadow-soft">
           {/* HEADER */}
-          <div className="text-center mb-8">
-            <img
-              src="/sahyog_setu.png"
-              alt="logo"
-              className="w-20 h-20 mx-auto mb-4 drop-shadow"
-            />
+          <div className="text-center mb-8 space-y-3">
+            <img src={logo} className="w-16 h-16 mx-auto" />
 
-            <h1 className="text-2xl font-semibold text-gray-800">
-              Sahyog Setu
+            <h1 className="text-2xl font-outfit font-bold text-primary">
+              Sahyog Sync
             </h1>
 
-            <p className="text-sm text-gray-500 mt-1">
-              Connecting Surplus to Need
+            <p className="text-sm text-on_surface_variant">
+              Sign in to continue
             </p>
           </div>
 
           {/* FORM */}
-          <form onSubmit={handleLogin} className="space-y-5">
-            {/* EMAIL */}
-            <div className="relative">
-              <input
-                type="email"
-                placeholder=" "
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="peer w-full px-4 pt-5 pb-3 rounded-xl bg-white border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition"
-              />
-              <label
-                className="absolute left-3 px-1 bg-white text-gray-500 text-sm transition-all 
-                peer-focus:-top-2 peer-focus:text-xs peer-focus:text-indigo-600
-                peer-[:not(:placeholder-shown)]:-top-2 peer-[:not(:placeholder-shown)]:text-xs"
-              >
-                Email Address
-              </label>
-            </div>
+          <form onSubmit={handleLogin} className="space-y-6">
+            <Input
+              label="Email Address"
+              value={email}
+              setValue={setEmail}
+              type="email"
+            />
 
-            {/* PASSWORD */}
-            <div className="relative">
-              <input
-                type="password"
-                placeholder=" "
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="peer w-full px-4 pt-5 pb-3 rounded-xl bg-white border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition"
-              />
-              <label
-                className="absolute left-3 px-1 bg-white text-gray-500 text-sm transition-all 
-                peer-focus:-top-2 peer-focus:text-xs peer-focus:text-indigo-600
-                peer-[:not(:placeholder-shown)]:-top-2 peer-[:not(:placeholder-shown)]:text-xs"
-              >
-                Password
-              </label>
-            </div>
-
-            {/* OPTIONS */}
-            <div className="flex items-center justify-between text-xs">
-              <label className="flex items-center gap-2 cursor-pointer text-gray-500">
-                <input type="checkbox" className="accent-indigo-600" />
-                Remember me
-              </label>
-
-              <span className="text-indigo-600 font-medium cursor-pointer hover:underline">
-                Forgot Password?
-              </span>
-            </div>
+            <Input
+              label="Password"
+              value={password}
+              setValue={setPassword}
+              type="password"
+            />
 
             {/* ERROR */}
             {error && (
               <p className="text-red-500 text-sm text-center">{error}</p>
             )}
 
-            {/* LOGIN BUTTON */}
+            {/* BUTTON */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition active:scale-[0.98]"
+              className="w-full py-4 bg-primaryGradient text-white font-bold rounded-lg shadow-soft hover:opacity-90 transition"
             >
-              {loading ? "Logging in..." : "Sign In"}
+              {loading ? "Signing in..." : "Sign In"}
             </button>
           </form>
 
           {/* FOOTER */}
-          <div className="mt-6 text-center text-sm text-gray-500">
+          <p className="text-sm text-center mt-6">
             Don’t have an account?{" "}
             <span
               onClick={() => navigate("/register")}
-              className="text-indigo-600 font-semibold cursor-pointer hover:underline"
+              className="text-primary font-medium cursor-pointer"
             >
               Sign up
             </span>
-          </div>
+          </p>
         </div>
 
-        {/* BOTTOM */}
-        <div className="mt-6 flex justify-center gap-4 text-[11px] text-gray-400">
-          <span className="hover:text-indigo-600 cursor-pointer">Privacy</span>
-          <span>•</span>
-          <span className="hover:text-indigo-600 cursor-pointer">Terms</span>
+        {/* bottom links */}
+        <div className="mt-6 text-center text-xs text-on_surface_variant">
+          <span className="cursor-pointer hover:text-primary">Privacy</span>
+          {" • "}
+          <span className="cursor-pointer hover:text-primary">Terms</span>
         </div>
       </div>
+    </div>
+  );
+};
+
+/* ✅ FIXED INPUT COMPONENT (no overlap after blur) */
+const Input = ({ label, value, setValue, type = "text" }) => {
+  const isActive = value && value.length > 0;
+
+  return (
+    <div className="relative">
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        className="
+          peer w-full px-4 pt-6 pb-2 rounded-lg
+          bg-surface_high text-sm
+          focus:outline-none focus:ring-2 focus:ring-primary/40
+        "
+      />
+
+      <label
+        className={`
+          absolute left-3 transition-all duration-200
+          pointer-events-none text-on_surface_variant
+
+          ${
+            isActive
+              ? "top-1 text-xs bg-surface_lowest px-1"
+              : "top-1/2 -translate-y-1/2 text-sm"
+          }
+
+          peer-focus:top-1 peer-focus:translate-y-0
+          peer-focus:text-xs peer-focus:bg-surface_lowest peer-focus:px-1
+        `}
+      >
+        {label}
+      </label>
     </div>
   );
 };
