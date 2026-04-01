@@ -81,6 +81,16 @@ const Campaigns = () => {
     setFormError("");
   };
 
+  const triggerBroadcast = async (campaignId) => {
+    try {
+      await API.post(`/campaigns/${campaignId}/broadcast`);
+      alert("Broadcast triggered successfully.");
+    } catch (err) {
+      console.error(err);
+      alert(err?.response?.data?.detail || "Failed to trigger broadcast");
+    }
+  };
+
   const createCampaign = async () => {
     const trimmedName = name.trim();
     const trimmedDescription = description.trim();
@@ -157,7 +167,7 @@ const Campaigns = () => {
     try {
       await API.post(`/campaigns/${campaignId}/approve-volunteer/${volId}`);
       if (selectedCampaign) {
-        openDetails(selectedCampaign);
+        await openDetails(selectedCampaign);
       }
       loadCampaigns();
     } catch (err) {
@@ -183,13 +193,6 @@ const Campaigns = () => {
     if (s === "COMPLETED") return "bg-emerald-100 text-emerald-700";
     if (s === "PLANNED") return "bg-amber-100 text-amber-700";
     return "bg-slate-100 text-slate-600";
-  };
-
-  const getStatusDot = (s) => {
-    if (s === "ACTIVE") return "bg-blue-500";
-    if (s === "COMPLETED") return "bg-emerald-500";
-    if (s === "PLANNED") return "bg-amber-500";
-    return "bg-slate-400";
   };
 
   const getTypeTone = (t) => {
@@ -255,6 +258,9 @@ const Campaigns = () => {
       prev.map((item, i) => (i === index ? { ...item, [field]: value } : item)),
     );
   };
+
+  const pendingCount = pool.filter((v) => v.status === "PENDING").length;
+  const approvedCount = pool.filter((v) => v.status === "APPROVED").length;
 
   return (
     <div className="space-y-8">
@@ -383,10 +389,17 @@ const Campaigns = () => {
                     : 0;
 
                   return (
-                    <button
+                    <div
                       key={c.id}
+                      role="button"
+                      tabIndex={0}
                       onClick={() => openDetails(c)}
-                      className={`text-left rounded-2xl border bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg ${
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          openDetails(c);
+                        }
+                      }}
+                      className={`cursor-pointer text-left rounded-2xl border bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg ${
                         isSelected
                           ? "border-blue-300 ring-2 ring-blue-100"
                           : "border-slate-200"
@@ -468,17 +481,34 @@ const Campaigns = () => {
                         </div>
                       )}
 
-                      <div className="mt-5 flex items-center justify-between">
+                      <div className="mt-5 flex items-center justify-between gap-3">
                         <span className="text-xs font-semibold text-blue-600">
                           View details →
                         </span>
-                        <span className="text-[10px] text-slate-400">
-                          {c.start_time
-                            ? new Date(c.start_time).toLocaleDateString()
-                            : "No start date"}
-                        </span>
+
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (c.status === "COMPLETED") return;
+                            triggerBroadcast(c.id);
+                          }}
+                          disabled={c.status === "COMPLETED"}
+                          className={`rounded-full px-3 py-1.5 text-[11px] font-semibold transition ${
+                            c.status === "COMPLETED"
+                              ? "cursor-not-allowed bg-slate-200 text-slate-500"
+                              : "bg-indigo-600 text-white hover:bg-indigo-700"
+                          }`}
+                        >
+                          Broadcast
+                        </button>
                       </div>
-                    </button>
+
+                      <div className="mt-3 text-[10px] text-slate-400">
+                        {c.start_time
+                          ? new Date(c.start_time).toLocaleDateString()
+                          : "No start date"}
+                      </div>
+                    </div>
                   );
                 })}
               </div>
@@ -596,7 +626,7 @@ const Campaigns = () => {
                 </p>
               </div>
               <span className="rounded-full bg-rose-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-rose-700">
-                {pool.length || 0} pending
+                {pendingCount} pending
               </span>
             </div>
 
@@ -630,16 +660,34 @@ const Campaigns = () => {
                         <p className="mt-1 text-xs text-slate-500">
                           {v.skills?.length ? v.skills.join(", ") : "No skills"}
                         </p>
+
+                        <span
+                          className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest ${
+                            v.status === "APPROVED"
+                              ? "bg-emerald-100 text-emerald-700"
+                              : v.status === "REJECTED"
+                                ? "bg-rose-100 text-rose-700"
+                                : "bg-amber-100 text-amber-700"
+                          }`}
+                        >
+                          {v.status}
+                        </span>
                       </div>
 
-                      <button
-                        onClick={() =>
-                          approve(selectedCampaign.id, v.volunteer_id)
-                        }
-                        className="shrink-0 rounded-full bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-emerald-700"
-                      >
-                        Approve
-                      </button>
+                      {v.status === "PENDING" ? (
+                        <button
+                          onClick={() =>
+                            approve(selectedCampaign.id, v.volunteer_id)
+                          }
+                          className="shrink-0 rounded-full bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-emerald-700"
+                        >
+                          Approve
+                        </button>
+                      ) : (
+                        <span className="shrink-0 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-500">
+                          {v.status === "APPROVED" ? "Approved" : "Rejected"}
+                        </span>
+                      )}
                     </div>
 
                     {v.match_score != null && (
@@ -652,7 +700,10 @@ const Campaigns = () => {
                           <div
                             className="h-1.5 rounded-full bg-blue-500"
                             style={{
-                              width: `${Math.max(0, Math.min(100, v.match_score))}%`,
+                              width: `${Math.max(
+                                0,
+                                Math.min(100, v.match_score),
+                              )}%`,
                             }}
                           />
                         </div>
@@ -724,16 +775,48 @@ const Campaigns = () => {
             </div>
 
             {selectedCampaign && (
-              <button
-                onClick={() => completeCampaign(selectedCampaign.id)}
-                className="mt-5 w-full rounded-xl px-4 py-3 text-sm font-semibold text-white transition hover:opacity-95 active:scale-[0.98]"
-                style={{
-                  background:
-                    "linear-gradient(135deg, #005da9 0%, #0075d4 100%)",
-                }}
-              >
-                Mark Campaign Completed
-              </button>
+              <div className="mt-5 space-y-3">
+                <button
+                  onClick={() => {
+                    if (selectedCampaign.status === "COMPLETED") return;
+                    triggerBroadcast(selectedCampaign.id);
+                  }}
+                  disabled={selectedCampaign.status === "COMPLETED"}
+                  className={`w-full rounded-xl px-4 py-3 text-sm font-semibold text-white transition active:scale-[0.98] ${
+                    selectedCampaign.status === "COMPLETED"
+                      ? "cursor-not-allowed bg-slate-300 opacity-70"
+                      : "hover:opacity-95"
+                  }`}
+                  style={{
+                    background:
+                      selectedCampaign.status === "COMPLETED"
+                        ? "#cbd5e1"
+                        : "linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)",
+                  }}
+                >
+                  Trigger Broadcast
+                </button>
+
+                {selectedCampaign.status === "COMPLETED" ? (
+                  <button
+                    disabled
+                    className="w-full rounded-xl bg-emerald-100 px-4 py-3 text-sm font-semibold text-emerald-700 opacity-80 cursor-not-allowed"
+                  >
+                    Completed
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => completeCampaign(selectedCampaign.id)}
+                    className="w-full rounded-xl px-4 py-3 text-sm font-semibold text-white transition hover:opacity-95 active:scale-[0.98]"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, #005da9 0%, #0075d4 100%)",
+                    }}
+                  >
+                    Mark Campaign Completed
+                  </button>
+                )}
+              </div>
             )}
           </div>
         </section>
@@ -878,16 +961,48 @@ const Campaigns = () => {
                   </div>
                 </div>
 
-                <button
-                  onClick={() => completeCampaign(selectedCampaign.id)}
-                  className="w-full rounded-xl px-4 py-3 text-sm font-semibold text-white transition hover:opacity-95"
-                  style={{
-                    background:
-                      "linear-gradient(135deg, #005da9 0%, #0075d4 100%)",
-                  }}
-                >
-                  Mark Completed
-                </button>
+                <div className="grid gap-3 md:grid-cols-2">
+                  <button
+                    onClick={() => {
+                      if (selectedCampaign.status === "COMPLETED") return;
+                      triggerBroadcast(selectedCampaign.id);
+                    }}
+                    disabled={selectedCampaign.status === "COMPLETED"}
+                    className={`w-full rounded-xl px-4 py-3 text-sm font-semibold text-white transition ${
+                      selectedCampaign.status === "COMPLETED"
+                        ? "cursor-not-allowed bg-slate-300 opacity-70"
+                        : "hover:opacity-95"
+                    }`}
+                    style={{
+                      background:
+                        selectedCampaign.status === "COMPLETED"
+                          ? "#cbd5e1"
+                          : "linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)",
+                    }}
+                  >
+                    Trigger Broadcast
+                  </button>
+
+                  {selectedCampaign.status === "COMPLETED" ? (
+                    <button
+                      disabled
+                      className="w-full rounded-xl bg-emerald-100 px-4 py-3 text-sm font-semibold text-emerald-700 opacity-80 cursor-not-allowed"
+                    >
+                      Completed
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => completeCampaign(selectedCampaign.id)}
+                      className="w-full rounded-xl px-4 py-3 text-sm font-semibold text-white transition hover:opacity-95"
+                      style={{
+                        background:
+                          "linear-gradient(135deg, #005da9 0%, #0075d4 100%)",
+                      }}
+                    >
+                      Mark Completed
+                    </button>
+                  )}
+                </div>
               </div>
 
               <div className="space-y-5">
@@ -895,7 +1010,9 @@ const Campaigns = () => {
                   <div className="mb-4 flex items-center justify-between">
                     <h3 className="font-bold text-slate-900">Volunteer Pool</h3>
                     <span className="text-xs font-bold uppercase tracking-widest text-blue-600">
-                      {loadingPool ? "Loading..." : `${pool.length} candidates`}
+                      {loadingPool
+                        ? "Loading..."
+                        : `${pendingCount} pending • ${approvedCount} approved`}
                     </span>
                   </div>
 
@@ -927,17 +1044,57 @@ const Campaigns = () => {
                                   ? v.skills.join(", ")
                                   : "No skills"}
                               </p>
+
+                              <span
+                                className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest ${
+                                  v.status === "APPROVED"
+                                    ? "bg-emerald-100 text-emerald-700"
+                                    : v.status === "REJECTED"
+                                      ? "bg-rose-100 text-rose-700"
+                                      : "bg-amber-100 text-amber-700"
+                                }`}
+                              >
+                                {v.status}
+                              </span>
                             </div>
 
-                            <button
-                              onClick={() =>
-                                approve(selectedCampaign.id, v.volunteer_id)
-                              }
-                              className="shrink-0 rounded-full bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-emerald-700"
-                            >
-                              Approve
-                            </button>
+                            {v.status === "PENDING" ? (
+                              <button
+                                onClick={() =>
+                                  approve(selectedCampaign.id, v.volunteer_id)
+                                }
+                                className="shrink-0 rounded-full bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-emerald-700"
+                              >
+                                Approve
+                              </button>
+                            ) : (
+                              <span className="shrink-0 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-500">
+                                {v.status === "APPROVED"
+                                  ? "Approved"
+                                  : "Rejected"}
+                              </span>
+                            )}
                           </div>
+
+                          {v.match_score != null && (
+                            <div className="mt-3">
+                              <div className="mb-1 flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                                <span>Match score</span>
+                                <span>{v.match_score}%</span>
+                              </div>
+                              <div className="h-1.5 rounded-full bg-slate-100">
+                                <div
+                                  className="h-1.5 rounded-full bg-blue-500"
+                                  style={{
+                                    width: `${Math.max(
+                                      0,
+                                      Math.min(100, v.match_score),
+                                    )}%`,
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -949,9 +1106,10 @@ const Campaigns = () => {
                     Ops note
                   </p>
                   <p className="mt-2 text-sm leading-relaxed text-white/80">
-                    Once volunteers are approved, keep this campaign open until
-                    coordination is complete. Closing the mission will archive
-                    it from the active board.
+                    Once volunteers are approved, they stay visible in the pool
+                    with their current status. This makes it easier to track who
+                    is pending, approved, or rejected without losing the full
+                    picture.
                   </p>
                 </div>
               </div>
@@ -1001,7 +1159,7 @@ const Campaigns = () => {
                 <Field label="Name">
                   <input
                     className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-blue-300 focus:bg-white"
-                    placeholder="Operation Azure Shield"
+                    placeholder="e.g. Community Meal Drive"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                   />
@@ -1010,7 +1168,7 @@ const Campaigns = () => {
                 <Field label="Description">
                   <textarea
                     className="min-h-[120px] w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-blue-300 focus:bg-white"
-                    placeholder="Describe the mission"
+                    placeholder="Write a short description of the campaign"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                   />
@@ -1034,7 +1192,7 @@ const Campaigns = () => {
                   <Field label="Goal">
                     <input
                       className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-blue-300 focus:bg-white"
-                      placeholder="100 meals"
+                      placeholder="e.g. 100 meals"
                       value={targetQuantity}
                       onChange={(e) => setTargetQuantity(e.target.value)}
                     />
@@ -1064,7 +1222,7 @@ const Campaigns = () => {
                 <Field label="Location">
                   <input
                     className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-blue-300 focus:bg-white"
-                    placeholder="Pickup / mission location"
+                    placeholder="e.g. Ward 12, City Hospital"
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                   />
@@ -1073,7 +1231,7 @@ const Campaigns = () => {
                 <Field label="Required Skills">
                   <input
                     className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-blue-300 focus:bg-white"
-                    placeholder="medical, logistics, coordination"
+                    placeholder="e.g. medical, logistics, coordination"
                     value={skills}
                     onChange={(e) => setSkills(e.target.value)}
                   />
@@ -1083,7 +1241,7 @@ const Campaigns = () => {
                   <input
                     type="number"
                     className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-blue-300 focus:bg-white"
-                    placeholder="5"
+                    placeholder="e.g. 5"
                     value={volunteersRequired}
                     onChange={(e) => setVolunteersRequired(e.target.value)}
                   />
@@ -1124,7 +1282,7 @@ const Campaigns = () => {
 
                         <input
                           type="number"
-                          placeholder="Qty"
+                          placeholder="Quantity"
                           value={item.value}
                           onChange={(e) =>
                             updateItem(idx, "value", e.target.value)
