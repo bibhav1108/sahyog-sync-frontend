@@ -189,11 +189,8 @@ const Layout = ({ children }) => {
 
       {/* Sidebar */}
       <aside className="fixed left-0 top-0 z-50 flex h-screen w-64 flex-col border-r border-white/5 bg-surface/80 px-5 pb-6 pt-5 shadow-soft backdrop-blur-xl">
-        <div className="mb-6 flex flex-col items-center gap-2">
-          <img src={logo} className="w-28" alt="Sahyog Sync" />
-          <span className="text-sm font-semibold text-primary">
-            Sahyog Sync
-          </span>
+        <div className="mb-6 flex flex-col items-center">
+          <img src={logo} className="w-36 pt-2" alt="Sahyog Sync" />
         </div>
 
         <nav className="flex-1 space-y-1 text-sm">

@@ -57,12 +57,8 @@ const Login = () => {
         {/* CARD */}
         <div className="bg-surface_lowest p-10 rounded-xl shadow-soft">
           {/* HEADER */}
-          <div className="text-center mb-8 space-y-3">
-            <img src={logo} className="w-16 h-16 mx-auto" />
-
-            <h1 className="text-2xl font-outfit font-bold text-primary">
-              Sahyog Sync
-            </h1>
+          <div className="text-center mb-8 space-y-0">
+            <img src={logo} className="w-40 h-40 mx-auto" />
 
             <p className="text-sm text-on_surface_variant">
               Sign in to continue
@@ -147,12 +143,12 @@ const Input = ({ label, value, setValue, type = "text" }) => {
 
           ${
             isActive
-              ? "top-1 text-xs bg-surface_lowest px-1"
+              ? "top-1 text-xs"
               : "top-1/2 -translate-y-1/2 text-sm"
           }
 
           peer-focus:top-1 peer-focus:translate-y-0
-          peer-focus:text-xs peer-focus:bg-surface_lowest peer-focus:px-1
+          peer-focus:text-xs
         `}
       >
         {label}

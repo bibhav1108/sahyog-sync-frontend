@@ -165,24 +165,42 @@ const Register = () => {
   );
 };
 
-/* 🔥 CLEAN INPUT COMPONENT */
-const Input = ({ label, value, setValue, type = "text" }) => (
-  <div className="relative">
-    <input
-      type={type}
-      value={value}
-      onChange={(e) => setValue(e.target.value)}
-      placeholder=" "
-      className="peer w-full p-4 rounded-lg bg-surface_high focus:outline-none focus:ring-2 focus:ring-primary/40"
-    />
-    <label
-      className="absolute left-4 top-4 text-on_surface_variant text-sm transition-all
-      peer-focus:-top-2 peer-focus:text-xs peer-focus:bg-surface_lowest peer-focus:px-1
-      peer-not-placeholder-shown:-top-2 peer-not-placeholder-shown:text-xs peer-not-placeholder-shown:bg-surface_lowest peer-not-placeholder-shown:px-1"
-    >
-      {label}
-    </label>
-  </div>
-);
+/* 🔥 VALID INPUT COMPONENT (no overlap, transparent bg) */
+const Input = ({ label, value, setValue, type = "text" }) => {
+  const isActive = value && value.length > 0;
+
+  return (
+    <div className="relative">
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        className="
+          peer w-full px-4 pt-6 pb-2 rounded-lg
+          bg-surface_high text-sm
+          focus:outline-none focus:ring-2 focus:ring-primary/40
+        "
+      />
+
+      <label
+        className={`
+          absolute left-3 transition-all duration-200
+          pointer-events-none text-on_surface_variant
+
+          ${
+            isActive
+              ? "top-1 text-xs"
+              : "top-1/2 -translate-y-1/2 text-sm"
+          }
+
+          peer-focus:top-1 peer-focus:translate-y-0
+          peer-focus:text-xs
+        `}
+      >
+        {label}
+      </label>
+    </div>
+  );
+};
 
 export default Register;
