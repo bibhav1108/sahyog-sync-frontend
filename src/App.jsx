@@ -13,6 +13,7 @@ import ActiveNeeds from "./pages/ActiveNeeds";
 import DispatchHistory from "./pages/DispatchHistory";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Campaigns from "./pages/Campaigns";
+import MissionResponse from "./pages/MissionResponse";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/missions/:campaign_id" element={<MissionResponse />} />
 
         {/* 🔐 Protected routes */}
         <Route
