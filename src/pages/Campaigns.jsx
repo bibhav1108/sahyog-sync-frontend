@@ -29,6 +29,9 @@ const Campaigns = () => {
   const [pool, setPool] = useState([]);
   const [loadingPool, setLoadingPool] = useState(false);
 
+  const [readiness, setReadiness] = useState([]);
+  const [loadingReadiness, setLoadingReadiness] = useState(false);
+
   const [showForm, setShowForm] = useState(false);
   const [creating, setCreating] = useState(false);
 
@@ -47,9 +50,12 @@ const Campaigns = () => {
   const loadCampaigns = async () => {
     try {
       const res = await API.get("/campaigns/");
-      setCampaigns(res.data || []);
+      const data = res.data || [];
+      setCampaigns(data);
+      return data;
     } catch (err) {
       console.error(err);
+      return [];
     }
   };
 
@@ -62,9 +68,67 @@ const Campaigns = () => {
     }
   };
 
+  const loadVolunteerReadiness = async (campaignData = null) => {
+    try {
+      setLoadingReadiness(true);
+
+      const source = campaignData ?? campaigns;
+      const ongoingCampaigns = source.filter((c) => c.status === "PLANNED");
+
+      const rows = await Promise.all(
+        ongoingCampaigns.map(async (campaign) => {
+          try {
+            const res = await API.get(`/campaigns/${campaign.id}/pool`);
+            console.log(res.data);
+            const normalizeStatus = (s) => {
+              if (!s) return "";
+              if (typeof s === "string") return s;
+              if (s.value) return s.value;
+              return String(s);
+            };
+
+            const approvedVolunteers = (res.data || []).filter(
+              (v) => normalizeStatus(v.status) === "APPROVED",
+            );
+
+            return {
+              campaign,
+              approvedVolunteers,
+            };
+          } catch (err) {
+            console.error(err);
+            return {
+              campaign,
+              approvedVolunteers: [],
+            };
+          }
+        }),
+      );
+
+      setReadiness(rows.filter((row) => row.approvedVolunteers.length > 0));
+    } catch (err) {
+      console.error(err);
+      setReadiness([]);
+    } finally {
+      setLoadingReadiness(false);
+    }
+  };
+
+  const refreshDashboard = async () => {
+    const campaignData = await loadCampaigns();
+    await loadVolunteerReadiness(campaignData);
+  };
+
   useEffect(() => {
-    loadCampaigns();
-    loadInventory();
+    const init = async () => {
+      const [campaignData] = await Promise.all([
+        loadCampaigns(),
+        loadInventory(),
+      ]);
+      await loadVolunteerReadiness(campaignData);
+    };
+
+    init();
   }, []);
 
   const resetForm = () => {
@@ -140,7 +204,7 @@ const Campaigns = () => {
 
       setShowForm(false);
       resetForm();
-      loadCampaigns();
+      await refreshDashboard();
     } catch (err) {
       console.error(err.response?.data || err);
       setFormError(err?.response?.data?.detail || "Error creating campaign");
@@ -169,7 +233,7 @@ const Campaigns = () => {
       if (selectedCampaign) {
         await openDetails(selectedCampaign);
       }
-      loadCampaigns();
+      await refreshDashboard();
     } catch (err) {
       console.error(err);
       alert(err?.response?.data?.detail || "Failed to approve volunteer");
@@ -181,7 +245,7 @@ const Campaigns = () => {
       await API.post(`/campaigns/${id}/complete`);
       setSelectedCampaign(null);
       setPool([]);
-      loadCampaigns();
+      await refreshDashboard();
     } catch (err) {
       console.error(err);
       alert(err?.response?.data?.detail || "Failed to complete campaign");
@@ -262,6 +326,11 @@ const Campaigns = () => {
   const pendingCount = pool.filter((v) => v.status === "PENDING").length;
   const approvedCount = pool.filter((v) => v.status === "APPROVED").length;
 
+  const totalApprovedReadiness = readiness.reduce(
+    (sum, row) => sum + row.approvedVolunteers.length,
+    0,
+  );
+
   return (
     <div className="space-y-8">
       {/* HEADER */}
@@ -271,7 +340,7 @@ const Campaigns = () => {
             Operational Hub
           </p>
           <h1 className="text-4xl font-black tracking-tight text-slate-900">
-            Mission Control
+            Campaigns
           </h1>
           <p className="max-w-2xl text-sm text-slate-500">
             Launch campaigns, inspect volunteer readiness, and keep live mission
@@ -294,7 +363,7 @@ const Campaigns = () => {
             }}
           >
             <span className="material-symbols-outlined text-[18px]">add</span>
-            New Mission Blueprint
+            New Campaign
           </button>
         </div>
       </div>
@@ -308,13 +377,13 @@ const Campaigns = () => {
           icon="rocket_launch"
         />
         <StatCard
-          label="Active Missions"
+          label="Active Campaigns"
           value={stats.active}
           hint="Currently running"
           icon="play_circle"
         />
         <StatCard
-          label="Planned Missions"
+          label="Planned Campaigns"
           value={stats.planned}
           hint="Awaiting launch"
           icon="event_upcoming"
@@ -328,9 +397,9 @@ const Campaigns = () => {
       </div>
 
       {/* MAIN GRID */}
-      <div className="grid grid-cols-12 gap-6 items-start">
+      <div className="grid grid-cols-12 items-start gap-6">
         {/* LEFT COLUMN */}
-        <section className="col-span-12 lg:col-span-7 space-y-6">
+        <section className="col-span-12 space-y-6 lg:col-span-7">
           <div className="rounded-2xl border border-white/30 bg-white/70 p-6 shadow-[0_40px_60px_-20px_rgba(32,25,36,0.08)] backdrop-blur-xl">
             <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div>
@@ -342,7 +411,7 @@ const Campaigns = () => {
 
               <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
                 <div className="relative">
-                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[20px]">
+                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[20px] text-slate-400">
                     search
                   </span>
                   <input
@@ -399,7 +468,7 @@ const Campaigns = () => {
                           openDetails(c);
                         }
                       }}
-                      className={`cursor-pointer text-left rounded-2xl border bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg ${
+                      className={`cursor-pointer rounded-2xl border bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg ${
                         isSelected
                           ? "border-blue-300 ring-2 ring-blue-100"
                           : "border-slate-200"
@@ -614,103 +683,50 @@ const Campaigns = () => {
         </section>
 
         {/* RIGHT COLUMN */}
-        <section className="col-span-12 lg:col-span-5 space-y-6">
+        <section className="col-span-12 space-y-6 lg:col-span-5">
           <div className="rounded-2xl border border-white/30 bg-white/70 p-6 shadow-[0_40px_60px_-20px_rgba(32,25,36,0.08)] backdrop-blur-xl">
             <div className="mb-5 flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-bold text-slate-900">
-                  Volunteer Pool
+                  Volunteer Readiness
                 </h3>
                 <p className="text-sm text-slate-500">
-                  Approve volunteers for the selected campaign.
+                  Approved volunteers for ongoing campaigns.
                 </p>
               </div>
-              <span className="rounded-full bg-rose-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-rose-700">
-                {pendingCount} pending
+              <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-emerald-700">
+                {totalApprovedReadiness} approved
               </span>
             </div>
 
-            {!selectedCampaign ? (
+            {loadingReadiness ? (
+              <div className="space-y-3">
+                <div className="h-20 animate-pulse rounded-2xl bg-slate-100" />
+                <div className="h-20 animate-pulse rounded-2xl bg-slate-100" />
+              </div>
+            ) : readiness.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-8 text-center">
                 <p className="text-sm text-slate-600">
-                  Open a campaign to see its volunteer pool.
+                  No ongoing campaigns with approved volunteers yet.
                 </p>
               </div>
-            ) : loadingPool ? (
-              <div className="space-y-3">
-                <div className="h-20 animate-pulse rounded-2xl bg-slate-100" />
-                <div className="h-20 animate-pulse rounded-2xl bg-slate-100" />
-              </div>
-            ) : pool.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-8 text-center">
-                <p className="text-sm text-slate-600">No volunteers yet.</p>
-              </div>
             ) : (
-              <div className="space-y-3">
-                {pool.map((v) => (
-                  <div
-                    key={v.volunteer_id}
-                    className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:shadow-md"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="truncate font-semibold text-slate-900">
-                          {v.volunteer_name}
-                        </p>
-                        <p className="mt-1 text-xs text-slate-500">
-                          {v.skills?.length ? v.skills.join(", ") : "No skills"}
-                        </p>
-
-                        <span
-                          className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest ${
-                            v.status === "APPROVED"
-                              ? "bg-emerald-100 text-emerald-700"
-                              : v.status === "REJECTED"
-                                ? "bg-rose-100 text-rose-700"
-                                : "bg-amber-100 text-amber-700"
-                          }`}
-                        >
-                          {v.status}
-                        </span>
-                      </div>
-
-                      {v.status === "PENDING" ? (
-                        <button
-                          onClick={() =>
-                            approve(selectedCampaign.id, v.volunteer_id)
-                          }
-                          className="shrink-0 rounded-full bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-emerald-700"
-                        >
-                          Approve
-                        </button>
-                      ) : (
-                        <span className="shrink-0 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-500">
-                          {v.status === "APPROVED" ? "Approved" : "Rejected"}
-                        </span>
-                      )}
+              <div className="space-y-2">
+                {readiness.flatMap(({ campaign, approvedVolunteers }) =>
+                  approvedVolunteers.map((v) => (
+                    <div
+                      key={`${campaign.id}-${v.volunteer_id}`}
+                      className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2 text-sm"
+                    >
+                      <span className="font-medium text-slate-900">
+                        {v.volunteer_name}
+                      </span>
+                      <span className="text-xs text-slate-500 truncate max-w-[120px]">
+                        {campaign.name}
+                      </span>
                     </div>
-
-                    {v.match_score != null && (
-                      <div className="mt-3">
-                        <div className="mb-1 flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                          <span>Match score</span>
-                          <span>{v.match_score}%</span>
-                        </div>
-                        <div className="h-1.5 rounded-full bg-slate-100">
-                          <div
-                            className="h-1.5 rounded-full bg-blue-500"
-                            style={{
-                              width: `${Math.max(
-                                0,
-                                Math.min(100, v.match_score),
-                              )}%`,
-                            }}
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ))}
+                  )),
+                )}
               </div>
             )}
           </div>
@@ -800,7 +816,7 @@ const Campaigns = () => {
                 {selectedCampaign.status === "COMPLETED" ? (
                   <button
                     disabled
-                    className="w-full rounded-xl bg-emerald-100 px-4 py-3 text-sm font-semibold text-emerald-700 opacity-80 cursor-not-allowed"
+                    className="cursor-not-allowed rounded-xl bg-emerald-100 px-4 py-3 text-sm font-semibold text-emerald-700 opacity-80"
                   >
                     Completed
                   </button>
@@ -986,7 +1002,7 @@ const Campaigns = () => {
                   {selectedCampaign.status === "COMPLETED" ? (
                     <button
                       disabled
-                      className="w-full rounded-xl bg-emerald-100 px-4 py-3 text-sm font-semibold text-emerald-700 opacity-80 cursor-not-allowed"
+                      className="cursor-not-allowed rounded-xl bg-emerald-100 px-4 py-3 text-sm font-semibold text-emerald-700 opacity-80"
                     >
                       Completed
                     </button>
