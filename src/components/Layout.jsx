@@ -8,7 +8,7 @@ const NAV_ITEMS = [
   { to: "/dashboard", label: "Overview", icon: "dashboard" },
   { to: "/needs", label: "Active Needs", icon: "emergency" },
   { to: "/marketplace", label: "Marketplace", icon: "notifications_active" },
-  { to: "/campaigns", label: "Campaigns", icon: "rocket_launch" },
+  { to: "/campaigns", label: "Mission Control", icon: "rocket_launch" },
   { to: "/volunteers", label: "Volunteers", icon: "groups" },
   { to: "/dispatches", label: "Dispatch History", icon: "history" },
   { to: "/inventory", label: "Inventory", icon: "inventory_2" },
@@ -27,7 +27,7 @@ const Layout = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [showNotifications, setShowNotifications] = useState(true);
+  const [showNotifications, setShowNotifications] = useState(false);
   const [panelWidth, setPanelWidth] = useState(340);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -38,6 +38,7 @@ const Layout = ({ children }) => {
   const [org, setOrg] = useState(null);
 
   const [profileOpen, setProfileOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const prevIdsRef = useRef(new Set());
   const loadingRef = useRef({
@@ -162,7 +163,10 @@ const Layout = ({ children }) => {
   return (
     <div className="min-h-screen bg-surface text-on_surface antialiased">
       {/* Toast stack */}
-      <div className="fixed left-[17rem] top-20 z-[9999] space-y-3">
+      <div 
+        className="fixed top-20 z-[9999] space-y-3 transition-all duration-300"
+        style={{ left: sidebarOpen ? "17rem" : "1.5rem" }}
+      >
         {toasts.map((t) => (
           <div
             key={t.toastId}
@@ -188,9 +192,18 @@ const Layout = ({ children }) => {
       </div>
 
       {/* Sidebar */}
-      <aside className="fixed left-0 top-0 z-50 flex h-screen w-64 flex-col border-r border-white/5 bg-surface/80 px-5 pb-6 pt-5 shadow-soft backdrop-blur-xl">
-        <div className="mb-6 flex flex-col items-center">
+      <aside className={`fixed left-0 top-0 z-50 flex h-screen w-64 flex-col border-r border-white/5 bg-surface/80 px-5 pb-6 pt-5 shadow-soft backdrop-blur-xl transition-all duration-300 ${
+        sidebarOpen ? "translate-x-0" : "-translate-x-full"
+      }`}>
+        <div className="mb-6 flex items-center justify-between px-1">
           <img src={logo} className="w-36 pt-2" alt="Sahyog Sync" />
+          <button 
+            onClick={() => setSidebarOpen(false)}
+            className="flex items-center justify-center rounded-lg p-1.5 text-on_surface_variant hover:bg-white/5 hover:text-on_surface transition-colors"
+            title="Close sidebar"
+          >
+            <span className="material-symbols-outlined text-[20px]">menu_open</span>
+          </button>
         </div>
 
         <nav className="flex-1 space-y-1 text-sm">
@@ -237,17 +250,28 @@ const Layout = ({ children }) => {
 
       {/* Top bar */}
       <header
-        className="fixed top-0 z-40 flex h-16 items-center justify-between border-b border-white/5 bg-surface/80 px-6 shadow-soft backdrop-blur-md"
-        style={{ left: "16rem", right: 0 }}
+        className="fixed top-0 z-40 flex h-16 items-center justify-between border-b border-white/5 bg-surface/80 px-6 shadow-soft backdrop-blur-md transition-all duration-300"
+        style={{ left: sidebarOpen ? "16rem" : "0", right: 0 }}
       >
-        <div className="relative flex-1 max-w-md">
-          <span className="material-symbols-outlined absolute left-3 top-2 text-on_surface_variant">
-            search
-          </span>
-          <input
-            className="w-full rounded-xl bg-surface_high py-2 pl-10 pr-3 text-sm outline-none transition focus:ring-2 focus:ring-primary/40"
-            placeholder="Search..."
-          />
+        <div className="flex flex-1 items-center gap-4 max-w-md">
+          {!sidebarOpen && (
+            <button 
+              onClick={() => setSidebarOpen(true)}
+              className="flex items-center justify-center rounded-lg p-2 text-on_surface_variant hover:bg-white/5 hover:text-on_surface transition-colors"
+              title="Open sidebar"
+            >
+              <span className="material-symbols-outlined text-[22px]">menu</span>
+            </button>
+          )}
+          <div className="relative flex-1">
+            <span className="material-symbols-outlined absolute left-3 top-2 text-on_surface_variant">
+              search
+            </span>
+            <input
+              className="w-full rounded-xl bg-surface_high py-2 pl-10 pr-3 text-sm outline-none transition focus:ring-2 focus:ring-primary/40"
+              placeholder="Search..."
+            />
+          </div>
         </div>
 
         <div className="flex items-center gap-4">
@@ -325,7 +349,7 @@ const Layout = ({ children }) => {
       </header>
 
       {/* Main */}
-      <main style={{ marginLeft: "16rem", paddingTop: "4rem" }}>
+      <main className="transition-all duration-300" style={{ marginLeft: sidebarOpen ? "16rem" : "0", paddingTop: "4rem" }}>
         <div className="p-6">{children}</div>
       </main>
 
