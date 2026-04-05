@@ -8,7 +8,7 @@ const NAV_ITEMS = [
   { to: "/dashboard", label: "Overview", icon: "dashboard" },
   { to: "/needs", label: "Active Needs", icon: "emergency" },
   { to: "/marketplace", label: "Marketplace", icon: "notifications_active" },
-  { to: "/campaigns", label: "Mission Control", icon: "rocket_launch" },
+  { to: "/campaigns", label: "Campaign Control", icon: "rocket_launch" },
   { to: "/volunteers", label: "Volunteers", icon: "groups" },
   { to: "/dispatches", label: "Dispatch History", icon: "history" },
   { to: "/inventory", label: "Inventory", icon: "inventory_2" },

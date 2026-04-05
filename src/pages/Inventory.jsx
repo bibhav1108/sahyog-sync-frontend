@@ -14,6 +14,11 @@ const Inventory = () => {
   const [editingId, setEditingId] = useState(null);
   const [editValue, setEditValue] = useState("");
 
+  // Delete state
+  const [deleteTarget, setDeleteTarget] = useState(null); // { id, item_name }
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
+
   const [newItem, setNewItem] = useState({
     item_name: "",
     quantity: "",
@@ -95,9 +100,27 @@ const Inventory = () => {
     }
   };
 
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    setDeleteError("");
+    try {
+      await API.delete(`/inventory/${deleteTarget.id}`);
+      setDeleteTarget(null);
+      fetchInventory(false);
+    } catch (err) {
+      const msg =
+        err?.response?.data?.detail ||
+        "Failed to delete item. Please try again.";
+      setDeleteError(msg);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
     <div className="space-y-8">
-      {/* 🔥 HERO */}
+      {/* HERO */}
       <div className="grid grid-cols-3 gap-4">
         <StatCard label="Total Units" value={total} />
         <StatCard label="Reserved" value={reserved} />
@@ -151,13 +174,25 @@ const Inventory = () => {
                 key={i.id}
                 className="bg-surface_high p-5 rounded-xl flex flex-col gap-4"
               >
-                {/* HEADER */}
-                <div className="flex justify-between">
+                {/* CARD HEADER */}
+                <div className="flex justify-between items-start">
                   <h3 className="font-bold">{i.item_name}</h3>
-
-                  <span className="text-xs bg-surface px-2 py-1 rounded">
-                    {i.category}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs bg-surface px-2 py-1 rounded">
+                      {i.category}
+                    </span>
+                    {/* DELETE BUTTON */}
+                    <button
+                      title="Delete item"
+                      onClick={() => {
+                        setDeleteTarget({ id: i.id, item_name: i.item_name, reserved_quantity: i.reserved_quantity });
+                        setDeleteError("");
+                      }}
+                      className="text-red-400 hover:text-red-600 hover:bg-red-500/10 p-1 rounded-lg transition"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">delete</span>
+                    </button>
+                  </div>
                 </div>
 
                 {/* STATS */}
@@ -222,7 +257,7 @@ const Inventory = () => {
         </div>
       )}
 
-      {/* MODAL */}
+      {/* ADD ITEM MODAL */}
       {showForm && (
         <div className="fixed inset-0 z-50 bg-transparent flex items-center justify-center">
           <div className="bg-surface_lowest p-6 rounded-xl w-full max-w-md space-y-4 relative">
@@ -282,6 +317,58 @@ const Inventory = () => {
                 {adding ? "Adding..." : "Add Item"}
               </button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* DELETE CONFIRMATION MODAL */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center">
+          <div className="bg-surface_lowest p-6 rounded-xl w-full max-w-sm space-y-4 shadow-xl">
+            {/* Icon */}
+            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-500/10 mx-auto">
+              <span className="material-symbols-outlined text-red-500 text-[28px]">delete_forever</span>
+            </div>
+
+            <div className="text-center space-y-1">
+              <h2 className="font-bold text-lg">Delete Item?</h2>
+              <p className="text-sm text-on_surface_variant">
+                Are you sure you want to delete{" "}
+                <span className="font-semibold text-on_surface">"{deleteTarget.item_name}"</span>?
+                This action cannot be undone.
+              </p>
+              {deleteTarget.reserved_quantity > 0 && (
+                <p className="text-xs text-amber-500 font-semibold mt-1">
+                  ⚠ This item has {deleteTarget.reserved_quantity} units reserved and cannot be deleted.
+                </p>
+              )}
+            </div>
+
+            {deleteError && (
+              <div className="text-red-500 text-sm font-semibold text-center bg-red-500/10 px-3 py-2 rounded-lg">
+                {deleteError}
+              </div>
+            )}
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setDeleteTarget(null);
+                  setDeleteError("");
+                }}
+                disabled={deleting}
+                className="flex-1 py-2 rounded-lg bg-surface_high text-on_surface_variant font-semibold hover:bg-black/5 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteConfirm}
+                disabled={deleting}
+                className="flex-1 py-2 rounded-lg bg-red-500 text-white font-semibold hover:bg-red-600 transition disabled:opacity-60"
+              >
+                {deleting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
           </div>
         </div>
       )}
