@@ -13,6 +13,7 @@ import DispatchHistory from "./pages/DispatchHistory";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Campaigns from "./pages/Campaigns";
 import MissionResponse from "./pages/MissionResponse";
+import CampaignHistory from "./pages/CampaignHistory";
 
 function App() {
   return (
@@ -97,6 +98,16 @@ function App() {
             <ProtectedRoute>
               <Layout>
                 <Campaigns />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/campaign-history"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <CampaignHistory />
               </Layout>
             </ProtectedRoute>
           }

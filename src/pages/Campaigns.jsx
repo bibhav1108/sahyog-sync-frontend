@@ -34,6 +34,7 @@ const Campaigns = () => {
 
   const [showForm, setShowForm] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -130,6 +131,10 @@ const Campaigns = () => {
 
     init();
   }, []);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterType, searchTerm]);
 
   const resetForm = () => {
     setName("");
@@ -274,6 +279,7 @@ const Campaigns = () => {
     const q = searchTerm.trim().toLowerCase();
 
     return [...campaigns]
+      .filter((c) => c.status === "ACTIVE" || c.status === "PLANNED")
       .filter((c) => filterType === "ALL" || c.type === filterType)
       .filter((c) => {
         if (!q) return true;
@@ -308,15 +314,6 @@ const Campaigns = () => {
     return { active, planned, completed, total: campaigns.length };
   }, [campaigns]);
 
-  const selectedPreview = selectedCampaign || campaignList[0] || null;
-
-  const momentumFromStatus = (status) => {
-    if (status === "ACTIVE") return 72;
-    if (status === "PLANNED") return 34;
-    if (status === "COMPLETED") return 100;
-    return 18;
-  };
-
   const updateItem = (index, field, value) => {
     setItems((prev) =>
       prev.map((item, i) => (i === index ? { ...item, [field]: value } : item)),
@@ -325,6 +322,47 @@ const Campaigns = () => {
 
   const pendingCount = pool.filter((v) => v.status === "PENDING").length;
   const approvedCount = pool.filter((v) => v.status === "APPROVED").length;
+
+  const ITEMS_PER_PAGE = 6;
+  const totalPages = Math.max(
+    1,
+    Math.ceil(campaignList.length / ITEMS_PER_PAGE),
+  );
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
+  const paginatedCampaigns = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return campaignList.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [campaignList, currentPage]);
+
+  const pageButtons = useMemo(() => {
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+
+    const pages = new Set([1, totalPages, currentPage]);
+
+    for (let i = currentPage - 1; i <= currentPage + 1; i += 1) {
+      if (i > 1 && i < totalPages) pages.add(i);
+    }
+
+    const sorted = Array.from(pages).sort((a, b) => a - b);
+    const result = [];
+
+    for (let i = 0; i < sorted.length; i += 1) {
+      result.push(sorted[i]);
+      if (i < sorted.length - 1 && sorted[i + 1] - sorted[i] > 1) {
+        result.push("...");
+      }
+    }
+
+    return result;
+  }, [currentPage, totalPages]);
 
   const totalApprovedReadiness = readiness.reduce(
     (sum, row) => sum + row.approvedVolunteers.length,
@@ -347,10 +385,10 @@ const Campaigns = () => {
 
         <div className="flex flex-wrap gap-3">
           <Link
-            to="/dispatches"
+            to="/campaign-history"
             className="rounded-xl bg-slate-100 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-200"
           >
-            View Past Deployments
+            View Past Campaigns
           </Link>
           <button
             onClick={() => setShowForm(true)}
@@ -399,13 +437,6 @@ const Campaigns = () => {
         <section className="col-span-12 space-y-6 lg:col-span-7">
           <div className="rounded-2xl border border-white/30 bg-white/70 p-6 shadow-[0_40px_60px_-20px_rgba(32,25,36,0.08)] backdrop-blur-xl">
             <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              <div>
-                <h2 className="text-xl font-bold text-slate-900">Campaigns</h2>
-                <p className="text-sm text-slate-500">
-                  Browse, sort, and inspect campaign details.
-                </p>
-              </div>
-
               <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
                 <div className="relative">
                   <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[20px] text-slate-400">
@@ -444,237 +475,124 @@ const Campaigns = () => {
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                {campaignList.map((c) => {
-                  const isSelected = selectedCampaign?.id === c.id;
-                  const itemsCount = c.items
-                    ? Object.values(c.items).reduce(
-                        (sum, v) => sum + (Number(v) || 0),
-                        0,
-                      )
-                    : 0;
+              <>
+                <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                  {paginatedCampaigns.map((c) => {
+                    const isSelected = selectedCampaign?.id === c.id;
+                    const itemsCount = c.items
+                      ? Object.values(c.items).reduce(
+                          (sum, v) => sum + (Number(v) || 0),
+                          0,
+                        )
+                      : 0;
 
-                  return (
-                    <div
-                      key={c.id}
-                      role="button"
-                      tabIndex={0}
-                      onClick={() => openDetails(c)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          openDetails(c);
+                    return (
+                      <div
+                        key={c.id}
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => openDetails(c)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            openDetails(c);
+                          }
+                        }}
+                        className={`cursor-pointer rounded-2xl border bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg ${
+                          isSelected
+                            ? "border-blue-300 ring-2 ring-blue-100"
+                            : "border-slate-200"
+                        }`}
+                      >
+                        <div className="mb-3 flex items-start justify-between gap-3">
+                          <span
+                            className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${getTypeTone(
+                              c.type,
+                            )}`}
+                          >
+                            {c.type || "OTHER"}
+                          </span>
+
+                          <span
+                            className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${getStatusClass(
+                              c.status,
+                            )}`}
+                          >
+                            {c.status}
+                          </span>
+                        </div>
+
+                        <h3 className="truncate text-lg font-bold text-slate-900">
+                          {c.name}
+                        </h3>
+
+                        <p className="mt-2 line-clamp-3 text-sm text-slate-500">
+                          {c.description}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {totalPages > 1 && (
+                  <div className="mt-6 flex flex-col items-center gap-3 border-t border-slate-200 pt-5">
+                    <div className="text-sm text-slate-500">
+                      Page{" "}
+                      <span className="font-semibold text-slate-800">
+                        {currentPage}
+                      </span>{" "}
+                      of{" "}
+                      <span className="font-semibold text-slate-800">
+                        {totalPages}
+                      </span>
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-center gap-2">
+                      <button
+                        className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
+                        disabled={currentPage === 1}
+                        onClick={() =>
+                          setCurrentPage((p) => Math.max(1, p - 1))
                         }
-                      }}
-                      className={`cursor-pointer rounded-2xl border bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg ${
-                        isSelected
-                          ? "border-blue-300 ring-2 ring-blue-100"
-                          : "border-slate-200"
-                      }`}
-                    >
-                      <div className="mb-4 flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">
-                            Mission #{c.id}
-                          </p>
-                          <h3 className="mt-1 truncate text-lg font-bold text-slate-900">
-                            {c.name}
-                          </h3>
-                        </div>
+                      >
+                        Prev
+                      </button>
 
-                        <span
-                          className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${getStatusClass(
-                            c.status,
-                          )}`}
-                        >
-                          {c.status}
-                        </span>
-                      </div>
-
-                      <p className="line-clamp-3 text-sm text-slate-500">
-                        {c.description}
-                      </p>
-
-                      <div className="mt-4 flex flex-wrap gap-2">
-                        <span
-                          className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${getTypeTone(
-                            c.type,
-                          )}`}
-                        >
-                          {c.type || "OTHER"}
-                        </span>
-                        <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-700">
-                          Goal: {c.target_quantity || "N/A"}
-                        </span>
-                        <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-700">
-                          Volunteers: {c.volunteers_required || 0}
-                        </span>
-                      </div>
-
-                      <div className="mt-4 space-y-2 text-sm text-slate-600">
-                        <div className="flex items-start gap-2">
-                          <span className="material-symbols-outlined text-[18px] text-slate-400">
-                            location_on
+                      {pageButtons.map((page, idx) =>
+                        page === "..." ? (
+                          <span
+                            key={`dots-${idx}`}
+                            className="px-2 text-sm text-slate-400"
+                          >
+                            ...
                           </span>
-                          <span className="line-clamp-2">
-                            {c.location_address || "No location"}
-                          </span>
-                        </div>
-
-                        <div className="flex items-start gap-2">
-                          <span className="material-symbols-outlined text-[18px] text-slate-400">
-                            inventory_2
-                          </span>
-                          <span>
-                            {itemsCount
-                              ? `${itemsCount} item units`
-                              : "No items listed"}
-                          </span>
-                        </div>
-                      </div>
-
-                      {c.items && Object.keys(c.items).length > 0 && (
-                        <div className="mt-4 flex flex-wrap gap-2">
-                          {Object.entries(c.items)
-                            .slice(0, 3)
-                            .map(([k, v]) => (
-                              <span
-                                key={k}
-                                className="rounded-full bg-slate-50 px-2.5 py-1 text-[11px] font-medium text-slate-600"
-                              >
-                                {k}: {v}
-                              </span>
-                            ))}
-                        </div>
+                        ) : (
+                          <button
+                            key={page}
+                            onClick={() => setCurrentPage(page)}
+                            className={`min-w-10 rounded-lg px-3 py-2 text-sm font-semibold transition ${
+                              currentPage === page
+                                ? "bg-blue-600 text-white"
+                                : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                            }`}
+                          >
+                            {page}
+                          </button>
+                        ),
                       )}
 
-                      <div className="mt-5 flex items-center justify-between gap-3">
-                        <span className="text-xs font-semibold text-blue-600">
-                          View details →
-                        </span>
-
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (c.status === "COMPLETED") return;
-                            triggerBroadcast(c.id);
-                          }}
-                          disabled={c.status === "COMPLETED"}
-                          className={`rounded-full px-3 py-1.5 text-[11px] font-semibold transition ${
-                            c.status === "COMPLETED"
-                              ? "cursor-not-allowed bg-slate-200 text-slate-500"
-                              : "bg-indigo-600 text-white hover:bg-indigo-700"
-                          }`}
-                        >
-                          Broadcast
-                        </button>
-                      </div>
-
-                      <div className="mt-3 text-[10px] text-slate-400">
-                        {c.start_time
-                          ? new Date(c.start_time).toLocaleDateString()
-                          : "No start date"}
-                      </div>
+                      <button
+                        className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
+                        disabled={currentPage === totalPages}
+                        onClick={() =>
+                          setCurrentPage((p) => Math.min(totalPages, p + 1))
+                        }
+                      >
+                        Next
+                      </button>
                     </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
-          <div className="rounded-2xl border border-white/30 bg-white/70 p-6 shadow-[0_40px_60px_-20px_rgba(32,25,36,0.08)] backdrop-blur-xl">
-            <div className="mb-5 flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-bold text-slate-900">
-                  Mission Readiness
-                </h3>
-                <p className="text-sm text-slate-500">
-                  Visual stage tracking for the selected campaign.
-                </p>
-              </div>
-              <span className="text-xs font-bold uppercase tracking-widest text-blue-600">
-                Live
-              </span>
-            </div>
-
-            {selectedPreview ? (
-              <>
-                <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                  <div>
-                    <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">
-                      {selectedPreview.type || "OTHER"}
-                    </p>
-                    <h4 className="mt-1 text-2xl font-black text-slate-900">
-                      {selectedPreview.name}
-                    </h4>
-                    <p className="mt-2 max-w-xl text-sm text-slate-500">
-                      {selectedPreview.description}
-                    </p>
                   </div>
-
-                  <div className="rounded-2xl bg-slate-50 px-4 py-3">
-                    <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400">
-                      Current Status
-                    </p>
-                    <p className="mt-1 text-sm font-semibold text-slate-800">
-                      {selectedPreview.status || "PLANNED"}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-6 grid gap-4 md:grid-cols-3">
-                  <div className="rounded-2xl bg-slate-50 p-4">
-                    <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400">
-                      Location
-                    </p>
-                    <p className="mt-2 text-sm font-semibold text-slate-800">
-                      {selectedPreview.location_address || "No location"}
-                    </p>
-                  </div>
-
-                  <div className="rounded-2xl bg-slate-50 p-4">
-                    <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400">
-                      Volunteers Required
-                    </p>
-                    <p className="mt-2 text-sm font-semibold text-slate-800">
-                      {selectedPreview.volunteers_required || 0}
-                    </p>
-                  </div>
-
-                  <div className="rounded-2xl bg-slate-50 p-4">
-                    <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400">
-                      Skills
-                    </p>
-                    <p className="mt-2 text-sm font-semibold text-slate-800">
-                      {selectedPreview?.required_skills?.length
-                        ? selectedPreview.required_skills.join(", ")
-                        : "General"}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-6">
-                  <div className="mb-2 flex items-center justify-between text-[11px] font-bold uppercase tracking-widest text-slate-500">
-                    <span>Operational stage</span>
-                    <span>{momentumFromStatus(selectedPreview.status)}%</span>
-                  </div>
-                  <div className="h-2 overflow-hidden rounded-full bg-slate-100">
-                    <div
-                      className="h-full rounded-full"
-                      style={{
-                        width: `${momentumFromStatus(selectedPreview.status)}%`,
-                        background:
-                          "linear-gradient(135deg, #005da9 0%, #0075d4 100%)",
-                      }}
-                    />
-                  </div>
-                </div>
+                )}
               </>
-            ) : (
-              <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-10 text-center">
-                <p className="text-sm font-medium text-slate-600">
-                  Select a campaign to inspect its mission readiness.
-                </p>
-              </div>
             )}
           </div>
         </section>
@@ -718,7 +636,7 @@ const Campaigns = () => {
                       <span className="font-medium text-slate-900">
                         {v.volunteer_name}
                       </span>
-                      <span className="text-xs text-slate-500 truncate max-w-[120px]">
+                      <span className="max-w-[120px] truncate text-xs text-slate-500">
                         {campaign.name}
                       </span>
                     </div>
@@ -960,13 +878,21 @@ const Campaigns = () => {
                 <div>
                   <div className="mb-2 flex items-center justify-between text-[11px] font-bold uppercase tracking-widest text-slate-500">
                     <span>Mission stage</span>
-                    <span>{momentumFromStatus(selectedCampaign.status)}%</span>
+                    <span>
+                      {selectedCampaign.status === "ACTIVE"
+                        ? "72%"
+                        : selectedCampaign.status === "PLANNED"
+                          ? "34%"
+                          : selectedCampaign.status === "COMPLETED"
+                            ? "100%"
+                            : "18%"}
+                    </span>
                   </div>
                   <div className="h-2 overflow-hidden rounded-full bg-slate-100">
                     <div
                       className="h-full rounded-full"
                       style={{
-                        width: `${momentumFromStatus(selectedCampaign.status)}%`,
+                        width: `${selectedCampaign.status === "ACTIVE" ? 72 : selectedCampaign.status === "PLANNED" ? 34 : selectedCampaign.status === "COMPLETED" ? 100 : 18}%`,
                         background:
                           "linear-gradient(135deg, #005da9 0%, #0075d4 100%)",
                       }}
