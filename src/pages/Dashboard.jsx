@@ -63,11 +63,11 @@ const Dashboard = () => {
         </div>
 
         {/* MAP */}
-        <div className="bg-surface_high rounded-xl p-4 h-[420px]">
+        <div className="bg-surface_high rounded-xl p-4 h-[420px] relative z-0">
           <MapContainer
             center={center}
             zoom={6}
-            className="h-full w-full rounded-xl"
+            className="h-full w-full rounded-xl z-0"
           >
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 

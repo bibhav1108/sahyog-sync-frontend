@@ -38,7 +38,7 @@ const Layout = ({ children }) => {
   const [org, setOrg] = useState(null);
 
   const [profileOpen, setProfileOpen] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 768);
 
   const prevIdsRef = useRef(new Set());
   const loadingRef = useRef({
@@ -161,11 +161,18 @@ const Layout = ({ children }) => {
   };
 
   return (
-    <div className="min-h-screen bg-surface text-on_surface antialiased">
+    <div className="min-h-screen bg-surface text-on_surface antialiased overflow-x-hidden">
+      {/* Mobile sidebar backdrop */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 z-[990] bg-black/50 backdrop-blur-sm md:hidden transition-opacity"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Toast stack */}
       <div 
-        className="fixed top-20 z-[9999] space-y-3 transition-all duration-300"
-        style={{ left: sidebarOpen ? "17rem" : "1.5rem" }}
+        className={`fixed top-20 z-[9999] space-y-3 transition-all duration-300 ${sidebarOpen ? 'md:left-[17rem] left-4' : 'left-4'}`}
       >
         {toasts.map((t) => (
           <div
@@ -192,7 +199,7 @@ const Layout = ({ children }) => {
       </div>
 
       {/* Sidebar */}
-      <aside className={`fixed left-0 top-0 z-50 flex h-screen w-64 flex-col border-r border-white/5 bg-surface/80 px-5 pb-6 pt-5 shadow-soft backdrop-blur-xl transition-all duration-300 ${
+      <aside className={`fixed left-0 top-0 z-[999] flex h-screen w-64 flex-col border-r border-white/5 bg-surface/95 px-5 pb-6 pt-5 shadow-soft backdrop-blur-xl transition-transform duration-300 ${
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
       }`}>
         <div className="mb-6 flex items-center justify-between px-1">
@@ -250,10 +257,9 @@ const Layout = ({ children }) => {
 
       {/* Top bar */}
       <header
-        className="fixed top-0 z-40 flex h-16 items-center justify-between border-b border-white/5 bg-surface/80 px-6 shadow-soft backdrop-blur-md transition-all duration-300"
-        style={{ left: sidebarOpen ? "16rem" : "0", right: 0 }}
+        className={`fixed top-0 right-0 z-[980] flex h-16 items-center justify-between border-b border-white/5 bg-surface/80 px-4 md:px-6 shadow-soft backdrop-blur-md transition-all duration-300 ${sidebarOpen ? 'md:left-64 left-0' : 'left-0'}`}
       >
-        <div className="flex flex-1 items-center gap-4 max-w-md">
+        <div className="flex flex-1 items-center gap-2 md:gap-4 max-w-xs md:max-w-md">
           {!sidebarOpen && (
             <button 
               onClick={() => setSidebarOpen(true)}
@@ -263,7 +269,16 @@ const Layout = ({ children }) => {
               <span className="material-symbols-outlined text-[22px]">menu</span>
             </button>
           )}
-          <div className="relative flex-1">
+          {sidebarOpen && (
+             <button 
+              onClick={() => setSidebarOpen(false)}
+              className="md:hidden flex items-center justify-center rounded-lg p-2 text-on_surface_variant hover:bg-white/5 hover:text-on_surface transition-colors"
+              title="Close sidebar"
+             >
+               <span className="material-symbols-outlined text-[22px]">menu_open</span>
+             </button>
+          )}
+          <div className="relative flex-1 hidden sm:block">
             <span className="material-symbols-outlined absolute left-3 top-2 text-on_surface_variant">
               search
             </span>
@@ -274,7 +289,12 @@ const Layout = ({ children }) => {
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 md:gap-4">
+          {/* Mobile Search Icon */}
+          <button className="sm:hidden rounded-xl p-2 text-on_surface_variant hover:bg-white/5">
+             <span className="material-symbols-outlined text-[22px]">search</span>
+          </button>
+
           {/* Notifications */}
           <button
             onClick={() => {
@@ -307,7 +327,7 @@ const Layout = ({ children }) => {
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-semibold text-white shadow-soft">
                   {getInitials(user.full_name)}
                 </div>
-                <span className="text-sm font-medium">
+                <span className="hidden sm:inline text-sm font-medium">
                   {user.full_name || "User"}
                 </span>
                 <span className="material-symbols-outlined text-[18px] text-on_surface_variant">
@@ -349,13 +369,13 @@ const Layout = ({ children }) => {
       </header>
 
       {/* Main */}
-      <main className="transition-all duration-300" style={{ marginLeft: sidebarOpen ? "16rem" : "0", paddingTop: "4rem" }}>
-        <div className="p-6">{children}</div>
+      <main className={`transition-all duration-300 pt-16 ${sidebarOpen ? 'md:ml-64 ml-0' : 'ml-0'}`}>
+        <div className="p-4 md:p-6 min-w-0">{children}</div>
       </main>
 
       {/* Notification panel */}
       <div
-        className="fixed right-0 top-16 z-40 h-[calc(100vh-4rem)] overflow-hidden border-l border-white/5 bg-surface_lowest shadow-soft transition-all duration-300"
+        className="fixed right-0 top-16 z-[995] h-[calc(100vh-4rem)] overflow-hidden border-l border-white/5 bg-surface_lowest shadow-soft transition-all duration-300"
         style={{
           width: showNotifications ? panelWidth : 0,
         }}

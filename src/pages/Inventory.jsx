@@ -121,19 +121,19 @@ const Inventory = () => {
   return (
     <div className="space-y-8">
       {/* HERO */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <StatCard label="Total Units" value={total} />
         <StatCard label="Reserved" value={reserved} />
         <StatCard label="Available" value={total - reserved} highlight />
       </div>
 
       {/* HEADER */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
         <h1 className="text-2xl font-bold">Inventory </h1>
 
         <button
           onClick={() => setShowForm(true)}
-          className="bg-primary text-white px-5 py-2 rounded-lg"
+          className="bg-primary text-white px-5 py-2 rounded-lg w-full sm:w-auto"
         >
           + Add Item
         </button>
@@ -323,7 +323,7 @@ const Inventory = () => {
 
       {/* DELETE CONFIRMATION MODAL */}
       {deleteTarget && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center">
+        <div className="fixed inset-0 z-50 bg-transparent flex items-center justify-center">
           <div className="bg-surface_lowest p-6 rounded-xl w-full max-w-sm space-y-4 shadow-xl">
             {/* Icon */}
             <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-500/10 mx-auto">
