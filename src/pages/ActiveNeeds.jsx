@@ -155,8 +155,14 @@ const ActiveNeeds = () => {
                     </p>
                   </div>
 
-                  <span className="text-xs px-2 py-1 bg-primary/10 text-primary rounded">
-                    {n.status}
+                  <span
+                    className={`text-xs px-3 py-1.5 rounded-full font-bold h-fit inline-flex items-center justify-center shadow-sm ${
+                      n.status === "OPEN"
+                        ? "bg-green-200 text-green-900 border border-green-300"
+                        : "bg-gray-300 text-gray-900 border border-gray-400"
+                    }`}
+                  >
+                    {n.status === "OPEN" ? "Open" : n.status === "DISPATCHED" ? "Dispatched" : n.status}
                   </span>
                 </div>
 

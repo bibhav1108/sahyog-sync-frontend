@@ -1,3 +1,19 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ── Responsive base font scaling ──────────────────────────
+   Tailwind uses rem units, so scaling html font-size
+   proportionally shrinks ALL text on mobile automatically.
+   14px on mobile  →  phones feel less cluttered
+   16px on md+     →  desktop stays perfectly sized
+─────────────────────────────────────────────────────────── */
+html {
+  font-size: 14px; /* mobile: ~87.5% of default */
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px; /* tablet / desktop: full size */
+  }
+}
