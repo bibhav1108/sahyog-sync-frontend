@@ -1,199 +1,316 @@
 import { Link } from "react-router-dom";
 import PublicNavbar from "../components/PublicNavbar";
+import { motion } from "framer-motion";
+
+const fadeIn = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.2
+    }
+  }
+};
 
 const Landing = () => {
   return (
-    <div className="min-h-screen bg-surface text-on_surface font-inter">
+    <div className="min-h-screen bg-surface text-on_surface font-inter overflow-hidden">
       <PublicNavbar />
 
       <main>
         {/* ================= HERO ================= */}
-        <section className="relative min-h-[90vh] flex items-center px-6 md:px-16 py-24 overflow-hidden">
+        <section className="relative min-h-[90vh] flex items-center px-6 md:px-16 py-24">
           <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-primary/10 blur-[100px] rounded-full -z-10" />
+          <div className="absolute bottom-[-10%] left-[-5%] w-[400px] h-[400px] bg-azure/10 blur-[100px] rounded-full -z-10" />
 
           <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
-            <div className="space-y-8">
-              <div className="px-4 py-2 rounded-full bg-surface_high text-primary text-xs font-semibold uppercase">
-                AI-Powered Logistics
-              </div>
+            <motion.div 
+              initial="hidden"
+              animate="visible"
+              variants={staggerContainer}
+              className="space-y-8"
+            >
+              <motion.div variants={fadeIn} className="inline-block px-4 py-2 rounded-full bg-azure/10 text-primary font-bold text-xs uppercase tracking-wider backdrop-blur-sm shadow-soft">
+                AI-Powered Logistics Platform
+              </motion.div>
 
-              <h1 className="text-5xl md:text-7xl font-outfit font-extrabold leading-[1.1] tracking-tight">
-                Empowering NGOs with{" "}
-                <span className="text-primary">Better Coordination.</span>
-              </h1>
+              <motion.h1 variants={fadeIn} className="text-5xl md:text-7xl font-outfit font-extrabold leading-[1.1] tracking-tight text-on_surface">
+                Empower Your NGO with <span className="text-primary bg-clip-text text-transparent bg-primaryGradient">Smarter Coordination.</span>
+              </motion.h1>
 
-              <p className="text-xl text-on_surface_variant max-w-lg">
-                Connect surplus resources with real-world needs through a
-                unified platform designed for NGOs and volunteers.
-              </p>
+              <motion.p variants={fadeIn} className="text-xl text-on_surface_variant max-w-lg leading-relaxed">
+                Seamlessly connect surplus resources with real-world needs through our unified, intelligent platform designed exclusively for NGOs and volunteer networks.
+              </motion.p>
 
-              <div className="flex gap-4 flex-wrap">
-                <Link className="bg-primaryGradient text-white px-8 py-4 rounded-lg font-bold">
-                  Get Started
+              <motion.div variants={fadeIn} className="flex gap-4 flex-wrap pt-4">
+                <Link to="/register" className="bg-primary hover:bg-primary_container text-white px-8 py-4 rounded-xl font-bold transition-all duration-300 shadow-soft hover:shadow-lg hover:-translate-y-1">
+                  Get Started Free
                 </Link>
 
-                <Link className="bg-surface_highest text-primary px-8 py-4 rounded-lg font-bold">
-                  Explore Platform
+                <Link className="bg-surface_highest text-primary hover:bg-white px-8 py-4 rounded-xl font-bold transition-all duration-300 border border-transparent hover:border-primary/20 shadow-soft hover:shadow-lg">
+                  Explore Features
                 </Link>
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
 
-            {/* image */}
-            <div className="relative">
-              <div className="bg-surface/60 backdrop-blur-glass p-4 rounded-xl shadow-soft">
+            {/* Hero Image */}
+            <motion.div 
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="relative"
+            >
+              <div className="bg-white/40 backdrop-blur-glass p-3 rounded-2xl shadow-soft border border-white/20">
                 <img
-                  src="https://images.unsplash.com/photo-1606787366850-de6330128bfc"
-                  className="rounded-lg w-full object-cover"
+                  src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=2070&auto=format&fit=crop"
+                  alt="NGO Coordination"
+                  className="rounded-xl w-full h-[500px] object-cover shadow-inner"
                 />
 
-                {/* removed fake stats */}
-                <div className="absolute -bottom-6 -left-6 bg-surface/80 backdrop-blur-glass p-4 rounded-lg shadow-soft">
-                  <p className="text-sm text-on_surface_variant">
-                    Real-time coordination interface
-                  </p>
-                </div>
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 1 }}
+                  className="absolute -bottom-8 -left-8 bg-white/90 backdrop-blur-glass p-5 rounded-xl shadow-soft border border-surface_highest flex items-center gap-4"
+                >
+                  <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                  <div>
+                    <p className="text-xs font-bold text-on_surface_variant uppercase tracking-wider">Live Status</p>
+                    <p className="text-sm font-semibold text-primary">Real-time matching active</p>
+                  </div>
+                </motion.div>
               </div>
-            </div>
+            </motion.div>
           </div>
         </section>
 
         {/* ================= PROBLEM ================= */}
-        <section className="py-32 px-6 md:px-16 bg-surface_low">
+        <section className="py-32 px-6 md:px-16 bg-surface_lowest relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-full h-px bg-gradient-to-r from-transparent via-primary/10 to-transparent"></div>
+          
           <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-20 items-center">
-            <div className="grid grid-cols-2 gap-4">
+            <motion.div 
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-100px" }}
+              variants={staggerContainer}
+              className="grid grid-cols-2 gap-6"
+            >
               {[
-                "Logistics Fatigue",
-                "Data Silos",
-                "Supply Gaps",
-                "Volunteer Mismatch",
+                { title: "Logistics Fatigue", desc: "Manual routing exhausts valuable volunteer hours." },
+                { title: "Data Silos", desc: "Disconnected tools cause critical information gaps." },
+                { title: "Supply Misses", desc: "Surplus often fails to reach areas of high demand." },
+                { title: "Skill Mismatch", desc: "Volunteers not placed where they are most effective." },
               ].map((item, i) => (
-                <div
+                <motion.div
+                  variants={fadeIn}
                   key={i}
-                  className="bg-surface_lowest p-6 rounded-lg shadow-soft"
+                  className="bg-surface p-6 rounded-2xl shadow-soft hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border border-primary/5 hover:border-primary/20 group"
                 >
-                  <h4 className="font-outfit font-bold mb-2">{item}</h4>
-                  <p className="text-sm text-on_surface_variant">
-                    Common coordination challenges faced in humanitarian
-                    workflows.
+                  <div className="w-10 h-10 rounded-full bg-azure/10 flex items-center justify-center mb-4 group-hover:bg-primary transition-colors duration-300">
+                    <span className="text-primary group-hover:text-white font-bold text-sm">0{i+1}</span>
+                  </div>
+                  <h4 className="font-outfit font-bold mb-2 text-on_surface group-hover:text-primary transition-colors">{item.title}</h4>
+                  <p className="text-sm text-on_surface_variant leading-relaxed">
+                    {item.desc}
                   </p>
-                </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
 
-            <div className="space-y-6">
-              <h2 className="text-4xl font-outfit font-extrabold">
-                Focus on <span className="text-primary">people</span>, not
-                process.
+            <motion.div 
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="space-y-8"
+            >
+              <h2 className="text-4xl lg:text-5xl font-outfit font-extrabold leading-tight">
+                Focus on <span className="text-transparent bg-clip-text bg-primaryGradient">impact</span>,<br/>not manual process.
               </h2>
 
-              <p className="text-on_surface_variant">
-                Disconnected systems slow down impact. A unified platform helps
-                streamline coordination and reduce manual effort.
+              <p className="text-lg text-on_surface_variant leading-relaxed">
+                Disconnected systems slow down humanitarian workflows. Our unified architecture simplifies logistics and amplifies your response speed, allowing teams to collaborate effortlessly.
               </p>
 
-              {/* removed fake stat */}
-              <div className="p-6 bg-surface rounded-lg shadow-soft">
-                <p className="text-sm text-on_surface_variant">
-                  Designed to simplify logistics workflows and improve response
-                  coordination across teams.
+              <div className="p-6 bg-surface_high/50 backdrop-blur-sm rounded-xl border-l-4 border-azure shadow-soft">
+                <p className="text-sm font-semibold text-primary italic">
+                  "Designed to remove friction from resource distribution so you can focus on saving lives."
                 </p>
               </div>
-            </div>
+            </motion.div>
           </div>
         </section>
 
         {/* ================= FEATURES ================= */}
-        <section className="py-32 px-6 md:px-16">
+        <section className="py-32 px-6 md:px-16 bg-surface relative">
           <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-20">
-              <h2 className="text-4xl font-outfit font-extrabold">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center mb-20 space-y-4"
+            >
+              <h2 className="text-4xl md:text-5xl font-outfit font-extrabold">
                 Core Capabilities
               </h2>
-              <p className="text-on_surface_variant mt-4">
-                Tools designed to support efficient coordination and resource
-                management.
+              <p className="text-lg text-on_surface_variant max-w-2xl mx-auto">
+                Purpose-built tools designed to support efficient coordination, transparent tracking, and intelligent resource management.
               </p>
-            </div>
+            </motion.div>
 
-            <div className="grid md:grid-cols-12 gap-6">
-              <div className="md:col-span-8 bg-surface/60 backdrop-blur-glass p-10 rounded-xl shadow-soft">
-                <h3 className="text-3xl font-outfit font-bold mb-4">
-                  Resource Matching
+            <motion.div 
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={staggerContainer}
+              className="grid md:grid-cols-12 gap-6"
+            >
+              {/* Feature 1 */}
+              <motion.div variants={fadeIn} className="md:col-span-8 bg-white/60 backdrop-blur-glass p-10 rounded-3xl shadow-soft hover:shadow-lg transition-all duration-300 border border-white hover:border-primary/20 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-azure/5 rounded-full blur-3xl group-hover:bg-azure/10 transition-colors" />
+                <h3 className="text-3xl font-outfit font-bold mb-4 text-on_surface">
+                  Intelligent Resource Matching
                 </h3>
+                <p className="text-lg text-on_surface_variant max-w-md relative z-10">
+                  Connect available resources with nearby demand efficiently using smart distance sorting and inventory availability checks.
+                </p>
+              </motion.div>
+
+              {/* Feature 2 */}
+              <motion.div variants={fadeIn} className="md:col-span-4 bg-primaryGradient text-white p-10 rounded-3xl shadow-lg hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-all" />
+                <div className="h-full flex flex-col justify-between relative z-10">
+                  <div>
+                    <h3 className="text-2xl font-outfit font-bold mb-3">
+                      Volunteer Coordination
+                    </h3>
+                    <p className="text-sm opacity-90 leading-relaxed text-blue-50">
+                      Assign tasks instantly based on location, availability, and specific skill sets.
+                    </p>
+                  </div>
+                  <div className="mt-8 w-12 h-12 rounded-full bg-white/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    &rarr;
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Feature 3 */}
+              <motion.div variants={fadeIn} className="md:col-span-4 bg-white/60 backdrop-blur-glass p-8 rounded-3xl shadow-soft hover:shadow-lg transition-all duration-300 border border-white hover:border-primary/20">
+                <h3 className="text-xl font-outfit font-bold mb-2">Transparency Tools</h3>
+                <p className="text-sm text-on_surface_variant">Full audit trails for goods received and dispatched.</p>
+              </motion.div>
+
+              {/* Feature 4 */}
+              <motion.div variants={fadeIn} className="md:col-span-8 bg-surface_high p-8 rounded-3xl shadow-soft hover:shadow-lg transition-all duration-300 border border-transparent hover:border-primary/10 overflow-hidden relative">
+                <div className="absolute right-0 bottom-0 opacity-10">
+                  <svg width="200" height="200" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM11 15.5962L7.29289 11.8891L5.87868 13.3033L11 18.4246L18.4246 11L17.0104 9.58579L11 15.5962Z"/></svg>
+                </div>
+                <h3 className="text-2xl font-outfit font-bold mb-3">Rapid Response Support</h3>
                 <p className="text-on_surface_variant">
-                  Connect available resources with nearby demand efficiently.
+                  Generate immediate alert systems and dispatch directives during critical mission protocols to ensure maximum efficiency when time is of the essence.
                 </p>
-              </div>
-
-              <div className="md:col-span-4 bg-primary text-white p-10 rounded-xl">
-                <h3 className="text-xl font-outfit font-bold">
-                  Volunteer Coordination
-                </h3>
-                <p className="text-sm opacity-80">
-                  Assign tasks based on availability and needs.
-                </p>
-              </div>
-
-              <div className="md:col-span-4 bg-surface/60 backdrop-blur-glass p-8 rounded-xl shadow-soft">
-                Transparency Tools
-              </div>
-
-              <div className="md:col-span-8 bg-surface_high p-8 rounded-xl shadow-soft">
-                Rapid Response Support
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
           </div>
         </section>
 
         {/* ================= DARK ================= */}
-        <section className="py-32 px-6 md:px-16 bg-on_surface text-white">
+        <section className="py-32 px-6 md:px-16 bg-[#001e2d] text-white overflow-hidden relative">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-primary/20 blur-[120px] rounded-full"></div>
+          
           <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-20 items-center">
-            <div className="space-y-6">
-              <h2 className="text-4xl font-outfit font-extrabold">
-                Building Better Coordination Systems
+            <motion.div 
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="space-y-8 z-10"
+            >
+              <div className="inline-block px-4 py-1.5 rounded-full border border-primary/30 text-primary_container text-xs font-bold uppercase tracking-wider">
+                Network Effect
+              </div>
+              
+              <h2 className="text-4xl md:text-5xl font-outfit font-extrabold leading-tight text-white">
+                Building Better <br/>Coordination Systems
               </h2>
 
-              <p className="opacity-70">
-                Connecting organizations, volunteers, and resources through a
-                unified network.
+              <p className="text-lg text-blue-100/70 max-w-md leading-relaxed">
+                Connect decentralized organizations, passionate volunteers, and critical resources through one unified network architecture.
               </p>
-            </div>
 
-            <div className="rounded-2xl overflow-hidden">
+              <ul className="space-y-4 pt-4">
+                {['Verified Partner Organizations', 'Secure Data Privacy', '24/7 Availability'].map((item, i) => (
+                  <li key={i} className="flex items-center gap-3">
+                    <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-primary_container text-sm">✓</div>
+                    <span className="text-blue-50 font-medium">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="rounded-3xl overflow-hidden shadow-2xl relative"
+            >
+              <div className="absolute inset-0 bg-gradient-to-t from-[#001e2d] via-transparent to-transparent z-10"></div>
               <img
-                src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d"
-                className="w-full object-cover"
+                src="https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&w=1200&q=80"
+                alt="Logistics Coordination"
+                className="w-full h-[500px] object-cover scale-105 hover:scale-100 transition-transform duration-700"
               />
-            </div>
+            </motion.div>
           </div>
         </section>
 
         {/* ================= CTA ================= */}
-        <section className="py-32 px-6 text-center">
-          <h2 className="text-5xl font-outfit font-extrabold">
-            Ready to get started?
-          </h2>
+        <section className="py-32 px-6 text-center bg-surface relative overflow-hidden">
+          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5 mix-blend-overlay"></div>
+          
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="max-w-3xl mx-auto space-y-8 relative z-10"
+          >
+            <h2 className="text-5xl md:text-6xl font-outfit font-extrabold text-on_surface">
+              Ready to accelerate your impact?
+            </h2>
 
-          <p className="text-on_surface_variant mt-4">
-            Join the platform and start coordinating resources more effectively.
-          </p>
+            <p className="text-xl text-on_surface_variant">
+              Join the platform and start coordinating resources more effectively today.
+            </p>
 
-          <div className="flex justify-center gap-6 mt-10 flex-wrap">
-            <Link className="bg-primaryGradient text-white px-12 py-5 rounded-lg font-bold">
-              Get Started
-            </Link>
+            <div className="flex justify-center gap-6 mt-10 flex-wrap pt-6">
+              <Link to="/register" className="bg-primary hover:bg-primary_container text-white px-10 py-5 rounded-2xl font-bold transition-all duration-300 shadow-soft hover:shadow-lg hover:-translate-y-1 text-lg">
+                Start For Free
+              </Link>
 
-            <Link className="bg-surface_highest text-primary px-12 py-5 rounded-lg font-bold">
-              Request Demo
-            </Link>
-          </div>
+              <Link className="bg-white text-primary hover:bg-surface_lowest px-10 py-5 rounded-2xl font-bold transition-all duration-300 shadow-soft border border-primary/10 hover:border-primary/30 text-lg">
+                Request Demo
+              </Link>
+            </div>
+          </motion.div>
         </section>
       </main>
 
       {/* ================= FOOTER ================= */}
-      <footer className="py-20 px-6 bg-surface_lowest">
-        <div className="max-w-7xl mx-auto text-center text-sm text-on_surface_variant">
-          © Sahyog Sync — Platform for resource coordination
+      <footer className="py-12 px-6 bg-surface_lowest border-t border-surface_high">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="font-outfit font-bold text-primary text-xl tracking-tight">
+            Sahyog Sync<span className="text-azure">.</span>
+          </div>
+          <div className="text-sm text-on_surface_variant font-medium">
+            © {new Date().getFullYear()} Sahyog Sync — Platform for resource coordination
+          </div>
         </div>
       </footer>
     </div>
