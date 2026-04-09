@@ -36,6 +36,10 @@ const Campaigns = () => {
   const [creating, setCreating] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
+  const [showAIModal, setShowAIModal] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [loadingAI, setLoadingAI] = useState(false);
+
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [type, setType] = useState("OTHER");
@@ -160,6 +164,81 @@ const Campaigns = () => {
     }
   };
 
+  const normalizeDateTimeLocal = (value) => {
+    if (!value) return "";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      if (typeof value === "string") return value.slice(0, 16);
+      return "";
+    }
+
+    const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+    return local.toISOString().slice(0, 16);
+  };
+
+  const openAIModal = () => {
+    setAiPrompt("");
+    setFormError("");
+    setShowAIModal(true);
+  };
+
+  const applyAIDraftToForm = (data) => {
+    const draftItems =
+      data?.items &&
+      typeof data.items === "object" &&
+      !Array.isArray(data.items)
+        ? Object.entries(data.items).map(([key, value]) => ({
+            key,
+            value: String(value ?? ""),
+          }))
+        : [{ key: "", value: "" }];
+
+    setName(data?.name || "");
+    setDescription(data?.description || "");
+    setType(data?.type || "OTHER");
+    setTargetQuantity(String(data?.target_quantity ?? ""));
+    setItems(draftItems.length > 0 ? draftItems : [{ key: "", value: "" }]);
+    setVolunteersRequired(String(data?.volunteers_required ?? ""));
+    setStartTime(normalizeDateTimeLocal(data?.start_time));
+    setEndTime(normalizeDateTimeLocal(data?.end_time));
+    setLocation(data?.location_address || "");
+    setSkills(
+      Array.isArray(data?.required_skills)
+        ? data.required_skills.join(", ")
+        : typeof data?.required_skills === "string"
+          ? data.required_skills
+          : "",
+    );
+    setFormError("");
+  };
+
+  const handleAIGenerate = async () => {
+    if (!aiPrompt.trim()) {
+      setFormError("Write a short campaign description first.");
+      return;
+    }
+
+    try {
+      setLoadingAI(true);
+      setFormError("");
+
+      const res = await API.post("/campaigns/draft", {
+        prompt: aiPrompt,
+      });
+
+      applyAIDraftToForm(res.data || {});
+      setShowAIModal(false);
+      setShowForm(true);
+    } catch (err) {
+      console.error("AI ERROR:", err);
+      setFormError(
+        err?.response?.data?.detail || "Failed to generate campaign draft",
+      );
+    } finally {
+      setLoadingAI(false);
+    }
+  };
+
   const createCampaign = async () => {
     const trimmedName = name.trim();
     const trimmedDescription = description.trim();
@@ -201,9 +280,9 @@ const Campaigns = () => {
         location_address: trimmedLocation || null,
         required_skills: skills
           ? skills
-            .split(",")
-            .map((s) => s.trim())
-            .filter(Boolean)
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean)
           : [],
       });
 
@@ -391,6 +470,18 @@ const Campaigns = () => {
             View Past Campaigns
           </Link>
           <button
+            onClick={openAIModal}
+            className="inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-white shadow-lg transition hover:opacity-95 active:scale-[0.98]"
+            style={{
+              background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)",
+            }}
+          >
+            <span className="material-symbols-outlined text-[18px]">
+              magic_button
+            </span>
+            Generate Campaign Draft
+          </button>
+          <button
             onClick={() => setShowForm(true)}
             className="inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-white shadow-lg transition hover:opacity-95 active:scale-[0.98]"
             style={{
@@ -408,25 +499,21 @@ const Campaigns = () => {
         <StatCard
           label="Total Campaigns"
           value={stats.total}
-          hint="All records"
           icon="rocket_launch"
         />
         <StatCard
           label="Active Campaigns"
           value={stats.active}
-          hint="Currently running"
           icon="play_circle"
         />
         <StatCard
           label="Planned Campaigns"
           value={stats.planned}
-          hint="Awaiting launch"
           icon="event_upcoming"
         />
         <StatCard
           label="Completed"
           value={stats.completed}
-          hint="Closed campaigns"
           icon="check_circle"
         />
       </div>
@@ -476,15 +563,22 @@ const Campaigns = () => {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                <div className="space-y-3">
                   {paginatedCampaigns.map((c) => {
                     const isSelected = selectedCampaign?.id === c.id;
                     const itemsCount = c.items
                       ? Object.values(c.items).reduce(
-                        (sum, v) => sum + (Number(v) || 0),
-                        0,
-                      )
+                          (sum, v) => sum + (Number(v) || 0),
+                          0,
+                        )
                       : 0;
+                    const dateLabel = c.start_time
+                      ? new Date(c.start_time).toLocaleDateString(undefined, {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })
+                      : "No date set";
 
                     return (
                       <div
@@ -497,36 +591,59 @@ const Campaigns = () => {
                             openDetails(c);
                           }
                         }}
-                        className={`cursor-pointer rounded-2xl border bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg ${isSelected
-                          ? "border-blue-300 ring-2 ring-blue-100"
-                          : "border-slate-200"
-                          }`}
+                        className={`cursor-pointer rounded-2xl border bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg ${
+                          isSelected
+                            ? "border-blue-300 ring-2 ring-blue-100"
+                            : "border-slate-200"
+                        }`}
                       >
-                        <div className="mb-3 flex items-start justify-between gap-3">
-                          <span
-                            className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${getTypeTone(
-                              c.type,
-                            )}`}
-                          >
-                            {c.type || "OTHER"}
-                          </span>
+                        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                          <div className="min-w-0 flex-1">
+                            <div className="mb-2 flex flex-wrap items-center gap-2">
+                              <span
+                                className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${getTypeTone(
+                                  c.type,
+                                )}`}
+                              >
+                                {c.type || "OTHER"}
+                              </span>
 
-                          <span
-                            className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${getStatusClass(
-                              c.status,
-                            )}`}
-                          >
-                            {c.status}
-                          </span>
+                              <span
+                                className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${getStatusClass(
+                                  c.status,
+                                )}`}
+                              >
+                                {c.status}
+                              </span>
+                            </div>
+
+                            <h3 className="truncate text-base font-bold text-slate-900">
+                              {c.name}
+                            </h3>
+
+                            <p className="mt-1 line-clamp-2 text-sm text-slate-500">
+                              {c.description}
+                            </p>
+
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-medium text-slate-600">
+                                {itemsCount} items
+                              </span>
+                              <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-medium text-slate-600">
+                                {c.location_address || "No location"}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex shrink-0 flex-row items-center gap-2 md:flex-col md:items-end md:text-right">
+                            <span className="text-xs font-semibold text-slate-500">
+                              {dateLabel}
+                            </span>
+                            <span className="text-[11px] uppercase tracking-widest text-slate-400">
+                              Open details
+                            </span>
+                          </div>
                         </div>
-
-                        <h3 className="truncate text-lg font-bold text-slate-900">
-                          {c.name}
-                        </h3>
-
-                        <p className="mt-2 line-clamp-3 text-sm text-slate-500">
-                          {c.description}
-                        </p>
                       </div>
                     );
                   })}
@@ -568,10 +685,11 @@ const Campaigns = () => {
                           <button
                             key={page}
                             onClick={() => setCurrentPage(page)}
-                            className={`min-w-10 rounded-lg px-3 py-2 text-sm font-semibold transition ${currentPage === page
-                              ? "bg-blue-600 text-white"
-                              : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-                              }`}
+                            className={`min-w-10 rounded-lg px-3 py-2 text-sm font-semibold transition ${
+                              currentPage === page
+                                ? "bg-blue-600 text-white"
+                                : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                            }`}
                           >
                             {page}
                           </button>
@@ -711,10 +829,11 @@ const Campaigns = () => {
                     triggerBroadcast(selectedCampaign.id);
                   }}
                   disabled={selectedCampaign.status === "COMPLETED"}
-                  className={`w-full rounded-xl px-4 py-3 text-sm font-semibold text-white transition active:scale-[0.98] ${selectedCampaign.status === "COMPLETED"
-                    ? "cursor-not-allowed bg-slate-300 opacity-70"
-                    : "hover:opacity-95"
-                    }`}
+                  className={`w-full rounded-xl px-4 py-3 text-sm font-semibold text-white transition active:scale-[0.98] ${
+                    selectedCampaign.status === "COMPLETED"
+                      ? "cursor-not-allowed bg-slate-300 opacity-70"
+                      : "hover:opacity-95"
+                  }`}
                   style={{
                     background:
                       selectedCampaign.status === "COMPLETED"
@@ -752,7 +871,7 @@ const Campaigns = () => {
 
       {/* DETAILS MODAL */}
       {selectedCampaign && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/45 px-4 py-10">
+        <div className="fixed inset-0 z-[1100] flex items-start justify-center overflow-y-auto bg-black/45 px-4 py-10">
           <div className="w-full max-w-5xl rounded-3xl border border-white/20 bg-white p-6 shadow-2xl">
             <div className="mb-6 flex items-start justify-between gap-4">
               <div>
@@ -849,7 +968,7 @@ const Campaigns = () => {
                   </div>
 
                   {selectedCampaign.items &&
-                    Object.keys(selectedCampaign.items).length > 0 ? (
+                  Object.keys(selectedCampaign.items).length > 0 ? (
                     <div className="space-y-2">
                       {Object.entries(selectedCampaign.items).map(([k, v]) => (
                         <div
@@ -889,7 +1008,15 @@ const Campaigns = () => {
                     <div
                       className="h-full rounded-full"
                       style={{
-                        width: `${selectedCampaign.status === "ACTIVE" ? 72 : selectedCampaign.status === "PLANNED" ? 34 : selectedCampaign.status === "COMPLETED" ? 100 : 18}%`,
+                        width: `${
+                          selectedCampaign.status === "ACTIVE"
+                            ? 72
+                            : selectedCampaign.status === "PLANNED"
+                              ? 34
+                              : selectedCampaign.status === "COMPLETED"
+                                ? 100
+                                : 18
+                        }%`,
                         background:
                           "linear-gradient(135deg, #005da9 0%, #0075d4 100%)",
                       }}
@@ -904,10 +1031,11 @@ const Campaigns = () => {
                       triggerBroadcast(selectedCampaign.id);
                     }}
                     disabled={selectedCampaign.status === "COMPLETED"}
-                    className={`w-full rounded-xl px-4 py-3 text-sm font-semibold text-white transition ${selectedCampaign.status === "COMPLETED"
-                      ? "cursor-not-allowed bg-slate-300 opacity-70"
-                      : "hover:opacity-95"
-                      }`}
+                    className={`w-full rounded-xl px-4 py-3 text-sm font-semibold text-white transition ${
+                      selectedCampaign.status === "COMPLETED"
+                        ? "cursor-not-allowed bg-slate-300 opacity-70"
+                        : "hover:opacity-95"
+                    }`}
                     style={{
                       background:
                         selectedCampaign.status === "COMPLETED"
@@ -981,12 +1109,13 @@ const Campaigns = () => {
                               </p>
 
                               <span
-                                className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest ${v.status === "APPROVED"
-                                  ? "bg-emerald-100 text-emerald-700"
-                                  : v.status === "REJECTED"
-                                    ? "bg-rose-100 text-rose-700"
-                                    : "bg-amber-100 text-amber-700"
-                                  }`}
+                                className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest ${
+                                  v.status === "APPROVED"
+                                    ? "bg-emerald-100 text-emerald-700"
+                                    : v.status === "REJECTED"
+                                      ? "bg-rose-100 text-rose-700"
+                                      : "bg-amber-100 text-amber-700"
+                                }`}
                               >
                                 {v.status}
                               </span>
@@ -1052,9 +1181,79 @@ const Campaigns = () => {
         </div>
       )}
 
+      {/* AI DRAFT MODAL */}
+      {showAIModal && (
+        <div className="fixed inset-0 z-[1100] flex items-start justify-center overflow-y-auto bg-black/45 px-4 py-10">
+          <div className="w-full max-w-3xl rounded-3xl border border-white/20 bg-white p-6 shadow-2xl">
+            <div className="mb-6 flex items-start justify-between gap-4">
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">
+                  Campaign Draft Assistant
+                </p>
+                <h2 className="mt-1 text-2xl font-black text-slate-900">
+                  Generate your campaign brief
+                </h2>
+                <p className="mt-2 text-sm text-slate-500">
+                  Write a short prompt and I will prefill the campaign form for
+                  you.
+                </p>
+              </div>
+
+              <button
+                onClick={() => {
+                  setShowAIModal(false);
+                  setFormError("");
+                }}
+                className="rounded-full bg-slate-100 p-2 text-slate-500 transition hover:bg-slate-200"
+                aria-label="Close AI draft"
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+
+            {formError && (
+              <div className="mb-5 rounded-2xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
+                {formError}
+              </div>
+            )}
+
+            <textarea
+              className="min-h-[180px] w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-blue-300 focus:bg-white"
+              placeholder="Example: Distribute 100 food packets in Varanasi this Sunday evening. Need 5 volunteers, 2 hours, near the railway station. Required items: rice 50, water 100, blankets 30."
+              value={aiPrompt}
+              onChange={(e) => setAiPrompt(e.target.value)}
+            />
+
+            <div className="mt-5 flex gap-3">
+              <button
+                onClick={handleAIGenerate}
+                disabled={loadingAI}
+                className="flex-1 rounded-xl px-4 py-3 text-sm font-semibold text-white transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-70"
+                style={{
+                  background:
+                    "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)",
+                }}
+              >
+                {loadingAI ? "Generating..." : "Generate Campaign Draft"}
+              </button>
+
+              <button
+                onClick={() => {
+                  setShowAIModal(false);
+                  setFormError("");
+                }}
+                className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* CREATE FORM MODAL */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/45 px-4 py-10">
+        <div className="fixed inset-0 z-[1100] flex items-start justify-center overflow-y-auto bg-black/45 px-4 py-10">
           <div className="mb-10 w-full max-w-4xl rounded-3xl border border-white/20 bg-white p-6 shadow-2xl">
             <div className="mb-6 flex items-start justify-between gap-4">
               <div>
@@ -1277,16 +1476,13 @@ const StatCard = ({ label, value, hint, icon }) => (
       <div className="rounded-2xl bg-slate-100 p-3 text-blue-600">
         <span className="material-symbols-outlined">{icon}</span>
       </div>
-      <span className="text-xs font-bold uppercase tracking-widest text-slate-500">
-        Live
-      </span>
     </div>
 
     <p className="mt-6 text-[11px] font-bold uppercase tracking-[0.2em] text-slate-600">
       {label}
     </p>
     <p className="mt-1 text-3xl font-black text-slate-900">{value}</p>
-    <p className="mt-2 text-xs text-slate-600 font-medium">{hint}</p>
+    <p className="mt-2 text-xs font-medium text-slate-600">{hint}</p>
   </div>
 );
 
