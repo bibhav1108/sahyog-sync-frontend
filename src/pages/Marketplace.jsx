@@ -1,130 +1,303 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import API from "../services/api";
+import { useNavigate } from "react-router-dom";
+import DispatchVolunteersModal from "../components/DispatchVolunteersModal";
 
-const Marketplace = () => {
+const Marketplace = ({ sidebarOpen }) => {
+  const navigate = useNavigate();
+
+  const [needs, setNeeds] = useState([]);
   const [alerts, setAlerts] = useState([]);
-  const [loadingId, setLoadingId] = useState(null);
-  const [error, setError] = useState("");
-  const [initialLoading, setInitialLoading] = useState(true);
+
+  const [needsLoading, setNeedsLoading] = useState(true);
+  const [alertsLoading, setAlertsLoading] = useState(true);
+
+  const [lastUpdated, setLastUpdated] = useState(null);
+
+  const [dispatchModal, setDispatchModal] = useState({
+    open: false,
+    needId: null,
+  });
+
+  const [claimingId, setClaimingId] = useState(null);
+  const [filter, setFilter] = useState("OPEN");
+  const [newNeedId, setNewNeedId] = useState(null);
+
+  const MIN_ALERTS = 6;
+  const MIN_NEEDS = 5;
+
+  const loadNeeds = async (init = false) => {
+    if (init) setNeedsLoading(true);
+
+    const res = await API.get("/marketplace/needs/");
+    let data = (res.data || []).filter((n) => n.status !== "COMPLETED");
+
+    data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+    setNeeds(data);
+    if (init) setNeedsLoading(false);
+  };
 
   const loadAlerts = async (init = false) => {
+    if (init) setAlertsLoading(true);
+
+    const res = await API.get("/marketplace/needs/alerts");
+    let data = res.data || [];
+
+    data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+    setAlerts(data);
+    if (init) setAlertsLoading(false);
+  };
+
+  const claimAlert = async (id) => {
     try {
-      if (init) setInitialLoading(true);
-      const res = await API.get("/marketplace/needs/alerts");
-      setAlerts(res.data || []);
+      setClaimingId(id);
+
+      await API.post(`/marketplace/needs/alerts/${id}/convert`);
+
+      setAlerts((prev) => prev.filter((a) => a.id !== id));
+
+      const res = await API.get("/marketplace/needs/");
+      let updated = res.data || [];
+
+      updated.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+      setNeeds(updated);
+
+      if (updated.length > 0) {
+        setNewNeedId(updated[0].id);
+        setTimeout(() => setNewNeedId(null), 1000);
+      }
     } catch {
-      setError("Failed to load alerts");
+      alert("Failed to claim alert");
     } finally {
-      if (init) setInitialLoading(false);
+      setClaimingId(null);
     }
   };
 
   useEffect(() => {
+    loadNeeds(true);
     loadAlerts(true);
-    const i = setInterval(() => loadAlerts(), 5000);
+
+    const i = setInterval(() => {
+      loadNeeds();
+      loadAlerts();
+      setLastUpdated(Date.now());
+    }, 5000);
+
     return () => clearInterval(i);
   }, []);
 
-  const claimAlert = async (id) => {
-    try {
-      setLoadingId(id);
-      await API.post(`/marketplace/needs/alerts/${id}/convert`);
-      setAlerts((prev) => prev.filter((a) => a.id !== id));
-    } catch (err) {
-      setError(err?.response?.data?.detail || "Failed to claim");
-    } finally {
-      setLoadingId(null);
-    }
+  const urgencyBorder = (u) => {
+    if (u === "HIGH") return "border-red-500";
+    if (u === "MEDIUM") return "border-yellow-400";
+    return "border-blue-400";
   };
 
+  const filteredNeeds = needs.filter((n) =>
+    filter === "ALL" ? true : n.status === filter,
+  );
+
   return (
-    <div className="space-y-8">
-      {/* HEADER */}
-      <div>
-        <h1 className="text-3xl font-outfit font-bold">Marketplace</h1>
-        <p className="text-sm text-on_surface_variant">
-          Real-time donor intelligence and resource alerts
-        </p>
-      </div>
+    <div className="grid grid-cols-12 gap-8">
+      {/* LEFT */}
+      <div className="col-span-12 lg:col-span-8 space-y-8">
+        {/* HEADER */}
+        <div>
+          <p className="text-primary text-xs font-semibold uppercase tracking-widest">
+            Operations Overview
+          </p>
 
-      {/* ERROR */}
-      {error && (
-        <div className="bg-red-100 text-red-600 text-sm p-3 rounded">
-          {error}
-        </div>
-      )}
+          <div className="flex justify-between items-center gap-3 flex-wrap">
+            <h1 className="text-3xl font-bold mt-1">Marketplace</h1>
 
-      {/* LOADING */}
-      {initialLoading ? (
-        <div className="text-center p-10 text-on_surface_variant">
-          Loading alerts...
-        </div>
-      ) : alerts.length === 0 ? (
-        <div className="text-center p-10 text-on_surface_variant">
-          No alerts right now
-        </div>
-      ) : (
-        <div className="grid grid-cols-12 gap-6">
-          {/* 🔥 ALERT INBOX */}
-          <div className="col-span-12 lg:col-span-8 space-y-4">
-            <h3 className="font-semibold text-lg">Alert Inbox</h3>
-
-            {alerts.map((a) => (
-              <div
-                key={a.id}
-                className="bg-surface_high p-5 rounded-xl border border-white/5 hover:scale-[1.01] transition"
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => navigate("/dispatches")}
+                className="px-4 py-2 text-sm bg-surface_high border border-white/10 rounded-lg hover:bg-white/5"
               >
-                {/* TOP */}
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs font-bold text-primary">
-                    DONOR ALERT
-                  </span>
+                Dispatch History
+              </button>
 
-                  <span className="text-[10px] text-on_surface_variant">
-                    {new Date(a.created_at).toLocaleTimeString()}
-                  </span>
-                </div>
+              <button
+                onClick={() => navigate("/marketplace-stats")}
+                className="px-4 py-2 text-sm bg-surface_high border border-white/10 rounded-lg hover:bg-white/5"
+              >
+                Stats
+              </button>
+            </div>
+          </div>
 
-                {/* MESSAGE */}
-                <p className="text-sm font-medium">{a.message_body}</p>
+          <div className="flex items-center gap-2 text-sm mt-1 opacity-70">
+            <span>Live donor intelligence</span>
+            <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
 
-                {/* DONOR */}
-                {a.donor_name && (
-                  <p className="text-xs text-on_surface_variant mt-2">
-                    👤 {a.donor_name}
-                  </p>
-                )}
+            {lastUpdated && (
+              <span className="text-xs">
+                {Math.floor((Date.now() - lastUpdated) / 1000)}s ago
+              </span>
+            )}
+          </div>
+        </div>
 
-                {/* ACTION */}
-                <div className="mt-4 flex justify-end">
+        {/* 🔴 ALERTS (COMPACT LIST) */}
+        <div className="bg-surface_high rounded-xl p-5 space-y-4 border border-white/10">
+          <div className="flex justify-between items-center">
+            <h3 className="font-semibold">Live Alerts</h3>
+
+            <button
+              onClick={() => navigate("/alerts")}
+              className="text-xs text-primary hover:underline"
+            >
+              View All →
+            </button>
+          </div>
+
+          <div className="space-y-2">
+            {(alertsLoading
+              ? Array.from({ length: MIN_ALERTS })
+              : alerts.slice(0, MIN_ALERTS)
+            ).map((a, i) =>
+              !a ? (
+                <div
+                  key={i}
+                  className="h-[70px] bg-surface rounded-lg animate-pulse"
+                />
+              ) : (
+                <div
+                  key={a.id}
+                  className="flex items-start justify-between gap-3 p-3 rounded-lg bg-surface border border-white/5 hover:bg-white/5 transition"
+                >
+                  <div className="flex-1 space-y-1">
+                    <div className="flex items-center gap-2 text-[11px]">
+                      <span className="text-primary font-bold">ALERT</span>
+                      <span className="opacity-60">
+                        {new Date(a.created_at).toLocaleTimeString()}
+                      </span>
+                    </div>
+
+                    <p className="text-sm leading-snug break-words">
+                      {a.message_body}
+                    </p>
+
+                    {a.donor_name && (
+                      <p className="text-[11px] opacity-60">
+                        👤 {a.donor_name}
+                      </p>
+                    )}
+                  </div>
+
                   <button
-                    disabled={loadingId === a.id}
+                    disabled={claimingId === a.id}
                     onClick={() => claimAlert(a.id)}
-                    className={`px-4 py-2 rounded-lg text-sm transition ${
-                      loadingId === a.id
-                        ? "bg-gray-400 text-white"
-                        : "bg-primary text-white hover:opacity-90"
-                    }`}
+                    className="text-xs px-3 py-1.5 rounded bg-primary text-white whitespace-nowrap"
                   >
-                    {loadingId === a.id ? "Processing..." : "Convert →"}
+                    {claimingId === a.id ? "..." : "Claim"}
                   </button>
                 </div>
-              </div>
+              ),
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* RIGHT */}
+      <div className="col-span-12 lg:col-span-4">
+        <div className="bg-surface_high rounded-xl p-5 space-y-4 border border-white/10">
+          <div className="flex justify-between">
+            <h3 className="font-semibold">Active Needs</h3>
+
+            <button
+              onClick={() => navigate("/needs")}
+              className="text-xs text-primary hover:underline"
+            >
+              View All →
+            </button>
+          </div>
+
+          {/* FILTER */}
+          <div className="flex gap-2 text-xs">
+            {["OPEN", "DISPATCHED"].map((f) => (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                className={`px-3 py-1 rounded ${
+                  filter === f
+                    ? "bg-primary text-white"
+                    : "bg-surface border border-white/10"
+                }`}
+              >
+                {f}
+              </button>
             ))}
           </div>
 
-          {/* 🔥 RIGHT PANEL (RESERVED) */}
-          <div className="col-span-12 lg:col-span-4">
-            <div className="bg-surface_high rounded-xl p-5 h-full min-h-[400px]">
-              <h3 className="font-semibold mb-4">Insights</h3>
+          <div className="space-y-3">
+            {(needsLoading
+              ? Array.from({ length: MIN_NEEDS })
+              : filteredNeeds.slice(0, MIN_NEEDS)
+            ).map((n, i) =>
+              !n ? (
+                <div
+                  key={i}
+                  className="h-[110px] bg-surface rounded-xl animate-pulse"
+                />
+              ) : (
+                <div
+                  key={n.id}
+                  className={`h-[110px] flex flex-col justify-between p-4 rounded-xl border border-white/5 bg-surface transition
+                  ${urgencyBorder(n.urgency)}
+                  ${newNeedId === n.id ? "scale-105 bg-white/10" : ""}
+                  `}
+                >
+                  <div>
+                    <p className="text-sm font-semibold">
+                      {n.type} • {n.quantity}
+                    </p>
 
-              <div className="flex items-center justify-center h-[300px] text-sm text-on_surface_variant">
-                Coming soon
-              </div>
-            </div>
+                    <p className="text-xs opacity-70 line-clamp-2">
+                      {n.description}
+                    </p>
+                  </div>
+
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs opacity-60">
+                      📍 {n.pickup_address}
+                    </span>
+
+                    {n.status === "OPEN" ? (
+                      <button
+                        onClick={() =>
+                          setDispatchModal({
+                            open: true,
+                            needId: n.id,
+                          })
+                        }
+                        className="text-xs px-3 py-1 rounded bg-primary text-white"
+                      >
+                        Dispatch
+                      </button>
+                    ) : (
+                      <span className="text-xs px-2 py-1 bg-gray-500/30 text-gray-300 rounded">
+                        Dispatched
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ),
+            )}
           </div>
         </div>
-      )}
+      </div>
+
+      <DispatchVolunteersModal
+        open={dispatchModal.open}
+        needId={dispatchModal.needId}
+        sidebarOpen={sidebarOpen}
+        onClose={() => setDispatchModal({ open: false, needId: null })}
+        onSuccess={loadNeeds}
+      />
     </div>
   );
 };
