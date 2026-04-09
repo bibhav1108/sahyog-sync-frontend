@@ -14,8 +14,7 @@ const Inventory = () => {
   const [editingId, setEditingId] = useState(null);
   const [editValue, setEditValue] = useState("");
 
-  // Delete state
-  const [deleteTarget, setDeleteTarget] = useState(null); // { id, item_name }
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState("");
 
@@ -55,11 +54,10 @@ const Inventory = () => {
   const handleUpdateQuantity = async (id, newQuantity) => {
     const finalQuantity = Math.max(0, Number(newQuantity));
 
-    // Optimistic UI update
     setItems((prev) =>
       prev.map((item) =>
-        item.id === id ? { ...item, quantity: finalQuantity } : item
-      )
+        item.id === id ? { ...item, quantity: finalQuantity } : item,
+      ),
     );
 
     try {
@@ -68,7 +66,7 @@ const Inventory = () => {
       });
       fetchInventory(false);
     } catch {
-      fetchInventory(false); // Revert on failure
+      fetchInventory(false);
     }
     setEditingId(null);
   };
@@ -92,7 +90,12 @@ const Inventory = () => {
 
       setShowForm(false);
       fetchInventory(false);
-      setNewItem({ item_name: "", quantity: "", unit: "kilogram", category: "OTHERS" });
+      setNewItem({
+        item_name: "",
+        quantity: "",
+        unit: "kilogram",
+        category: "OTHERS",
+      });
     } catch {
       setFormError("Failed to add item. Please try again.");
     } finally {
@@ -120,7 +123,7 @@ const Inventory = () => {
 
   return (
     <div className="space-y-8">
-      {/* HERO */}
+      {/* STATS */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <StatCard label="Total Units" value={total} />
         <StatCard label="Reserved" value={reserved} />
@@ -129,7 +132,7 @@ const Inventory = () => {
 
       {/* HEADER */}
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-        <h1 className="text-2xl font-bold">Inventory </h1>
+        <h1 className="text-2xl font-bold">Inventory</h1>
 
         <button
           onClick={() => setShowForm(true)}
@@ -139,20 +142,6 @@ const Inventory = () => {
         </button>
       </div>
 
-      {/* FILTERS */}
-      <div className="flex gap-2 flex-wrap">
-        {["ALL", "FOOD", "MEDICAL", "WATER", "OTHERS"].map((f) => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`px-3 py-1 rounded-full text-xs ${filter === f ? "bg-primary text-white" : "bg-surface_high"
-              }`}
-          >
-            {f}
-          </button>
-        ))}
-      </div>
-
       {/* SEARCH */}
       <input
         placeholder="Search inventory..."
@@ -160,11 +149,35 @@ const Inventory = () => {
         onChange={(e) => setSearch(e.target.value)}
       />
 
-      {/* GRID */}
+      {/* FILTERS */}
+      <div className="flex gap-2 flex-wrap">
+        {["ALL", "FOOD", "MEDICAL", "WATER", "OTHERS"].map((f) => (
+          <button
+            key={f}
+            onClick={() => setFilter(f)}
+            className={`px-3 py-1 rounded-full text-xs ${
+              filter === f ? "bg-primary text-white" : "bg-surface_high"
+            }`}
+          >
+            {f}
+          </button>
+        ))}
+      </div>
+
+      {/* LIST */}
       {loading ? (
         <div className="text-center p-10">Loading...</div>
       ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="bg-surface_high rounded-xl overflow-hidden">
+          <div className="grid grid-cols-6 gap-4 px-4 py-3 text-xs font-semibold text-on_surface_variant border-b border-black/10">
+            <div>Name</div>
+            <div>Category</div>
+            <div>Total</div>
+            <div>Reserved</div>
+            <div>Available</div>
+            <div className="text-right">Actions</div>
+          </div>
+
           {filtered.map((i) => {
             const available = getAvailable(i);
             const low = available < i.quantity * 0.2;
@@ -172,88 +185,97 @@ const Inventory = () => {
             return (
               <div
                 key={i.id}
-                className="bg-surface_high p-5 rounded-xl flex flex-col gap-4"
+                className="grid grid-cols-6 gap-4 px-4 py-3 items-center border-b border-black/5 hover:bg-black/5 transition"
               >
-                {/* CARD HEADER */}
-                <div className="flex justify-between items-start">
-                  <h3 className="font-bold">{i.item_name}</h3>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs bg-surface px-2 py-1 rounded">
-                      {i.category}
-                    </span>
-                    {/* DELETE BUTTON */}
-                    <button
-                      title="Delete item"
-                      onClick={() => {
-                        setDeleteTarget({ id: i.id, item_name: i.item_name, reserved_quantity: i.reserved_quantity });
-                        setDeleteError("");
-                      }}
-                      className="text-red-400 hover:text-red-600 hover:bg-red-500/10 p-1 rounded-lg transition"
-                    >
-                      <span className="material-symbols-outlined text-[18px]">delete</span>
-                    </button>
-                  </div>
+                <div className="font-semibold">
+                  {i.item_name}
+                  {low && <span className="ml-2 text-xs text-red-500">⚠</span>}
                 </div>
 
-                {/* STATS */}
-                <div className="grid grid-cols-3 text-center">
-                  <MiniStat label="Total" value={i.quantity} />
-                  <MiniStat label="Reserved" value={i.reserved_quantity} />
-                  <MiniStat label="Available" value={available} />
+                <div>
+                  <span className="text-xs bg-surface px-2 py-1 rounded">
+                    {i.category}
+                  </span>
                 </div>
 
-                {/* LOW STOCK */}
-                {low && (
-                  <div className="text-xs text-red-500 font-semibold">
-                    ⚠ Low Stock
-                  </div>
-                )}
+                <div>{i.quantity}</div>
+                <div>{i.reserved_quantity}</div>
+                <div className={low ? "text-red-500 font-semibold" : ""}>
+                  {available}
+                </div>
 
-                {/* CONTROLS */}
-                <div className="pt-2 mt-auto">
+                <div className="flex justify-end gap-2">
                   {editingId === i.id ? (
-                    <div className="flex items-center gap-2">
+                    <>
                       <input
                         type="number"
                         min="0"
                         autoFocus
                         value={editValue}
                         onChange={(e) => {
-                          if (Number(e.target.value) >= 0 || e.target.value === "") {
+                          if (
+                            Number(e.target.value) >= 0 ||
+                            e.target.value === ""
+                          ) {
                             setEditValue(e.target.value);
                           }
                         }}
-                        className="w-full px-3 py-1.5 rounded-lg bg-surface text-sm font-semibold outline-none focus:ring-2 focus:ring-primary/40 border border-black/5"
+                        className="w-20 px-2 py-1 rounded bg-surface text-sm border border-black/10"
                       />
                       <button
                         onClick={() => handleUpdateQuantity(i.id, editValue)}
-                        className="px-3 py-1.5 bg-primary text-white text-xs font-bold rounded-lg hover:opacity-90 transition"
+                        className="text-xs px-2 py-1 bg-primary text-white rounded"
                       >
                         Save
                       </button>
                       <button
                         onClick={() => setEditingId(null)}
-                        className="px-3 py-1.5 bg-surface text-on_surface_variant text-xs font-bold rounded-lg hover:bg-black/5 transition"
+                        className="text-xs px-2 py-1 bg-surface rounded"
                       >
                         Cancel
                       </button>
-                    </div>
+                    </>
                   ) : (
-                    <button
-                      onClick={() => {
-                        setEditingId(i.id);
-                        setEditValue(i.quantity);
-                      }}
-                      className="w-full flex items-center justify-center gap-2 py-2 text-sm font-semibold text-primary bg-primary/10 hover:bg-primary/20 rounded-lg transition"
-                    >
-                      <span className="material-symbols-outlined text-[18px]">edit</span>
-                      Edit Quantity
-                    </button>
+                    <>
+                      <button
+                        onClick={() => {
+                          setEditingId(i.id);
+                          setEditValue(i.quantity);
+                        }}
+                        className="p-1 hover:bg-primary/10 rounded"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">
+                          edit
+                        </span>
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setDeleteTarget({
+                            id: i.id,
+                            item_name: i.item_name,
+                            reserved_quantity: i.reserved_quantity,
+                          });
+                          setDeleteError("");
+                        }}
+                        className="p-1 text-red-400 hover:text-red-600 hover:bg-red-500/10 rounded"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">
+                          delete
+                        </span>
+                      </button>
+                    </>
                   )}
                 </div>
               </div>
             );
           })}
+
+          {filtered.length === 0 && (
+            <div className="p-6 text-center text-sm text-on_surface_variant">
+              No items found
+            </div>
+          )}
         </div>
       )}
 
@@ -266,21 +288,24 @@ const Inventory = () => {
                 setShowForm(false);
                 setFormError("");
               }}
-              className="absolute top-4 right-4 text-on_surface_variant hover:text-on_surface transition"
+              className="absolute top-4 right-4"
             >
-              <span className="material-symbols-outlined text-[20px]">close</span>
+              ✕
             </button>
+
             <h2 className="font-bold text-lg">Add Item</h2>
 
             {formError && (
-              <div className="text-red-500 text-sm font-semibold">{formError}</div>
+              <div className="text-red-500 text-sm font-semibold">
+                {formError}
+              </div>
             )}
 
             <form onSubmit={handleAddItem} className="space-y-3">
               <input
                 placeholder="Item"
                 value={newItem.item_name}
-                className="w-full px-3 py-2 rounded bg-surface_high outline-none focus:ring-2 focus:ring-primary/40"
+                className="w-full px-3 py-2 rounded bg-surface_high"
                 onChange={(e) =>
                   setNewItem({ ...newItem, item_name: e.target.value })
                 }
@@ -292,7 +317,7 @@ const Inventory = () => {
                   min="0"
                   placeholder="Qty"
                   value={newItem.quantity}
-                  className="px-3 py-2 rounded bg-surface_high outline-none focus:ring-2 focus:ring-primary/40"
+                  className="px-3 py-2 rounded bg-surface_high"
                   onChange={(e) =>
                     setNewItem({ ...newItem, quantity: e.target.value })
                   }
@@ -300,12 +325,11 @@ const Inventory = () => {
 
                 <select
                   value={newItem.unit}
-                  className="px-3 py-2 rounded bg-surface_high outline-none focus:ring-2 focus:ring-primary/40"
+                  className="px-3 py-2 rounded bg-surface_high"
                   onChange={(e) =>
                     setNewItem({ ...newItem, unit: e.target.value })
                   }
                 >
-                  <option value="" disabled>Select Unit</option>
                   <option value="kilogram">kilogram</option>
                   <option value="pound">pound</option>
                   <option value="ounce">ounce</option>
@@ -313,7 +337,7 @@ const Inventory = () => {
                 </select>
               </div>
 
-              <button className="w-full py-2 bg-primary text-white rounded hover:opacity-90 transition">
+              <button className="w-full py-2 bg-primary text-white rounded">
                 {adding ? "Adding..." : "Add Item"}
               </button>
             </form>
@@ -321,50 +345,30 @@ const Inventory = () => {
         </div>
       )}
 
-      {/* DELETE CONFIRMATION MODAL */}
+      {/* DELETE MODAL */}
       {deleteTarget && (
-        <div className="fixed inset-0 z-50 bg-transparent flex items-center justify-center">
-          <div className="bg-surface_lowest p-6 rounded-xl w-full max-w-sm space-y-4 shadow-xl">
-            {/* Icon */}
-            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-500/10 mx-auto">
-              <span className="material-symbols-outlined text-red-500 text-[28px]">delete_forever</span>
-            </div>
-
-            <div className="text-center space-y-1">
-              <h2 className="font-bold text-lg">Delete Item?</h2>
-              <p className="text-sm text-on_surface_variant">
-                Are you sure you want to delete{" "}
-                <span className="font-semibold text-on_surface">"{deleteTarget.item_name}"</span>?
-                This action cannot be undone.
-              </p>
-              {deleteTarget.reserved_quantity > 0 && (
-                <p className="text-xs text-amber-500 font-semibold mt-1">
-                  ⚠ This item has {deleteTarget.reserved_quantity} units reserved and cannot be deleted.
-                </p>
-              )}
-            </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="bg-surface_lowest p-6 rounded-xl w-full max-w-sm space-y-4">
+            <h2 className="font-bold text-lg text-center">
+              Delete "{deleteTarget.item_name}"?
+            </h2>
 
             {deleteError && (
-              <div className="text-red-500 text-sm font-semibold text-center bg-red-500/10 px-3 py-2 rounded-lg">
+              <div className="text-red-500 text-sm text-center">
                 {deleteError}
               </div>
             )}
 
             <div className="flex gap-3">
               <button
-                onClick={() => {
-                  setDeleteTarget(null);
-                  setDeleteError("");
-                }}
-                disabled={deleting}
-                className="flex-1 py-2 rounded-lg bg-surface_high text-on_surface_variant font-semibold hover:bg-black/5 transition"
+                onClick={() => setDeleteTarget(null)}
+                className="flex-1 py-2 bg-surface_high rounded"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDeleteConfirm}
-                disabled={deleting}
-                className="flex-1 py-2 rounded-lg bg-red-500 text-white font-semibold hover:bg-red-600 transition disabled:opacity-60"
+                className="flex-1 py-2 bg-red-500 text-white rounded"
               >
                 {deleting ? "Deleting..." : "Delete"}
               </button>
@@ -378,18 +382,12 @@ const Inventory = () => {
 
 const StatCard = ({ label, value, highlight }) => (
   <div
-    className={`p-5 rounded-xl ${highlight ? "bg-primary text-white" : "bg-surface_high"
-      }`}
+    className={`p-5 rounded-xl ${
+      highlight ? "bg-primary text-white" : "bg-surface_high"
+    }`}
   >
     <p className="text-xs">{label}</p>
     <p className="text-2xl font-bold">{value}</p>
-  </div>
-);
-
-const MiniStat = ({ label, value }) => (
-  <div>
-    <p className="text-xs text-on_surface_variant">{label}</p>
-    <p className="font-bold">{value}</p>
   </div>
 );
 
