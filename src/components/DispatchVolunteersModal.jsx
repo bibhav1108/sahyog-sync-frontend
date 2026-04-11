@@ -73,15 +73,15 @@ const DispatchVolunteersModal = ({ open, onClose, needId, onSuccess }) => {
         className="relative w-full max-w-6xl h-[80vh] rounded-2xl border border-white/10 bg-surface_high/95 backdrop-blur-xl shadow-2xl flex gap-6 p-6 pt-10"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* MODAL CLOSE BUTTON */}
+        {/* MAIN MODAL CLOSE BUTTON - NOW ACTUALLY RED */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-white/60 hover:text-white transition-colors"
+          className="absolute top-4 right-4 w-9 h-9 flex items-center justify-center rounded-full bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/40 transition-all duration-200 shadow-sm"
           title="Close modal"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6"
+            className="h-4 w-4"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -89,7 +89,7 @@ const DispatchVolunteersModal = ({ open, onClose, needId, onSuccess }) => {
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
-              strokeWidth={2}
+              strokeWidth={2.5}
               d="M6 18L18 6M6 6l12 12"
             />
           </svg>
@@ -196,15 +196,15 @@ const DispatchVolunteersModal = ({ open, onClose, needId, onSuccess }) => {
                   className="group flex items-center justify-between bg-surface border border-white/10 px-3 py-2.5 rounded-lg transition-colors hover:border-white/20"
                 >
                   <span className="text-sm">{v.name}</span>
-                  {/* REMOVE VOLUNTEER CROSS BUTTON */}
+                  {/* DESELECT VOLUNTEER BUTTON - NOW ACTUALLY RED */}
                   <button
                     onClick={() => toggle(v.id)}
-                    className="text-white/40 hover:text-red-400 hover:bg-red-400/10 p-1.5 rounded-md transition-all"
+                    className="w-7 h-7 flex items-center justify-center rounded-md bg-red-500/10 text-red-500 hover:bg-red-500/20 hover:text-red-400 transition-all duration-200"
                     title={`Remove ${v.name}`}
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4"
+                      className="h-3.5 w-3.5"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -212,7 +212,7 @@ const DispatchVolunteersModal = ({ open, onClose, needId, onSuccess }) => {
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        strokeWidth={2}
+                        strokeWidth={2.5}
                         d="M6 18L18 6M6 6l12 12"
                       />
                     </svg>
