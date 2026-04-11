@@ -37,7 +37,6 @@ const Layout = ({ children }) => {
   const [user, setUser] = useState(null);
 
   const [profileOpen, setProfileOpen] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 768);
 
   const [loadingUser, setLoadingUser] = useState(true);
@@ -47,6 +46,8 @@ const Layout = ({ children }) => {
   const loadingRef = useRef({
     notifications: false,
   });
+
+  const unreadCount = notifications.filter((n) => !n.is_read).length;
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -68,14 +69,14 @@ const Layout = ({ children }) => {
     loadingRef.current.notifications = true;
 
     try {
-      const res = await API.get("/marketplace/needs/alerts");
+      const res = await API.get("/notifications");
 
       const sorted = (res.data || []).sort(
         (a, b) => new Date(b.created_at) - new Date(a.created_at),
       );
 
       const prevIds = prevIdsRef.current;
-      const newOnes = sorted.filter((a) => !prevIds.has(a.id));
+      const newOnes = sorted.filter((a) => !a.is_read && !prevIds.has(a.id));
 
       if (newOnes.length > 0) {
         try {
@@ -92,18 +93,45 @@ const Layout = ({ children }) => {
       }
 
       prevIdsRef.current = new Set(sorted.map((a) => a.id));
-      setNotifications(sorted.slice(0, 6));
+      setNotifications(sorted);
     } catch (err) {
-      console.error(err);
+      console.error("Failed to load notifications", err);
     } finally {
       loadingRef.current.notifications = false;
       setLoadingNotifications(false);
     }
   };
 
+  const handleMarkRead = async (id, isRead) => {
+    if (isRead) return;
+
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, is_read: true } : n)),
+    );
+
+    try {
+      await API.post(`/notifications/${id}/read`);
+    } catch (err) {
+      console.error("Failed to mark as read", err);
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, is_read: false } : n)),
+      );
+    }
+  };
+
+  const handleMarkAllRead = async () => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+
+    try {
+      await API.post(`/notifications/mark-all-read`);
+    } catch (err) {
+      console.error("Failed to mark all as read", err);
+      loadNotifications();
+    }
+  };
+
   useEffect(() => {
     loadNotifications();
-
     const interval = setInterval(loadNotifications, 5000);
     return () => clearInterval(interval);
   }, []);
@@ -145,12 +173,6 @@ const Layout = ({ children }) => {
       if (!e.target.closest("[data-profile-dropdown]")) {
         setProfileOpen(false);
       }
-      if (!e.target.closest("[data-settings-dropdown]")) {
-        setSettingsOpen(false);
-      }
-      if (!e.target.closest("[data-org-dropdown]")) {
-        // no org dropdown currently, but keeping structure safe
-      }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
@@ -171,6 +193,7 @@ const Layout = ({ children }) => {
         />
       )}
 
+      {/* Toasts */}
       <div
         className={`fixed top-20 z-[9999] space-y-3 transition-all duration-300 ${
           sidebarOpen ? "md:left-[17rem] left-4" : "left-4"
@@ -180,22 +203,18 @@ const Layout = ({ children }) => {
           <div
             key={t.toastId}
             onClick={() => {
+              handleMarkRead(t.id, t.is_read);
               navigate("/marketplace");
               setToasts((prev) => prev.filter((x) => x.toastId !== t.toastId));
             }}
             className="cursor-pointer rounded-xl border-l-4 border-primary bg-surface_lowest p-4 shadow-soft transition hover:scale-[1.02] w-80"
           >
             <p className="text-sm font-semibold text-primary">
-              📦 New Donor Alert
+              {t.title || "📦 New Alert"}
             </p>
             <p className="mt-1 text-xs text-on_surface_variant">
-              {t.message_body}
+              {t.message_body || t.message || "You have a new notification."}
             </p>
-            {t.donor_name && (
-              <p className="mt-1 text-[11px] text-on_surface_variant/80">
-                👤 {t.donor_name}
-              </p>
-            )}
           </div>
         ))}
       </div>
@@ -210,7 +229,6 @@ const Layout = ({ children }) => {
           <button
             onClick={() => setSidebarOpen(false)}
             className="flex items-center justify-center rounded-lg p-1.5 text-on_surface_variant hover:bg-white/5 hover:text-on_surface transition-colors"
-            title="Close sidebar"
           >
             <span className="material-symbols-outlined text-[20px]">
               menu_open
@@ -221,7 +239,6 @@ const Layout = ({ children }) => {
         <nav className="flex-1 space-y-1 text-sm">
           {NAV_ITEMS.map((item) => {
             const active = location.pathname === item.to;
-
             return (
               <Link
                 key={item.to}
@@ -262,19 +279,16 @@ const Layout = ({ children }) => {
             <button
               onClick={() => setSidebarOpen(true)}
               className="flex items-center justify-center rounded-lg p-2 text-on_surface_variant hover:bg-white/5 hover:text-on_surface transition-colors"
-              title="Open sidebar"
             >
               <span className="material-symbols-outlined text-[22px]">
                 menu
               </span>
             </button>
           )}
-
           {sidebarOpen && (
             <button
               onClick={() => setSidebarOpen(false)}
               className="md:hidden flex items-center justify-center rounded-lg p-2 text-on_surface_variant hover:bg-white/5 hover:text-on_surface transition-colors"
-              title="Close sidebar"
             >
               <span className="material-symbols-outlined text-[22px]">
                 menu_open
@@ -310,62 +324,19 @@ const Layout = ({ children }) => {
             <span className="material-symbols-outlined">
               notifications_active
             </span>
-
-            {!loadingNotifications && notifications.length > 0 && (
+            {!loadingNotifications && unreadCount > 0 && (
               <span className="absolute right-0 top-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] text-white">
-                {notifications.length}
+                {unreadCount > 9 ? "9+" : unreadCount}
               </span>
             )}
           </button>
 
-          <div className="relative" data-settings-dropdown>
-            <button
-              onClick={() => {
-                setSettingsOpen((p) => !p);
-                setShowNotifications(false);
-                setProfileOpen(false);
-              }}
-              className="relative rounded-xl p-2 text-on_surface_variant transition hover:bg-white/5 hover:text-on_surface"
-              title="Settings"
-            >
-              <span className="material-symbols-outlined text-[24px]">
-                settings
-              </span>
-            </button>
-
-            {settingsOpen && (
-              <div className="absolute right-0 mt-3 w-56 rounded-xl border border-white/5 bg-surface_lowest p-2 shadow-[0_10px_30px_rgba(0,0,0,0.15)] animate-[fadeIn_0.2s_ease] z-[1000]">
-                <div className="absolute right-4 top-0 h-3 w-3 -translate-y-1/2 rotate-45 border-l border-t border-white/5 bg-surface_lowest" />
-                <div className="space-y-1">
-                  {[
-                    { label: "Profile", icon: "person" },
-                    { label: "Organisation", icon: "corporate_fare" },
-                    { label: "Review Us", icon: "star" },
-                    { label: "Contact Us", icon: "support_agent" },
-                    { label: "Help Center", icon: "help" },
-                    { label: "More", icon: "more_horiz" },
-                  ].map((item) => (
-                    <button
-                      key={item.label}
-                      className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-on_surface_variant hover:bg-white/5 hover:text-on_surface transition-colors"
-                    >
-                      <span className="material-symbols-outlined text-[20px]">
-                        {item.icon}
-                      </span>
-                      {item.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
+          {/* Combined Profile & Settings Dropdown */}
           <div className="relative" data-profile-dropdown>
             {loadingUser ? (
               <div className="flex items-center gap-2 rounded-xl bg-surface_high px-3 py-2 w-44">
                 <Skeleton className="h-8 w-8 rounded-full" />
                 <Skeleton className="h-4 w-20" />
-                <Skeleton className="h-4 w-4 ml-auto" />
               </div>
             ) : (
               user && (
@@ -373,7 +344,6 @@ const Layout = ({ children }) => {
                   onClick={() => {
                     setProfileOpen((p) => !p);
                     setShowNotifications(false);
-                    setSettingsOpen(false);
                   }}
                   className="flex items-center gap-2 rounded-xl bg-surface_high px-3 py-2 transition-all duration-200 hover:scale-[1.01] hover:bg-white/5"
                 >
@@ -391,11 +361,12 @@ const Layout = ({ children }) => {
             )}
 
             {profileOpen && user && (
-              <div className="absolute right-0 mt-3 w-64 rounded-xl border border-white/5 bg-surface_lowest p-4 shadow-[0_10px_30px_rgba(0,0,0,0.15)] animate-[fadeIn_0.2s_ease]">
+              <div className="absolute right-0 mt-3 w-64 rounded-xl border border-white/5 bg-surface_lowest p-2 shadow-[0_10px_30px_rgba(0,0,0,0.15)] animate-[fadeIn_0.2s_ease]">
                 <div className="absolute right-6 top-0 h-3 w-3 -translate-y-1/2 rotate-45 border-l border-t border-white/5 bg-surface_lowest" />
 
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary font-semibold text-white shadow-soft">
+                {/* User Info Section */}
+                <div className="flex items-center gap-3 p-2">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary font-semibold text-white shadow-soft">
                     {getInitials(user.full_name)}
                   </div>
                   <div className="min-w-0">
@@ -408,11 +379,36 @@ const Layout = ({ children }) => {
                   </div>
                 </div>
 
-                <div className="mt-3 border-t border-white/5 pt-3">
+                {/* Settings & Options List */}
+                <div className="mt-2 border-t border-white/5 pt-2 space-y-1">
+                  {[
+                    { label: "Profile", icon: "person" },
+                    { label: "Organisation", icon: "corporate_fare" },
+                    { label: "Review Us", icon: "star" },
+                    { label: "Contact Us", icon: "support_agent" },
+                    { label: "Help Center", icon: "help" },
+                  ].map((item) => (
+                    <button
+                      key={item.label}
+                      className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-on_surface_variant hover:bg-white/5 hover:text-on_surface transition-colors"
+                    >
+                      <span className="material-symbols-outlined text-[20px]">
+                        {item.icon}
+                      </span>
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Logout Section */}
+                <div className="mt-2 border-t border-white/5 pt-2">
                   <button
                     onClick={logout}
-                    className="text-sm font-medium text-red-500 transition hover:opacity-80"
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-red-500 hover:bg-red-500/10 transition-colors"
                   >
+                    <span className="material-symbols-outlined text-[20px]">
+                      logout
+                    </span>
                     Logout
                   </button>
                 </div>
@@ -432,13 +428,28 @@ const Layout = ({ children }) => {
         </div>
       </main>
 
+      {/* Notifications Sidebar Panel */}
       <div
-        className="fixed right-0 top-16 z-[995] h-[calc(100vh-4rem)] overflow-hidden border-l border-white/10 bg-white/10 backdrop-blur-xl shadow-soft transition-all duration-300"
+        className="fixed right-0 top-16 z-[995] h-[calc(100vh-4rem)] overflow-hidden border-l border-white/10 bg-surface/95 backdrop-blur-xl shadow-soft transition-all duration-300 flex flex-col"
         style={{
           width: showNotifications ? panelWidth : 0,
         }}
       >
-        <div className="relative h-full overflow-y-auto p-4 space-y-3">
+        {/* Panel Header */}
+        <div className="flex items-center justify-between p-4 border-b border-white/5">
+          <h2 className="text-sm font-semibold">Notifications</h2>
+          {unreadCount > 0 && (
+            <button
+              onClick={handleMarkAllRead}
+              className="text-xs font-medium text-primary hover:opacity-80 transition"
+            >
+              Mark all as read
+            </button>
+          )}
+        </div>
+
+        {/* Panel Content */}
+        <div className="relative flex-1 overflow-y-auto p-4 space-y-3">
           {loadingNotifications ? (
             <>
               <Skeleton className="h-20 w-full" />
@@ -446,32 +457,48 @@ const Layout = ({ children }) => {
               <Skeleton className="h-20 w-full" />
             </>
           ) : notifications.length === 0 ? (
-            <p className="text-sm text-on_surface_variant">No alerts</p>
+            <div className="flex flex-col items-center justify-center h-full text-on_surface_variant">
+              <span className="material-symbols-outlined text-[40px] mb-2 opacity-50">
+                notifications_off
+              </span>
+              <p className="text-sm">No new alerts</p>
+            </div>
           ) : (
             notifications.map((a) => (
               <div
                 key={a.id}
                 onClick={() => {
+                  handleMarkRead(a.id, a.is_read);
                   navigate("/marketplace");
                   setShowNotifications(false);
                 }}
-                className="cursor-pointer rounded-xl bg-surface_high p-3 shadow-soft border border-white/5 transition hover:scale-[1.02]"
+                className={`cursor-pointer rounded-xl p-3 shadow-soft border border-white/5 transition hover:scale-[1.02] ${
+                  a.is_read ? "bg-surface/50 opacity-70" : "bg-surface_high"
+                }`}
               >
-                <p className="text-sm font-semibold">📦 Alert</p>
+                <div className="flex justify-between items-start">
+                  <p className="text-sm font-semibold">
+                    {a.title || "📦 Alert"}
+                  </p>
+                  {!a.is_read && (
+                    <span className="h-2 w-2 rounded-full bg-primary mt-1" />
+                  )}
+                </div>
                 <p className="mt-1 text-xs text-on_surface_variant">
-                  {a.message_body}
+                  {a.message_body || a.message}
                 </p>
-                <p className="mt-1 text-[10px] text-on_surface_variant/70">
-                  {new Date(a.created_at).toLocaleTimeString()}
+                <p className="mt-2 text-[10px] text-on_surface_variant/70">
+                  {new Date(a.created_at).toLocaleString()}
                 </p>
               </div>
             ))
           )}
         </div>
 
+        {/* Draggable handle to resize panel */}
         <div
           onMouseDown={() => setIsDragging(true)}
-          className="absolute left-0 top-0 h-full w-[4px] cursor-ew-resize"
+          className="absolute left-0 top-0 h-full w-[4px] cursor-ew-resize hover:bg-white/10 transition-colors"
         />
       </div>
 
