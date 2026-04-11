@@ -187,12 +187,12 @@ const Campaigns = () => {
   const applyAIDraftToForm = (data) => {
     const draftItems =
       data?.items &&
-        typeof data.items === "object" &&
-        !Array.isArray(data.items)
+      typeof data.items === "object" &&
+      !Array.isArray(data.items)
         ? Object.entries(data.items).map(([key, value]) => ({
-          key,
-          value: String(value ?? ""),
-        }))
+            key,
+            value: String(value ?? ""),
+          }))
         : [{ key: "", value: "" }];
 
     setName(data?.name || "");
@@ -286,9 +286,9 @@ const Campaigns = () => {
         location_address: trimmedLocation || null,
         required_skills: skills
           ? skills
-            .split(",")
-            .map((s) => s.trim())
-            .filter(Boolean)
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean)
           : [],
       });
 
@@ -452,7 +452,7 @@ const Campaigns = () => {
           <div className="flex flex-wrap gap-3">
             <Link
               to="/campaign-history"
-              className="rounded-xl border border-white/10 bg-surface px-5 py-2.5 text-sm font-semibold transition hover:scale-105 hover:bg-slate-500 hover:text-white active:scale-95 shadow-sm"
+              className="rounded-xl border border-white/10 bg-surface px-5 py-2.5 text-sm font-semibold transition hover:bg-white/5"
             >
               Past Campaigns
             </Link>
@@ -557,15 +557,15 @@ const Campaigns = () => {
                     const isSelected = selectedCampaign?.id === c.id;
                     const itemsCount = c.items
                       ? Object.values(c.items).reduce(
-                        (sum, v) => sum + (Number(v) || 0),
-                        0,
-                      )
+                          (sum, v) => sum + (Number(v) || 0),
+                          0,
+                        )
                       : 0;
                     const dateLabel = c.start_time
                       ? new Date(c.start_time).toLocaleDateString(undefined, {
-                        month: "short",
-                        day: "numeric",
-                      })
+                          month: "short",
+                          day: "numeric",
+                        })
                       : "TBD";
 
                     return (
@@ -578,10 +578,11 @@ const Campaigns = () => {
                           if (e.key === "Enter" || e.key === " ")
                             openDetails(c);
                         }}
-                        className={`group cursor-pointer rounded-2xl border p-5 transition-all hover:-translate-y-0.5 shadow-lg ${isSelected
+                        className={`group cursor-pointer rounded-2xl border p-5 transition-all hover:-translate-y-0.5 shadow-lg ${
+                          isSelected
                             ? "border-primary bg-white ring-2 ring-primary/50"
                             : "border-transparent bg-white/90 hover:bg-white"
-                          }`}
+                        }`}
                         style={{ animationDelay: `${i * 40}ms` }}
                       >
                         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -592,10 +593,11 @@ const Campaigns = () => {
                               </span>
                               <span className="h-1 w-1 rounded-full bg-gray-400" />
                               <span
-                                className={`text-[10px] font-bold uppercase tracking-widest ${c.status === "ACTIVE"
+                                className={`text-[10px] font-bold uppercase tracking-widest ${
+                                  c.status === "ACTIVE"
                                     ? "text-green-600"
                                     : "text-amber-600"
-                                  }`}
+                                }`}
                               >
                                 {c.status}
                               </span>
@@ -669,10 +671,11 @@ const Campaigns = () => {
                           <button
                             key={page}
                             onClick={() => setCurrentPage(page)}
-                            className={`min-w-8 rounded-lg px-3 py-1.5 text-sm font-semibold transition ${currentPage === page
+                            className={`min-w-8 rounded-lg px-3 py-1.5 text-sm font-semibold transition ${
+                              currentPage === page
                                 ? "bg-primary text-white"
                                 : "border border-white/10 bg-surface hover:bg-white/5"
-                              }`}
+                            }`}
                           >
                             {page}
                           </button>
@@ -800,10 +803,11 @@ const Campaigns = () => {
                     triggerBroadcast(selectedCampaign.id);
                   }}
                   disabled={selectedCampaign.status === "COMPLETED"}
-                  className={`w-full rounded-xl px-4 py-3 text-sm font-semibold text-white transition ${selectedCampaign.status === "COMPLETED"
+                  className={`w-full rounded-xl px-4 py-3 text-sm font-semibold text-white transition ${
+                    selectedCampaign.status === "COMPLETED"
                       ? "cursor-not-allowed bg-white/10 opacity-50"
                       : "bg-blue-600 hover:bg-blue-500"
-                    }`}
+                  }`}
                 >
                   Trigger Broadcast
                 </button>
@@ -864,10 +868,10 @@ const Campaigns = () => {
                   <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-primary">
                     Mission Details
                   </p>
-                  <h2 className="mt-1 text-2xl font-black text-white">
+                  <h2 className="mt-1 text-2xl font-black text-on_surface">
                     {selectedCampaign.name}
                   </h2>
-                  <p className="mt-2 max-w-3xl text-sm opacity-70">
+                  <p className="mt-2 max-w-3xl text-sm text-on_surface_variant opacity-80">
                     {selectedCampaign.description}
                   </p>
                 </div>
@@ -936,7 +940,7 @@ const Campaigns = () => {
                       </div>
 
                       {selectedCampaign.items &&
-                        Object.keys(selectedCampaign.items).length > 0 ? (
+                      Object.keys(selectedCampaign.items).length > 0 ? (
                         <div className="space-y-2">
                           {Object.entries(selectedCampaign.items).map(
                             ([k, v]) => (
@@ -1000,12 +1004,13 @@ const Campaigns = () => {
                                       : "No skills"}
                                   </p>
                                   <span
-                                    className={`mt-2 inline-flex rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest ${v.status === "APPROVED"
+                                    className={`mt-2 inline-flex rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest ${
+                                      v.status === "APPROVED"
                                         ? "bg-green-500/10 text-green-400"
                                         : v.status === "REJECTED"
                                           ? "bg-red-500/10 text-red-400"
                                           : "bg-amber-500/10 text-amber-400"
-                                      }`}
+                                    }`}
                                   >
                                     {v.status}
                                   </span>
@@ -1097,10 +1102,10 @@ const Campaigns = () => {
                   <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-primary">
                     Intelligence Assistant
                   </p>
-                  <h2 className="mt-1 text-2xl font-black text-white">
+                  <h2 className="mt-1 text-2xl font-black text-on_surface">
                     Generate Blueprint
                   </h2>
-                  <p className="mt-2 text-sm opacity-70">
+                  <p className="mt-2 text-sm text-on_surface_variant opacity-80">
                     Describe the operation. The AI will parse requirements and
                     prefill the form.
                   </p>
@@ -1112,9 +1117,8 @@ const Campaigns = () => {
                   </div>
                 )}
 
-                {/* === HIGH CONTRAST AI INPUT === */}
                 <textarea
-                  className="min-h-[180px] w-full rounded-2xl border border-white/20 bg-black/40 px-4 py-3 text-white placeholder-white/40 shadow-inner outline-none transition focus:border-primary focus:bg-black/60 focus:ring-1 focus:ring-primary"
+                  className="min-h-[180px] w-full rounded-2xl border border-on_surface/10 bg-surface_low px-4 py-3 text-on_surface placeholder-on_surface/40 shadow-sm outline-none transition focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/20"
                   placeholder="Example: Distribute 100 food packets in Varanasi this Sunday. Need 5 volunteers for 2 hours..."
                   value={aiPrompt}
                   onChange={(e) => setAiPrompt(e.target.value)}
@@ -1130,7 +1134,7 @@ const Campaigns = () => {
                   </button>
                   <button
                     onClick={() => setShowAIModal(false)}
-                    className="rounded-xl border border-white/10 bg-surface px-6 py-3 text-sm font-semibold transition hover:bg-white/5"
+                    className="rounded-xl border border-on_surface/10 bg-surface_high px-6 py-3 text-sm font-semibold transition hover:bg-surface_highest text-on_surface"
                   >
                     Cancel
                   </button>
@@ -1183,10 +1187,10 @@ const Campaigns = () => {
                   <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-primary">
                     Mission Blueprint
                   </p>
-                  <h2 className="mt-1 text-2xl font-black text-black">
+                  <h2 className="mt-1 text-2xl font-black text-on_surface">
                     Create Campaign
                   </h2>
-                  <p className="mt-2 text-sm opacity-70">
+                  <p className="mt-2 text-sm text-on_surface_variant opacity-80">
                     Define scope, timeline, inventory limits, and personnel
                     requirements.
                   </p>
@@ -1200,10 +1204,9 @@ const Campaigns = () => {
 
                 <div className="grid gap-6 lg:grid-cols-2">
                   <div className="space-y-4">
-                    {/* === HIGH CONTRAST INPUTS === */}
                     <Field label="Name">
                       <input
-                        className="w-full rounded-xl border border-white/20 bg-white/40 px-4 py-3 text-sm text-black placeholder-black/40 shadow-inner outline-none transition focus:bg-slate-300 focus:ring-1 focus:ring-primary"
+                        className="w-full rounded-xl border border-on_surface/10 bg-surface_low px-4 py-3 text-sm text-on_surface placeholder-on_surface/40 shadow-sm outline-none transition focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/20"
                         placeholder="e.g. Community Meal Drive"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
@@ -1212,7 +1215,7 @@ const Campaigns = () => {
 
                     <Field label="Description">
                       <textarea
-                        className="min-h-[120px] w-full rounded-xl border border-white/20 bg-white/40 px-4 py-3 text-sm text-black placeholder-black/40 shadow-inner outline-none transition focus:bg-slate-300 focus:ring-1 focus:ring-primary"
+                        className="min-h-[120px] w-full rounded-xl border border-on_surface/10 bg-surface_low px-4 py-3 text-sm text-on_surface placeholder-on_surface/40 shadow-sm outline-none transition focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/20"
                         placeholder="Brief description of operations..."
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
@@ -1224,7 +1227,7 @@ const Campaigns = () => {
                         <select
                           value={type}
                           onChange={(e) => setType(e.target.value)}
-                          className="w-full rounded-xl border border-white/20 bg-gray-300 px-4 py-3 text-sm text-black shadow-inner outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
+                          className="w-full rounded-xl border border-on_surface/10 bg-surface_low px-4 py-3 text-sm text-on_surface shadow-sm outline-none transition focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/20 cursor-pointer"
                         >
                           {TYPE_OPTIONS.map((opt) => (
                             <option key={opt} value={opt}>
@@ -1236,7 +1239,7 @@ const Campaigns = () => {
 
                       <Field label="Target Goal">
                         <input
-                          className="w-full rounded-xl border border-white/20 bg-black/40 px-4 py-3 text-sm text-white placeholder-white/40 shadow-inner outline-none transition focus:border-primary focus:bg-black/60 focus:ring-1 focus:ring-primary"
+                          className="w-full rounded-xl border border-on_surface/10 bg-surface_low px-4 py-3 text-sm text-on_surface placeholder-on_surface/40 shadow-sm outline-none transition focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/20"
                           placeholder="e.g. 100 meals"
                           value={targetQuantity}
                           onChange={(e) => setTargetQuantity(e.target.value)}
@@ -1248,7 +1251,7 @@ const Campaigns = () => {
                       <Field label="Start Time">
                         <input
                           type="datetime-local"
-                          className="w-full rounded-xl border border-white/20 bg-black/40 px-4 py-3 text-sm text-white placeholder-white/40 shadow-inner outline-none transition focus:border-primary focus:bg-black/60 focus:ring-1 focus:ring-primary"
+                          className="w-full rounded-xl border border-on_surface/10 bg-surface_low px-4 py-3 text-sm text-on_surface shadow-sm outline-none transition focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/20"
                           value={startTime}
                           onChange={(e) => setStartTime(e.target.value)}
                         />
@@ -1257,7 +1260,7 @@ const Campaigns = () => {
                       <Field label="End Time">
                         <input
                           type="datetime-local"
-                          className="w-full rounded-xl border border-white/20 bg-black/40 px-4 py-3 text-sm text-white placeholder-white/40 shadow-inner outline-none transition focus:border-primary focus:bg-black/60 focus:ring-1 focus:ring-primary"
+                          className="w-full rounded-xl border border-on_surface/10 bg-surface_low px-4 py-3 text-sm text-on_surface shadow-sm outline-none transition focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/20"
                           value={endTime}
                           onChange={(e) => setEndTime(e.target.value)}
                         />
@@ -1266,7 +1269,7 @@ const Campaigns = () => {
 
                     <Field label="Location">
                       <input
-                        className="w-full rounded-xl border border-white/20 bg-black/40 px-4 py-3 text-sm text-white placeholder-white/40 shadow-inner outline-none transition focus:border-primary focus:bg-black/60 focus:ring-1 focus:ring-primary"
+                        className="w-full rounded-xl border border-on_surface/10 bg-surface_low px-4 py-3 text-sm text-on_surface placeholder-on_surface/40 shadow-sm outline-none transition focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/20"
                         placeholder="e.g. Ward 12, City Hospital"
                         value={location}
                         onChange={(e) => setLocation(e.target.value)}
@@ -1276,7 +1279,7 @@ const Campaigns = () => {
                     <div className="grid gap-4 md:grid-cols-2">
                       <Field label="Required Skills (CSV)">
                         <input
-                          className="w-full rounded-xl border border-white/20 bg-black/40 px-4 py-3 text-sm text-white placeholder-white/40 shadow-inner outline-none transition focus:border-primary focus:bg-black/60 focus:ring-1 focus:ring-primary"
+                          className="w-full rounded-xl border border-on_surface/10 bg-surface_low px-4 py-3 text-sm text-on_surface placeholder-on_surface/40 shadow-sm outline-none transition focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/20"
                           placeholder="medical, logistics"
                           value={skills}
                           onChange={(e) => setSkills(e.target.value)}
@@ -1286,7 +1289,7 @@ const Campaigns = () => {
                       <Field label="Personnel Needed">
                         <input
                           type="number"
-                          className="w-full rounded-xl border border-white/20 bg-black/40 px-4 py-3 text-sm text-white placeholder-white/40 shadow-inner outline-none transition focus:border-primary focus:bg-black/60 focus:ring-1 focus:ring-primary"
+                          className="w-full rounded-xl border border-on_surface/10 bg-surface_low px-4 py-3 text-sm text-on_surface placeholder-on_surface/40 shadow-sm outline-none transition focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/20"
                           placeholder="e.g. 5"
                           value={volunteersRequired}
                           onChange={(e) =>
@@ -1319,7 +1322,7 @@ const Campaigns = () => {
                               onChange={(e) =>
                                 updateItem(idx, "key", e.target.value)
                               }
-                              className="w-full rounded-xl border border-white/20 bg-gray-900 px-4 py-3 text-sm text-white shadow-inner outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                              className="w-full rounded-xl border border-on_surface/10 bg-surface px-4 py-3 text-sm text-on_surface shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 cursor-pointer"
                             >
                               <option value="">Select inventory...</option>
                               {inventory.map((inv) => (
@@ -1335,7 +1338,7 @@ const Campaigns = () => {
                               onChange={(e) =>
                                 updateItem(idx, "value", e.target.value)
                               }
-                              className="w-full rounded-xl border border-white/20 bg-black/40 px-4 py-3 text-sm text-white placeholder-white/40 shadow-inner outline-none focus:border-primary focus:bg-black/60 focus:ring-1 focus:ring-primary"
+                              className="w-full rounded-xl border border-on_surface/10 bg-surface_low px-4 py-3 text-sm text-on_surface placeholder-on_surface/40 shadow-sm outline-none transition focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/20"
                             />
                           </div>
                         ))}
@@ -1352,7 +1355,7 @@ const Campaigns = () => {
                       </button>
                       <button
                         onClick={() => setShowForm(false)}
-                        className="rounded-xl border border-white/10 bg-surface px-6 py-3 text-sm font-semibold transition hover:bg-white/5"
+                        className="rounded-xl border border-on_surface/10 bg-surface_high px-6 py-3 text-sm font-semibold transition hover:bg-surface_highest text-on_surface"
                       >
                         Cancel
                       </button>
@@ -1370,22 +1373,22 @@ const Campaigns = () => {
 
 // UI Sub-components
 const StatCard = ({ label, value, icon }) => (
-  <div className="rounded-2xl border border-white/10 bg-surface_high/90 p-5 shadow-lg shadow-black/10 backdrop-blur-sm">
+  <div className="rounded-2xl border border-on_surface/5 bg-surface_high p-5 shadow-soft transition hover:scale-[1.02]">
     <div className="mb-4 flex items-center justify-between">
-      <div className="rounded-xl bg-primary/20 p-2.5 text-primary border border-primary/20">
+      <div className="rounded-xl bg-primary/10 p-2.5 text-primary border border-primary/10">
         <span className="material-symbols-outlined text-[20px]">{icon}</span>
       </div>
     </div>
-    <p className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-60">
+    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-on_surface_variant">
       {label}
     </p>
-    <p className="mt-1 text-3xl font-black">{value}</p>
+    <p className="mt-1 text-3xl font-black text-on_surface">{value}</p>
   </div>
 );
 
 const Field = ({ label, children }) => (
   <label className="block space-y-2">
-    <span className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-60 ml-1">
+    <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-on_surface_variant ml-1">
       {label}
     </span>
     {children}
