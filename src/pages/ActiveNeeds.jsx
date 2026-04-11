@@ -67,7 +67,7 @@ const ActiveNeeds = ({ sidebarOpen }) => {
           <div className="flex items-center gap-4">
             <button
               onClick={() => navigate("/marketplace")}
-              className="px-3 py-2 text-sm rounded-xl border border-white/10 bg-surface hover:bg-white/5"
+              className="px-3 py-2 text-sm rounded-xl border border-white/10 bg-surface transition hover:scale-105 hover:bg-slate-500 hover:text-white active:scale-95 shadow-sm"
             >
               ← Back
             </button>
@@ -90,7 +90,7 @@ const ActiveNeeds = ({ sidebarOpen }) => {
               className={`px-3 py-1.5 rounded-lg text-xs transition ${
                 filter === f
                   ? "bg-primary text-white"
-                  : "bg-surface border border-white/10 hover:bg-white/5"
+                  : "bg-surface border border-white/10 hover:scale-105 hover:bg-slate-500 hover:text-white active:scale-95 shadow-sm"
               }`}
             >
               {f.replace("_", " ")}
