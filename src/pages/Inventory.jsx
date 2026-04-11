@@ -212,19 +212,46 @@ const Inventory = () => {
                     </span>
                   </div>
 
-                  <div>{i.quantity}</div>
+                  <div>
+                    {editingId === i.id ? (
+                      <input
+                        autoFocus
+                        type="number"
+                        className="w-20 px-2 py-1 bg-surface_highest rounded outline-none border border-primary/30"
+                        value={editValue}
+                        onBlur={() => handleUpdateQuantity(i.id, editValue)}
+                        onChange={(e) => setEditValue(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter")
+                            handleUpdateQuantity(i.id, editValue);
+                          if (e.key === "Escape") setEditingId(null);
+                        }}
+                      />
+                    ) : (
+                      <span>{i.quantity}</span>
+                    )}
+                  </div>
                   <div>{i.reserved_quantity}</div>
                   <div className={low ? "text-red-500 font-semibold" : ""}>
                     {available}
                   </div>
 
                   <div className="flex justify-end gap-2">
-                    <button className="p-1 hover:bg-primary/10 rounded">
+                    <button
+                      onClick={() => {
+                        setEditingId(i.id);
+                        setEditValue(i.quantity);
+                      }}
+                      className="p-1 hover:bg-primary/10 rounded"
+                    >
                       <span className="material-symbols-outlined text-[18px]">
                         edit
                       </span>
                     </button>
-                    <button className="p-1 text-red-400 hover:text-red-600 hover:bg-red-500/10 rounded">
+                    <button
+                      onClick={() => setDeleteTarget(i)}
+                      className="p-1 text-red-400 hover:text-red-600 hover:bg-red-500/10 rounded"
+                    >
                       <span className="material-symbols-outlined text-[18px]">
                         delete
                       </span>
@@ -242,6 +269,166 @@ const Inventory = () => {
           </>
         )}
       </div>
+
+      {/* --- ADD ITEM MODAL --- */}
+      {showForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={() => setShowForm(false)}
+          />
+          <div className="relative w-full max-w-md bg-surface p-6 rounded-xl shadow-soft animate-fadeIn">
+            <h2 className="text-xl font-bold mb-6">Add New Item</h2>
+
+            <form onSubmit={handleAddItem} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold mb-1 opacity-70">
+                  Item Name
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Rice, Bandages..."
+                  className="w-full px-4 py-2 rounded-lg bg-surface_high"
+                  value={newItem.item_name}
+                  onChange={(e) =>
+                    setNewItem({ ...newItem, item_name: e.target.value })
+                  }
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold mb-1 opacity-70">
+                    Quantity
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    min="0"
+                    placeholder="0.00"
+                    className="w-full px-4 py-2 rounded-lg bg-surface_high"
+                    value={newItem.quantity}
+                    onChange={(e) =>
+                      setNewItem({ ...newItem, quantity: e.target.value })
+                    }
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold mb-1 opacity-70">
+                    Unit
+                  </label>
+                  <select
+                    className="w-full px-4 py-2 rounded-lg bg-surface_high"
+                    value={newItem.unit}
+                    onChange={(e) =>
+                      setNewItem({ ...newItem, unit: e.target.value })
+                    }
+                  >
+                    <option value="kilogram">Kilogram (kg)</option>
+                    <option value="litre">Litre (L)</option>
+                    <option value="piece">Piece (pcs)</option>
+                    <option value="box">Box</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold mb-1 opacity-70">
+                  Category
+                </label>
+                <div className="flex gap-2 flex-wrap">
+                  {["FOOD", "MEDICAL", "WATER", "OTHERS"].map((cat) => (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => setNewItem({ ...newItem, category: cat })}
+                      className={`px-3 py-1 rounded-full text-xs transition ${
+                        newItem.category === cat
+                          ? "bg-primary text-white"
+                          : "bg-surface_high hover:bg-surface_highest"
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {formError && (
+                <p className="text-red-500 text-xs font-medium">{formError}</p>
+              )}
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowForm(false)}
+                  className="flex-1 px-4 py-2 rounded-lg bg-surface_high font-semibold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={adding}
+                  className="flex-1 px-4 py-2 rounded-lg bg-primary text-white font-semibold disabled:opacity-50"
+                >
+                  {adding ? "Adding..." : "Add Item"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* --- DELETE CONFIRMATION --- */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={() => setDeleteTarget(null)}
+          />
+          <div className="relative w-full max-w-sm bg-surface p-6 rounded-xl shadow-soft animate-fadeIn">
+            <div className="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center mb-4">
+              <span className="material-symbols-outlined">delete</span>
+            </div>
+
+            <h2 className="text-lg font-bold mb-1">Delete Item?</h2>
+            <p className="text-sm text-on_surface_variant mb-6">
+              Are you sure you want to delete <b>{deleteTarget.item_name}</b>?
+              This action cannot be undone.
+            </p>
+
+            {deleteError && (
+              <div className="p-3 mb-4 rounded bg-red-50 text-red-600 text-xs font-medium">
+                {deleteError}
+              </div>
+            )}
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setDeleteTarget(null)}
+                className="flex-1 px-4 py-2 rounded-lg bg-surface_high font-semibold transition hover:bg-surface_highest"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteConfirm}
+                disabled={deleting}
+                className="flex-1 px-4 py-2 rounded-lg bg-red-500 text-white font-semibold transition hover:bg-red-600 disabled:opacity-50"
+              >
+                {deleting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- EDIT QUANTITY (INLINE OVERLAY) --- */}
+      {editingId && (
+        <div className="fixed inset-0 z-40 bg-transparent" onClick={() => setEditingId(null)}>
+          {/* This is a backdrop to close edit on click outside if we want, or just handle it in the row */}
+        </div>
+      )}
     </div>
   );
 };
