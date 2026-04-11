@@ -4,7 +4,6 @@ export default {
 
   theme: {
     extend: {
-      // 🎨 COLORS — Theme 1: Warm Earth & Teal
       colors: {
         primary: "#0D7377",
         primary_container: "#14919B",
@@ -40,6 +39,33 @@ export default {
 
       backgroundImage: {
         primaryGradient: "linear-gradient(135deg, #0D7377 0%, #14919B 100%)",
+
+        shimmer:
+          "linear-gradient(120deg, transparent 40%, rgba(232,225,218,0.6) 50%, transparent 60%)",
+      },
+
+      keyframes: {
+        shimmer: {
+          "0%": { transform: "translateX(-120%)" },
+          "100%": { transform: "translateX(120%)" },
+        },
+
+        fadeIn: {
+          "0%": {
+            opacity: "0",
+            transform: "translateY(6px)",
+          },
+          "100%": {
+            opacity: "1",
+            transform: "translateY(0)",
+          },
+        },
+      },
+
+      animation: {
+        shimmer: "shimmer 1.8s ease-in-out infinite",
+
+        fadeIn: "fadeIn 0.4s ease-out forwards",
       },
     },
   },
