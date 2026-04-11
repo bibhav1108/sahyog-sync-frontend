@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import API from "../services/api";
 import Skeleton from "../components/Skeleton";
@@ -433,7 +434,7 @@ const Campaigns = () => {
   );
 
   return (
-    <div className="space-y-6 animate-fadeIn">
+    <div className="space-y-6 animate-fadeIn relative">
       {/* HEADER SECTION */}
       <div className="rounded-2xl border border-white/10 bg-surface_high/90 backdrop-blur-sm p-6 shadow-lg shadow-black/10">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
@@ -496,23 +497,24 @@ const Campaigns = () => {
         <section className="col-span-12 space-y-6 lg:col-span-8">
           <div className="rounded-2xl border border-white/10 bg-surface_high/90 p-6 shadow-lg shadow-black/10 backdrop-blur-sm">
             <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div className="flex flex-col gap-3 md:flex-row md:items-center w-full">
+              {/* === LIGHT, HIGH-CONTRAST SEARCHBAR & TOGGLE === */}
+              <div className="flex flex-col md:flex-row w-full gap-4">
                 <div className="relative flex-1">
-                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[20px] opacity-60 text-white">
+                  <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[20px] text-gray-500">
                     search
                   </span>
                   <input
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     placeholder="Search campaigns..."
-                    className="w-full rounded-xl border border-white/10 bg-surface_high/50 py-2.5 pl-10 pr-4 text-sm text-white placeholder-white/70 outline-none transition focus:border-primary/50"
+                    className="w-full rounded-xl border border-gray-300 bg-white/90 py-3 pl-11 pr-4 text-sm text-gray-900 placeholder-gray-500 shadow-sm outline-none transition focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
 
                 <select
                   value={filterType}
                   onChange={(e) => setFilterType(e.target.value)}
-                  className="rounded-xl border border-white/10 bg-surface_high/50 px-4 py-2.5 text-sm text-white outline-none transition focus:border-primary/50"
+                  className="w-full md:w-auto min-w-[160px] rounded-xl border border-gray-300 bg-white/90 px-4 py-3 text-sm font-medium text-gray-900 shadow-sm outline-none transition cursor-pointer focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/20"
                 >
                   <option value="ALL">All types</option>
                   {TYPE_OPTIONS.map((t) => (
@@ -825,522 +827,314 @@ const Campaigns = () => {
       </div>
 
       {/* DETAILS MODAL */}
-      {selectedCampaign && (
-        <div
-          className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-fadeIn"
-          onClick={() => {
-            setSelectedCampaign(null);
-            setPool([]);
-          }}
-        >
+      {selectedCampaign &&
+        createPortal(
           <div
-            className="relative w-full max-w-5xl max-h-[95vh] overflow-y-auto rounded-3xl border border-white/10 bg-surface p-6 md:p-8 shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-fadeIn"
+            onClick={() => {
+              setSelectedCampaign(null);
+              setPool([]);
+            }}
           >
-            {/* Modal Close Cross */}
-            <button
-              onClick={() => {
-                setSelectedCampaign(null);
-                setPool([]);
-              }}
-              className="absolute right-4 top-4 rounded-full bg-white/5 p-2 text-white/50 transition hover:bg-white/10 hover:text-white"
+            <div
+              className="relative w-full max-w-5xl max-h-[95vh] flex flex-col rounded-3xl border border-white/10 bg-surface shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+              <button
+                onClick={() => {
+                  setSelectedCampaign(null);
+                  setPool([]);
+                }}
+                className="absolute right-4 top-4 z-10 rounded-full bg-white/10 p-2 text-white/70 transition hover:bg-white/20 hover:text-white backdrop-blur-sm"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
 
-            <div className="mb-6 pr-10">
-              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-primary">
-                Mission Details
-              </p>
-              <h2 className="mt-1 text-2xl font-black text-white">
-                {selectedCampaign.name}
-              </h2>
-              <p className="mt-2 max-w-3xl text-sm opacity-70">
-                {selectedCampaign.description}
-              </p>
-            </div>
-
-            <div className="grid gap-6 lg:grid-cols-2">
-              <div className="space-y-5">
-                {/* Meta details */}
-                <div className="rounded-2xl bg-surface_high/50 p-5 border border-white/5">
-                  <div className="flex flex-wrap items-center gap-2 mb-5">
-                    <span
-                      className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-widest ${getStatusStyle(selectedCampaign.status)}`}
-                    >
-                      {selectedCampaign.status}
-                    </span>
-                    <span className="rounded-full bg-white/10 border border-white/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-white">
-                      {selectedCampaign.type || "OTHER"}
-                    </span>
-                  </div>
-
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-widest opacity-50">
-                        Location
-                      </p>
-                      <p className="mt-1 text-sm font-semibold">
-                        {selectedCampaign.location_address || "No location"}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-widest opacity-50">
-                        Goal
-                      </p>
-                      <p className="mt-1 text-sm font-semibold">
-                        {selectedCampaign.target_quantity || "N/A"}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-widest opacity-50">
-                        Required Personnel
-                      </p>
-                      <p className="mt-1 text-sm font-semibold">
-                        {selectedCampaign.volunteers_required || 0}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-widest opacity-50">
-                        Required Skills
-                      </p>
-                      <p className="mt-1 text-sm font-semibold">
-                        {selectedCampaign?.required_skills?.length
-                          ? selectedCampaign.required_skills.join(", ")
-                          : "General"}
-                      </p>
-                    </div>
-                  </div>
+              <div className="overflow-y-auto p-6 md:p-8">
+                <div className="mb-6 pr-10">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-primary">
+                    Mission Details
+                  </p>
+                  <h2 className="mt-1 text-2xl font-black text-white">
+                    {selectedCampaign.name}
+                  </h2>
+                  <p className="mt-2 max-w-3xl text-sm opacity-70">
+                    {selectedCampaign.description}
+                  </p>
                 </div>
 
-                {/* Items Breakdown */}
-                <div className="rounded-2xl border border-white/5 bg-surface_high/50 p-5">
-                  <div className="mb-4 flex items-center justify-between">
-                    <h3 className="font-bold">Inventory Requirements</h3>
-                    <span className="text-xs opacity-50">
-                      {selectedCampaign.items
-                        ? Object.keys(selectedCampaign.items).length
-                        : 0}{" "}
-                      entries
-                    </span>
-                  </div>
-
-                  {selectedCampaign.items &&
-                  Object.keys(selectedCampaign.items).length > 0 ? (
-                    <div className="space-y-2">
-                      {Object.entries(selectedCampaign.items).map(([k, v]) => (
-                        <div
-                          key={k}
-                          className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3 border border-white/5"
+                <div className="grid gap-6 lg:grid-cols-2">
+                  <div className="space-y-5">
+                    <div className="rounded-2xl bg-surface_high/50 p-5 border border-white/5">
+                      <div className="flex flex-wrap items-center gap-2 mb-5">
+                        <span
+                          className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-widest ${getStatusStyle(selectedCampaign.status)}`}
                         >
-                          <span className="text-sm font-medium">{k}</span>
-                          <span className="text-sm font-bold text-primary">
-                            {v}
-                          </span>
+                          {selectedCampaign.status}
+                        </span>
+                        <span className="rounded-full bg-white/10 border border-white/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-white">
+                          {selectedCampaign.type || "OTHER"}
+                        </span>
+                      </div>
+
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <div>
+                          <p className="text-[10px] font-bold uppercase tracking-widest opacity-50">
+                            Location
+                          </p>
+                          <p className="mt-1 text-sm font-semibold">
+                            {selectedCampaign.location_address || "No location"}
+                          </p>
                         </div>
-                      ))}
+                        <div>
+                          <p className="text-[10px] font-bold uppercase tracking-widest opacity-50">
+                            Goal
+                          </p>
+                          <p className="mt-1 text-sm font-semibold">
+                            {selectedCampaign.target_quantity || "N/A"}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-bold uppercase tracking-widest opacity-50">
+                            Required Personnel
+                          </p>
+                          <p className="mt-1 text-sm font-semibold">
+                            {selectedCampaign.volunteers_required || 0}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-bold uppercase tracking-widest opacity-50">
+                            Required Skills
+                          </p>
+                          <p className="mt-1 text-sm font-semibold">
+                            {selectedCampaign?.required_skills?.length
+                              ? selectedCampaign.required_skills.join(", ")
+                              : "General"}
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                  ) : (
-                    <p className="text-sm opacity-50">No items specified.</p>
-                  )}
-                </div>
-              </div>
 
-              {/* Pool Operations */}
-              <div className="space-y-5">
-                <div className="rounded-2xl border border-white/5 bg-surface_high/50 p-5 min-h-[300px]">
-                  <div className="mb-5 flex items-center justify-between">
-                    <h3 className="font-bold">Volunteer Pool</h3>
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-primary">
-                      {loadingPool
-                        ? "Syncing..."
-                        : `${pendingCount} pending • ${approvedCount} approved`}
-                    </span>
-                  </div>
+                    <div className="rounded-2xl border border-white/5 bg-surface_high/50 p-5">
+                      <div className="mb-4 flex items-center justify-between">
+                        <h3 className="font-bold">Inventory Requirements</h3>
+                        <span className="text-xs opacity-50">
+                          {selectedCampaign.items
+                            ? Object.keys(selectedCampaign.items).length
+                            : 0}{" "}
+                          entries
+                        </span>
+                      </div>
 
-                  {loadingPool ? (
-                    <div className="space-y-3">
-                      <Skeleton className="h-16 w-full rounded-2xl" />
-                      <Skeleton className="h-16 w-full rounded-2xl" />
-                    </div>
-                  ) : pool.length === 0 ? (
-                    <div className="rounded-xl bg-surface p-8 text-center border border-white/5">
-                      <p className="text-sm opacity-50">
-                        No volunteers matched or applied yet.
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {pool.map((v) => (
-                        <div
-                          key={v.volunteer_id}
-                          className="rounded-xl border border-white/5 bg-white/5 p-4"
-                        >
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="min-w-0">
-                              <p className="truncate font-semibold">
-                                {v.volunteer_name}
-                              </p>
-                              <p className="mt-1 text-xs opacity-60">
-                                {v.skills?.length
-                                  ? v.skills.join(", ")
-                                  : "No skills"}
-                              </p>
-                              <span
-                                className={`mt-2 inline-flex rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest ${
-                                  v.status === "APPROVED"
-                                    ? "bg-green-500/10 text-green-400"
-                                    : v.status === "REJECTED"
-                                      ? "bg-red-500/10 text-red-400"
-                                      : "bg-amber-500/10 text-amber-400"
-                                }`}
+                      {selectedCampaign.items &&
+                      Object.keys(selectedCampaign.items).length > 0 ? (
+                        <div className="space-y-2">
+                          {Object.entries(selectedCampaign.items).map(
+                            ([k, v]) => (
+                              <div
+                                key={k}
+                                className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3 border border-white/5"
                               >
-                                {v.status}
-                              </span>
-                            </div>
-
-                            {v.status === "PENDING" && (
-                              <button
-                                onClick={() =>
-                                  approve(selectedCampaign.id, v.volunteer_id)
-                                }
-                                className="shrink-0 rounded-lg bg-green-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-green-500"
-                              >
-                                Approve
-                              </button>
-                            )}
-                          </div>
-
-                          {v.match_score != null && (
-                            <div className="mt-4">
-                              <div className="mb-1 flex items-center justify-between text-[10px] font-bold uppercase tracking-widest opacity-50">
-                                <span>Match score</span>
-                                <span>{v.match_score}%</span>
+                                <span className="text-sm font-medium">{k}</span>
+                                <span className="text-sm font-bold text-primary">
+                                  {v}
+                                </span>
                               </div>
-                              <div className="h-1 rounded-full bg-white/10">
-                                <div
-                                  className="h-1 rounded-full bg-primary"
-                                  style={{
-                                    width: `${Math.max(0, Math.min(100, v.match_score))}%`,
-                                  }}
-                                />
-                              </div>
-                            </div>
+                            ),
                           )}
                         </div>
-                      ))}
+                      ) : (
+                        <p className="text-sm opacity-50">
+                          No items specified.
+                        </p>
+                      )}
                     </div>
-                  )}
+                  </div>
+
+                  <div className="space-y-5">
+                    <div className="rounded-2xl border border-white/5 bg-surface_high/50 p-5 min-h-[300px]">
+                      <div className="mb-5 flex items-center justify-between">
+                        <h3 className="font-bold">Volunteer Pool</h3>
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-primary">
+                          {loadingPool
+                            ? "Syncing..."
+                            : `${pendingCount} pending • ${approvedCount} approved`}
+                        </span>
+                      </div>
+
+                      {loadingPool ? (
+                        <div className="space-y-3">
+                          <Skeleton className="h-16 w-full rounded-2xl" />
+                          <Skeleton className="h-16 w-full rounded-2xl" />
+                        </div>
+                      ) : pool.length === 0 ? (
+                        <div className="rounded-xl bg-surface p-8 text-center border border-white/5">
+                          <p className="text-sm opacity-50">
+                            No volunteers matched or applied yet.
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          {pool.map((v) => (
+                            <div
+                              key={v.volunteer_id}
+                              className="rounded-xl border border-white/5 bg-white/5 p-4"
+                            >
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="min-w-0">
+                                  <p className="truncate font-semibold">
+                                    {v.volunteer_name}
+                                  </p>
+                                  <p className="mt-1 text-xs opacity-60">
+                                    {v.skills?.length
+                                      ? v.skills.join(", ")
+                                      : "No skills"}
+                                  </p>
+                                  <span
+                                    className={`mt-2 inline-flex rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest ${
+                                      v.status === "APPROVED"
+                                        ? "bg-green-500/10 text-green-400"
+                                        : v.status === "REJECTED"
+                                          ? "bg-red-500/10 text-red-400"
+                                          : "bg-amber-500/10 text-amber-400"
+                                    }`}
+                                  >
+                                    {v.status}
+                                  </span>
+                                </div>
+
+                                {v.status === "PENDING" && (
+                                  <button
+                                    onClick={() =>
+                                      approve(
+                                        selectedCampaign.id,
+                                        v.volunteer_id,
+                                      )
+                                    }
+                                    className="shrink-0 rounded-lg bg-green-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-green-500"
+                                  >
+                                    Approve
+                                  </button>
+                                )}
+                              </div>
+
+                              {v.match_score != null && (
+                                <div className="mt-4">
+                                  <div className="mb-1 flex items-center justify-between text-[10px] font-bold uppercase tracking-widest opacity-50">
+                                    <span>Match score</span>
+                                    <span>{v.match_score}%</span>
+                                  </div>
+                                  <div className="h-1 rounded-full bg-white/10">
+                                    <div
+                                      className="h-1 rounded-full bg-primary"
+                                      style={{
+                                        width: `${Math.max(0, Math.min(100, v.match_score))}%`,
+                                      }}
+                                    />
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
 
       {/* AI DRAFT MODAL */}
-      {showAIModal && (
-        <div
-          className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-fadeIn"
-          onClick={() => {
-            setShowAIModal(false);
-            setFormError("");
-          }}
-        >
+      {showAIModal &&
+        createPortal(
           <div
-            className="relative w-full max-w-3xl max-h-[95vh] overflow-y-auto rounded-3xl border border-white/10 bg-surface p-6 md:p-8 shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-fadeIn"
+            onClick={() => {
+              setShowAIModal(false);
+              setFormError("");
+            }}
           >
-            {/* Modal Close Cross */}
-            <button
-              onClick={() => {
-                setShowAIModal(false);
-                setFormError("");
-              }}
-              className="absolute right-4 top-4 rounded-full bg-white/5 p-2 text-white/50 transition hover:bg-white/10 hover:text-white"
+            <div
+              className="relative w-full max-w-3xl max-h-[95vh] flex flex-col rounded-3xl border border-white/10 bg-surface shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-
-            <div className="mb-6 pr-10">
-              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-primary">
-                Intelligence Assistant
-              </p>
-              <h2 className="mt-1 text-2xl font-black text-white">
-                Generate Blueprint
-              </h2>
-              <p className="mt-2 text-sm opacity-70">
-                Describe the operation. The AI will parse requirements and
-                prefill the form.
-              </p>
-            </div>
-
-            {formError && (
-              <div className="mb-5 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-400">
-                {formError}
-              </div>
-            )}
-
-            <textarea
-              className="min-h-[180px] w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-white/30 outline-none transition focus:border-primary/50"
-              placeholder="Example: Distribute 100 food packets in Varanasi this Sunday. Need 5 volunteers for 2 hours..."
-              value={aiPrompt}
-              onChange={(e) => setAiPrompt(e.target.value)}
-            />
-
-            <div className="mt-5 flex gap-3">
               <button
-                onClick={handleAIGenerate}
-                disabled={loadingAI}
-                className="flex-1 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-white shadow-lg transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                onClick={() => {
+                  setShowAIModal(false);
+                  setFormError("");
+                }}
+                className="absolute right-4 top-4 z-10 rounded-full bg-white/10 p-2 text-white/70 transition hover:bg-white/20 hover:text-white backdrop-blur-sm"
               >
-                {loadingAI ? "Parsing Intelligence..." : "Generate Draft"}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
               </button>
-              <button
-                onClick={() => setShowAIModal(false)}
-                className="rounded-xl border border-white/10 bg-surface px-6 py-3 text-sm font-semibold transition hover:bg-white/5"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
-      {/* CREATE FORM MODAL */}
-      {showForm && (
-        <div
-          className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-fadeIn"
-          onClick={() => {
-            setShowForm(false);
-            setFormError("");
-          }}
-        >
-          <div
-            className="relative w-full max-w-4xl max-h-[95vh] overflow-y-auto rounded-3xl border border-white/10 bg-surface p-6 md:p-8 shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal Close Cross */}
-            <button
-              onClick={() => {
-                setShowForm(false);
-                setFormError("");
-              }}
-              className="absolute right-4 top-4 rounded-full bg-white/5 p-2 text-white/50 transition hover:bg-white/10 hover:text-white"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
+              <div className="overflow-y-auto p-6 md:p-8">
+                <div className="mb-6 pr-10">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-primary">
+                    Intelligence Assistant
+                  </p>
+                  <h2 className="mt-1 text-2xl font-black text-white">
+                    Generate Blueprint
+                  </h2>
+                  <p className="mt-2 text-sm opacity-70">
+                    Describe the operation. The AI will parse requirements and
+                    prefill the form.
+                  </p>
+                </div>
+
+                {formError && (
+                  <div className="mb-5 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-400">
+                    {formError}
+                  </div>
+                )}
+
+                {/* === HIGH CONTRAST AI INPUT === */}
+                <textarea
+                  className="min-h-[180px] w-full rounded-2xl border border-white/20 bg-black/40 px-4 py-3 text-white placeholder-white/40 shadow-inner outline-none transition focus:border-primary focus:bg-black/60 focus:ring-1 focus:ring-primary"
+                  placeholder="Example: Distribute 100 food packets in Varanasi this Sunday. Need 5 volunteers for 2 hours..."
+                  value={aiPrompt}
+                  onChange={(e) => setAiPrompt(e.target.value)}
                 />
-              </svg>
-            </button>
 
-            <div className="mb-6 pr-10">
-              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-primary">
-                Mission Blueprint
-              </p>
-              <h2 className="mt-1 text-2xl font-black text-white">
-                Create Campaign
-              </h2>
-              <p className="mt-2 text-sm opacity-70">
-                Define scope, timeline, inventory limits, and personnel
-                requirements.
-              </p>
-            </div>
-
-            {formError && (
-              <div className="mb-5 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-400">
-                {formError}
-              </div>
-            )}
-
-            <div className="grid gap-6 lg:grid-cols-2">
-              <div className="space-y-4">
-                <Field label="Name">
-                  <input
-                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/30 outline-none transition focus:border-primary/50"
-                    placeholder="e.g. Community Meal Drive"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                  />
-                </Field>
-
-                <Field label="Description">
-                  <textarea
-                    className="min-h-[120px] w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/30 outline-none transition focus:border-primary/50"
-                    placeholder="Brief description of operations..."
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                  />
-                </Field>
-
-                <div className="grid gap-4 md:grid-cols-2">
-                  <Field label="Type">
-                    <select
-                      value={type}
-                      onChange={(e) => setType(e.target.value)}
-                      className="w-full rounded-xl border border-white/10 bg-surface_high px-4 py-3 text-sm text-white outline-none transition focus:border-primary/50"
-                    >
-                      {TYPE_OPTIONS.map((opt) => (
-                        <option key={opt} value={opt}>
-                          {opt.replaceAll("_", " ")}
-                        </option>
-                      ))}
-                    </select>
-                  </Field>
-
-                  <Field label="Target Goal">
-                    <input
-                      className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/30 outline-none transition focus:border-primary/50"
-                      placeholder="e.g. 100 meals"
-                      value={targetQuantity}
-                      onChange={(e) => setTargetQuantity(e.target.value)}
-                    />
-                  </Field>
-                </div>
-
-                <div className="grid gap-4 md:grid-cols-2">
-                  <Field label="Start Time">
-                    <input
-                      type="datetime-local"
-                      className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/30 outline-none transition focus:border-primary/50"
-                      value={startTime}
-                      onChange={(e) => setStartTime(e.target.value)}
-                    />
-                  </Field>
-
-                  <Field label="End Time">
-                    <input
-                      type="datetime-local"
-                      className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/30 outline-none transition focus:border-primary/50"
-                      value={endTime}
-                      onChange={(e) => setEndTime(e.target.value)}
-                    />
-                  </Field>
-                </div>
-
-                <Field label="Location">
-                  <input
-                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/30 outline-none transition focus:border-primary/50"
-                    placeholder="e.g. Ward 12, City Hospital"
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                  />
-                </Field>
-
-                <div className="grid gap-4 md:grid-cols-2">
-                  <Field label="Required Skills (CSV)">
-                    <input
-                      className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/30 outline-none transition focus:border-primary/50"
-                      placeholder="medical, logistics"
-                      value={skills}
-                      onChange={(e) => setSkills(e.target.value)}
-                    />
-                  </Field>
-
-                  <Field label="Personnel Needed">
-                    <input
-                      type="number"
-                      className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/30 outline-none transition focus:border-primary/50"
-                      placeholder="e.g. 5"
-                      value={volunteersRequired}
-                      onChange={(e) => setVolunteersRequired(e.target.value)}
-                    />
-                  </Field>
-                </div>
-              </div>
-
-              {/* Form Right Col */}
-              <div className="space-y-4">
-                <div className="rounded-2xl border border-white/10 bg-surface_high/50 p-5">
-                  <div className="mb-4 flex items-center justify-between">
-                    <h3 className="font-bold">Item Loadout</h3>
-                    <button
-                      onClick={() =>
-                        setItems([...items, { key: "", value: "" }])
-                      }
-                      className="text-xs font-bold text-primary hover:underline"
-                    >
-                      + ADD ITEM
-                    </button>
-                  </div>
-
-                  <div className="space-y-3">
-                    {items.map((item, idx) => (
-                      <div key={idx} className="grid gap-3 md:grid-cols-2">
-                        <select
-                          value={item.key}
-                          onChange={(e) =>
-                            updateItem(idx, "key", e.target.value)
-                          }
-                          className="w-full rounded-xl border border-white/10 bg-surface_high px-4 py-3 text-sm text-white outline-none focus:border-primary/50"
-                        >
-                          <option value="">Select inventory...</option>
-                          {inventory.map((inv) => (
-                            <option key={inv.id} value={inv.item_name}>
-                              {inv.item_name} ({inv.quantity} {inv.unit})
-                            </option>
-                          ))}
-                        </select>
-                        <input
-                          type="number"
-                          placeholder="Quantity"
-                          value={item.value}
-                          onChange={(e) =>
-                            updateItem(idx, "value", e.target.value)
-                          }
-                          className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/30 outline-none focus:border-primary/50"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="flex gap-3 pt-6">
+                <div className="mt-5 flex gap-3">
                   <button
-                    onClick={createCampaign}
-                    disabled={creating}
-                    className="flex-1 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                    onClick={handleAIGenerate}
+                    disabled={loadingAI}
+                    className="flex-1 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-white shadow-lg transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    {creating ? "Processing..." : "Deploy Campaign"}
+                    {loadingAI ? "Parsing Intelligence..." : "Generate Draft"}
                   </button>
                   <button
-                    onClick={() => setShowForm(false)}
+                    onClick={() => setShowAIModal(false)}
                     className="rounded-xl border border-white/10 bg-surface px-6 py-3 text-sm font-semibold transition hover:bg-white/5"
                   >
                     Cancel
@@ -1348,9 +1142,233 @@ const Campaigns = () => {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
+
+      {/* CREATE FORM MODAL */}
+      {showForm &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-fadeIn"
+            onClick={() => {
+              setShowForm(false);
+              setFormError("");
+            }}
+          >
+            <div
+              className="relative w-full max-w-4xl max-h-[95vh] flex flex-col rounded-3xl border border-white/10 bg-surface shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={() => {
+                  setShowForm(false);
+                  setFormError("");
+                }}
+                className="absolute right-4 top-4 z-10 rounded-full bg-white/10 p-2 text-white/70 transition hover:bg-white/20 hover:text-white backdrop-blur-sm"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+
+              <div className="overflow-y-auto p-6 md:p-8">
+                <div className="mb-6 pr-10">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-primary">
+                    Mission Blueprint
+                  </p>
+                  <h2 className="mt-1 text-2xl font-black text-white">
+                    Create Campaign
+                  </h2>
+                  <p className="mt-2 text-sm opacity-70">
+                    Define scope, timeline, inventory limits, and personnel
+                    requirements.
+                  </p>
+                </div>
+
+                {formError && (
+                  <div className="mb-5 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-400">
+                    {formError}
+                  </div>
+                )}
+
+                <div className="grid gap-6 lg:grid-cols-2">
+                  <div className="space-y-4">
+                    {/* === HIGH CONTRAST INPUTS === */}
+                    <Field label="Name">
+                      <input
+                        className="w-full rounded-xl border border-white/20 bg-black/40 px-4 py-3 text-sm text-white placeholder-white/40 shadow-inner outline-none transition focus:border-primary focus:bg-black/60 focus:ring-1 focus:ring-primary"
+                        placeholder="e.g. Community Meal Drive"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                      />
+                    </Field>
+
+                    <Field label="Description">
+                      <textarea
+                        className="min-h-[120px] w-full rounded-xl border border-white/20 bg-black/40 px-4 py-3 text-sm text-white placeholder-white/40 shadow-inner outline-none transition focus:border-primary focus:bg-black/60 focus:ring-1 focus:ring-primary"
+                        placeholder="Brief description of operations..."
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                      />
+                    </Field>
+
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <Field label="Type">
+                        <select
+                          value={type}
+                          onChange={(e) => setType(e.target.value)}
+                          className="w-full rounded-xl border border-white/20 bg-gray-900 px-4 py-3 text-sm text-white shadow-inner outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
+                        >
+                          {TYPE_OPTIONS.map((opt) => (
+                            <option key={opt} value={opt}>
+                              {opt.replaceAll("_", " ")}
+                            </option>
+                          ))}
+                        </select>
+                      </Field>
+
+                      <Field label="Target Goal">
+                        <input
+                          className="w-full rounded-xl border border-white/20 bg-black/40 px-4 py-3 text-sm text-white placeholder-white/40 shadow-inner outline-none transition focus:border-primary focus:bg-black/60 focus:ring-1 focus:ring-primary"
+                          placeholder="e.g. 100 meals"
+                          value={targetQuantity}
+                          onChange={(e) => setTargetQuantity(e.target.value)}
+                        />
+                      </Field>
+                    </div>
+
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <Field label="Start Time">
+                        <input
+                          type="datetime-local"
+                          className="w-full rounded-xl border border-white/20 bg-black/40 px-4 py-3 text-sm text-white placeholder-white/40 shadow-inner outline-none transition focus:border-primary focus:bg-black/60 focus:ring-1 focus:ring-primary"
+                          value={startTime}
+                          onChange={(e) => setStartTime(e.target.value)}
+                        />
+                      </Field>
+
+                      <Field label="End Time">
+                        <input
+                          type="datetime-local"
+                          className="w-full rounded-xl border border-white/20 bg-black/40 px-4 py-3 text-sm text-white placeholder-white/40 shadow-inner outline-none transition focus:border-primary focus:bg-black/60 focus:ring-1 focus:ring-primary"
+                          value={endTime}
+                          onChange={(e) => setEndTime(e.target.value)}
+                        />
+                      </Field>
+                    </div>
+
+                    <Field label="Location">
+                      <input
+                        className="w-full rounded-xl border border-white/20 bg-black/40 px-4 py-3 text-sm text-white placeholder-white/40 shadow-inner outline-none transition focus:border-primary focus:bg-black/60 focus:ring-1 focus:ring-primary"
+                        placeholder="e.g. Ward 12, City Hospital"
+                        value={location}
+                        onChange={(e) => setLocation(e.target.value)}
+                      />
+                    </Field>
+
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <Field label="Required Skills (CSV)">
+                        <input
+                          className="w-full rounded-xl border border-white/20 bg-black/40 px-4 py-3 text-sm text-white placeholder-white/40 shadow-inner outline-none transition focus:border-primary focus:bg-black/60 focus:ring-1 focus:ring-primary"
+                          placeholder="medical, logistics"
+                          value={skills}
+                          onChange={(e) => setSkills(e.target.value)}
+                        />
+                      </Field>
+
+                      <Field label="Personnel Needed">
+                        <input
+                          type="number"
+                          className="w-full rounded-xl border border-white/20 bg-black/40 px-4 py-3 text-sm text-white placeholder-white/40 shadow-inner outline-none transition focus:border-primary focus:bg-black/60 focus:ring-1 focus:ring-primary"
+                          placeholder="e.g. 5"
+                          value={volunteersRequired}
+                          onChange={(e) =>
+                            setVolunteersRequired(e.target.value)
+                          }
+                        />
+                      </Field>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="rounded-2xl border border-white/10 bg-surface_high/50 p-5">
+                      <div className="mb-4 flex items-center justify-between">
+                        <h3 className="font-bold">Item Loadout</h3>
+                        <button
+                          onClick={() =>
+                            setItems([...items, { key: "", value: "" }])
+                          }
+                          className="text-xs font-bold text-primary hover:underline"
+                        >
+                          + ADD ITEM
+                        </button>
+                      </div>
+
+                      <div className="space-y-3">
+                        {items.map((item, idx) => (
+                          <div key={idx} className="grid gap-3 md:grid-cols-2">
+                            <select
+                              value={item.key}
+                              onChange={(e) =>
+                                updateItem(idx, "key", e.target.value)
+                              }
+                              className="w-full rounded-xl border border-white/20 bg-gray-900 px-4 py-3 text-sm text-white shadow-inner outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                            >
+                              <option value="">Select inventory...</option>
+                              {inventory.map((inv) => (
+                                <option key={inv.id} value={inv.item_name}>
+                                  {inv.item_name} ({inv.quantity} {inv.unit})
+                                </option>
+                              ))}
+                            </select>
+                            <input
+                              type="number"
+                              placeholder="Quantity"
+                              value={item.value}
+                              onChange={(e) =>
+                                updateItem(idx, "value", e.target.value)
+                              }
+                              className="w-full rounded-xl border border-white/20 bg-black/40 px-4 py-3 text-sm text-white placeholder-white/40 shadow-inner outline-none focus:border-primary focus:bg-black/60 focus:ring-1 focus:ring-primary"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3 pt-6">
+                      <button
+                        onClick={createCampaign}
+                        disabled={creating}
+                        className="flex-1 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {creating ? "Processing..." : "Deploy Campaign"}
+                      </button>
+                      <button
+                        onClick={() => setShowForm(false)}
+                        className="rounded-xl border border-white/10 bg-surface px-6 py-3 text-sm font-semibold transition hover:bg-white/5"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 };
