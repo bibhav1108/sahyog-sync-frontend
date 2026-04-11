@@ -4,14 +4,13 @@ import API from "../services/api";
 import logo from "../assets/logo.png";
 import pingSound from "../assets/ping.mp3";
 import React from "react";
+import Skeleton from "../components/Skeleton";
 
 const NAV_ITEMS = [
   { to: "/dashboard", label: "Overview", icon: "dashboard" },
-
   { to: "/marketplace", label: "Marketplace", icon: "notifications_active" },
   { to: "/campaigns", label: "Campaign Control", icon: "rocket_launch" },
   { to: "/volunteers", label: "Volunteers", icon: "groups" },
-
   { to: "/inventory", label: "Inventory", icon: "inventory_2" },
 ];
 
@@ -36,11 +35,13 @@ const Layout = ({ children }) => {
   const [toasts, setToasts] = useState([]);
 
   const [user, setUser] = useState(null);
-  const [org, setOrg] = useState(null);
 
   const [profileOpen, setProfileOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 768);
+
+  const [loadingUser, setLoadingUser] = useState(true);
+  const [loadingNotifications, setLoadingNotifications] = useState(true);
 
   const prevIdsRef = useRef(new Set());
   const loadingRef = useRef({
@@ -54,13 +55,8 @@ const Layout = ({ children }) => {
         setUser(userRes.data);
       } catch (err) {
         console.error("User profile load failed", err);
-      }
-
-      try {
-        const orgRes = await API.get("/organizations/me");
-        setOrg(orgRes.data);
-      } catch (err) {
-        console.error("Org profile load failed", err);
+      } finally {
+        setLoadingUser(false);
       }
     };
 
@@ -101,6 +97,7 @@ const Layout = ({ children }) => {
       console.error(err);
     } finally {
       loadingRef.current.notifications = false;
+      setLoadingNotifications(false);
     }
   };
 
@@ -162,12 +159,11 @@ const Layout = ({ children }) => {
 
   const logout = () => {
     localStorage.clear();
-    window.location.href = "/";
+    navigate("/", { replace: true });
   };
 
   return (
     <div className="min-h-screen bg-surface text-on_surface antialiased overflow-x-hidden">
-      {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 z-[990] bg-black/50 backdrop-blur-sm md:hidden transition-opacity"
@@ -175,9 +171,10 @@ const Layout = ({ children }) => {
         />
       )}
 
-      {/* Toast stack */}
       <div
-        className={`fixed top-20 z-[9999] space-y-3 transition-all duration-300 ${sidebarOpen ? "md:left-[17rem] left-4" : "left-4"}`}
+        className={`fixed top-20 z-[9999] space-y-3 transition-all duration-300 ${
+          sidebarOpen ? "md:left-[17rem] left-4" : "left-4"
+        }`}
       >
         {toasts.map((t) => (
           <div
@@ -203,7 +200,6 @@ const Layout = ({ children }) => {
         ))}
       </div>
 
-      {/* Sidebar */}
       <aside
         className={`fixed left-0 top-0 z-[999] flex h-screen w-64 flex-col border-r border-white/5 bg-surface/95 px-5 pb-6 pt-5 shadow-soft backdrop-blur-xl transition-transform duration-300 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
@@ -247,26 +243,19 @@ const Layout = ({ children }) => {
           })}
         </nav>
 
-        {/* Org profile */}
-        {org && (
-          <div className="mt-auto flex items-center gap-3 rounded-xl bg-surface_high p-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary font-semibold text-white shadow-soft">
-              {getInitials(org.name)}
-            </div>
-
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold">{org.name}</p>
-              <p className="truncate text-xs text-on_surface_variant">
-                {org.contact_email}
-              </p>
-            </div>
-          </div>
-        )}
+        <button
+          onClick={logout}
+          className="mt-auto flex items-center gap-3 rounded-xl bg-red-500/10 p-3 text-sm font-medium text-red-400 transition hover:bg-red-500/20 hover:text-red-300"
+        >
+          <span className="material-symbols-outlined text-[20px]">logout</span>
+          Logout
+        </button>
       </aside>
 
-      {/* Top bar */}
       <header
-        className={`fixed top-0 right-0 z-[980] flex h-16 items-center justify-between border-b border-white/5 bg-surface/80 px-4 md:px-6 shadow-soft backdrop-blur-md transition-all duration-300 ${sidebarOpen ? "md:left-64 left-0" : "left-0"}`}
+        className={`fixed top-0 right-0 z-[980] flex h-16 items-center justify-between border-b border-white/5 bg-surface/80 px-4 md:px-6 shadow-soft backdrop-blur-md transition-all duration-300 ${
+          sidebarOpen ? "md:left-64 left-0" : "left-0"
+        }`}
       >
         <div className="flex flex-1 items-center gap-2 md:gap-4 max-w-xs md:max-w-md">
           {!sidebarOpen && (
@@ -280,6 +269,7 @@ const Layout = ({ children }) => {
               </span>
             </button>
           )}
+
           {sidebarOpen && (
             <button
               onClick={() => setSidebarOpen(false)}
@@ -291,6 +281,7 @@ const Layout = ({ children }) => {
               </span>
             </button>
           )}
+
           <div className="relative flex-1 hidden sm:block">
             <span className="material-symbols-outlined absolute left-3 top-2 text-on_surface_variant">
               search
@@ -303,14 +294,12 @@ const Layout = ({ children }) => {
         </div>
 
         <div className="flex items-center gap-2 md:gap-4">
-          {/* Mobile Search Icon */}
           <button className="sm:hidden rounded-xl p-2 text-on_surface_variant hover:bg-white/5">
             <span className="material-symbols-outlined text-[22px]">
               search
             </span>
           </button>
 
-          {/* Notifications */}
           <button
             onClick={() => {
               setShowNotifications((prev) => !prev);
@@ -322,14 +311,13 @@ const Layout = ({ children }) => {
               notifications_active
             </span>
 
-            {notifications.length > 0 && (
+            {!loadingNotifications && notifications.length > 0 && (
               <span className="absolute right-0 top-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] text-white">
                 {notifications.length}
               </span>
             )}
           </button>
 
-          {/* Settings dropdown */}
           <div className="relative" data-settings-dropdown>
             <button
               onClick={() => {
@@ -372,79 +360,92 @@ const Layout = ({ children }) => {
             )}
           </div>
 
-          {/* User profile dropdown */}
-          {user && (
-            <div className="relative" data-profile-dropdown>
-              <button
-                onClick={() => {
-                  setProfileOpen((p) => !p);
-                  setShowNotifications(false);
-                  setSettingsOpen(false);
-                }}
-                className="flex items-center gap-2 rounded-xl bg-surface_high px-3 py-2 transition-all duration-200 hover:scale-[1.01] hover:bg-white/5"
-              >
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-semibold text-white shadow-soft">
-                  {getInitials(user.full_name)}
-                </div>
-                <span className="hidden sm:inline text-sm font-medium">
-                  {user.full_name || "User"}
-                </span>
-                <span className="material-symbols-outlined text-[18px] text-on_surface_variant">
-                  expand_more
-                </span>
-              </button>
-
-              {profileOpen && (
-                <div className="absolute right-0 mt-3 w-64 rounded-xl border border-white/5 bg-surface_lowest p-4 shadow-[0_10px_30px_rgba(0,0,0,0.15)] animate-[fadeIn_0.2s_ease]">
-                  <div className="absolute right-6 top-0 h-3 w-3 -translate-y-1/2 rotate-45 border-l border-t border-white/5 bg-surface_lowest" />
-
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary font-semibold text-white shadow-soft">
-                      {getInitials(user.full_name)}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="truncate font-semibold">
-                        {user.full_name || "User"}
-                      </p>
-                      <p className="truncate text-xs text-on_surface_variant">
-                        {user.email}
-                      </p>
-                    </div>
+          <div className="relative" data-profile-dropdown>
+            {loadingUser ? (
+              <div className="flex items-center gap-2 rounded-xl bg-surface_high px-3 py-2 w-44">
+                <Skeleton className="h-8 w-8 rounded-full" />
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-4 w-4 ml-auto" />
+              </div>
+            ) : (
+              user && (
+                <button
+                  onClick={() => {
+                    setProfileOpen((p) => !p);
+                    setShowNotifications(false);
+                    setSettingsOpen(false);
+                  }}
+                  className="flex items-center gap-2 rounded-xl bg-surface_high px-3 py-2 transition-all duration-200 hover:scale-[1.01] hover:bg-white/5"
+                >
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-semibold text-white shadow-soft">
+                    {getInitials(user.full_name)}
                   </div>
+                  <span className="hidden sm:inline text-sm font-medium">
+                    {user.full_name || "User"}
+                  </span>
+                  <span className="material-symbols-outlined text-[18px] text-on_surface_variant">
+                    expand_more
+                  </span>
+                </button>
+              )
+            )}
 
-                  <div className="mt-3 border-t border-white/5 pt-3">
-                    <button
-                      onClick={logout}
-                      className="text-sm font-medium text-red-500 transition hover:opacity-80"
-                    >
-                      Logout
-                    </button>
+            {profileOpen && user && (
+              <div className="absolute right-0 mt-3 w-64 rounded-xl border border-white/5 bg-surface_lowest p-4 shadow-[0_10px_30px_rgba(0,0,0,0.15)] animate-[fadeIn_0.2s_ease]">
+                <div className="absolute right-6 top-0 h-3 w-3 -translate-y-1/2 rotate-45 border-l border-t border-white/5 bg-surface_lowest" />
+
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary font-semibold text-white shadow-soft">
+                    {getInitials(user.full_name)}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate font-semibold">
+                      {user.full_name || "User"}
+                    </p>
+                    <p className="truncate text-xs text-on_surface_variant">
+                      {user.email}
+                    </p>
                   </div>
                 </div>
-              )}
-            </div>
-          )}
+
+                <div className="mt-3 border-t border-white/5 pt-3">
+                  <button
+                    onClick={logout}
+                    className="text-sm font-medium text-red-500 transition hover:opacity-80"
+                  >
+                    Logout
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 
-      {/* Main */}
       <main
-        className={`transition-all duration-300 pt-16 ${sidebarOpen ? "md:ml-64 ml-0" : "ml-0"}`}
+        className={`transition-all duration-300 pt-16 ${
+          sidebarOpen ? "md:ml-64 ml-0" : "ml-0"
+        }`}
       >
         <div className="p-4 md:p-6 min-w-0">
           {children && React.cloneElement(children, { sidebarOpen })}
         </div>
       </main>
 
-      {/* Notification panel */}
       <div
-        className="fixed right-0 top-16 z-[995] h-[calc(100vh-4rem)] overflow-hidden border-l border-white/5 bg-surface_lowest shadow-soft transition-all duration-300"
+        className="fixed right-0 top-16 z-[995] h-[calc(100vh-4rem)] overflow-hidden border-l border-white/10 bg-white/10 backdrop-blur-xl shadow-soft transition-all duration-300"
         style={{
           width: showNotifications ? panelWidth : 0,
         }}
       >
         <div className="relative h-full overflow-y-auto p-4 space-y-3">
-          {notifications.length === 0 ? (
+          {loadingNotifications ? (
+            <>
+              <Skeleton className="h-20 w-full" />
+              <Skeleton className="h-20 w-full" />
+              <Skeleton className="h-20 w-full" />
+            </>
+          ) : notifications.length === 0 ? (
             <p className="text-sm text-on_surface_variant">No alerts</p>
           ) : (
             notifications.map((a) => (
@@ -454,7 +455,7 @@ const Layout = ({ children }) => {
                   navigate("/marketplace");
                   setShowNotifications(false);
                 }}
-                className="cursor-pointer rounded-xl bg-surface_high p-3 transition hover:scale-[1.02]"
+                className="cursor-pointer rounded-xl bg-surface_high p-3 shadow-soft border border-white/5 transition hover:scale-[1.02]"
               >
                 <p className="text-sm font-semibold">📦 Alert</p>
                 <p className="mt-1 text-xs text-on_surface_variant">
