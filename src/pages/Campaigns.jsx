@@ -187,12 +187,12 @@ const Campaigns = () => {
   const applyAIDraftToForm = (data) => {
     const draftItems =
       data?.items &&
-      typeof data.items === "object" &&
-      !Array.isArray(data.items)
+        typeof data.items === "object" &&
+        !Array.isArray(data.items)
         ? Object.entries(data.items).map(([key, value]) => ({
-            key,
-            value: String(value ?? ""),
-          }))
+          key,
+          value: String(value ?? ""),
+        }))
         : [{ key: "", value: "" }];
 
     setName(data?.name || "");
@@ -286,9 +286,9 @@ const Campaigns = () => {
         location_address: trimmedLocation || null,
         required_skills: skills
           ? skills
-              .split(",")
-              .map((s) => s.trim())
-              .filter(Boolean)
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean)
           : [],
       });
 
@@ -452,7 +452,7 @@ const Campaigns = () => {
           <div className="flex flex-wrap gap-3">
             <Link
               to="/campaign-history"
-              className="rounded-xl border border-white/10 bg-surface px-5 py-2.5 text-sm font-semibold transition hover:bg-white/5"
+              className="rounded-xl border border-white/10 bg-surface px-5 py-2.5 text-sm font-semibold transition hover:scale-105 hover:bg-slate-500 hover:text-white active:scale-95 shadow-sm"
             >
               Past Campaigns
             </Link>
@@ -557,15 +557,15 @@ const Campaigns = () => {
                     const isSelected = selectedCampaign?.id === c.id;
                     const itemsCount = c.items
                       ? Object.values(c.items).reduce(
-                          (sum, v) => sum + (Number(v) || 0),
-                          0,
-                        )
+                        (sum, v) => sum + (Number(v) || 0),
+                        0,
+                      )
                       : 0;
                     const dateLabel = c.start_time
                       ? new Date(c.start_time).toLocaleDateString(undefined, {
-                          month: "short",
-                          day: "numeric",
-                        })
+                        month: "short",
+                        day: "numeric",
+                      })
                       : "TBD";
 
                     return (
@@ -578,11 +578,10 @@ const Campaigns = () => {
                           if (e.key === "Enter" || e.key === " ")
                             openDetails(c);
                         }}
-                        className={`group cursor-pointer rounded-2xl border p-5 transition-all hover:-translate-y-0.5 shadow-lg ${
-                          isSelected
+                        className={`group cursor-pointer rounded-2xl border p-5 transition-all hover:-translate-y-0.5 shadow-lg ${isSelected
                             ? "border-primary bg-white ring-2 ring-primary/50"
                             : "border-transparent bg-white/90 hover:bg-white"
-                        }`}
+                          }`}
                         style={{ animationDelay: `${i * 40}ms` }}
                       >
                         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -593,11 +592,10 @@ const Campaigns = () => {
                               </span>
                               <span className="h-1 w-1 rounded-full bg-gray-400" />
                               <span
-                                className={`text-[10px] font-bold uppercase tracking-widest ${
-                                  c.status === "ACTIVE"
+                                className={`text-[10px] font-bold uppercase tracking-widest ${c.status === "ACTIVE"
                                     ? "text-green-600"
                                     : "text-amber-600"
-                                }`}
+                                  }`}
                               >
                                 {c.status}
                               </span>
@@ -671,11 +669,10 @@ const Campaigns = () => {
                           <button
                             key={page}
                             onClick={() => setCurrentPage(page)}
-                            className={`min-w-8 rounded-lg px-3 py-1.5 text-sm font-semibold transition ${
-                              currentPage === page
+                            className={`min-w-8 rounded-lg px-3 py-1.5 text-sm font-semibold transition ${currentPage === page
                                 ? "bg-primary text-white"
                                 : "border border-white/10 bg-surface hover:bg-white/5"
-                            }`}
+                              }`}
                           >
                             {page}
                           </button>
@@ -803,11 +800,10 @@ const Campaigns = () => {
                     triggerBroadcast(selectedCampaign.id);
                   }}
                   disabled={selectedCampaign.status === "COMPLETED"}
-                  className={`w-full rounded-xl px-4 py-3 text-sm font-semibold text-white transition ${
-                    selectedCampaign.status === "COMPLETED"
+                  className={`w-full rounded-xl px-4 py-3 text-sm font-semibold text-white transition ${selectedCampaign.status === "COMPLETED"
                       ? "cursor-not-allowed bg-white/10 opacity-50"
                       : "bg-blue-600 hover:bg-blue-500"
-                  }`}
+                    }`}
                 >
                   Trigger Broadcast
                 </button>
@@ -940,7 +936,7 @@ const Campaigns = () => {
                       </div>
 
                       {selectedCampaign.items &&
-                      Object.keys(selectedCampaign.items).length > 0 ? (
+                        Object.keys(selectedCampaign.items).length > 0 ? (
                         <div className="space-y-2">
                           {Object.entries(selectedCampaign.items).map(
                             ([k, v]) => (
@@ -1004,13 +1000,12 @@ const Campaigns = () => {
                                       : "No skills"}
                                   </p>
                                   <span
-                                    className={`mt-2 inline-flex rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest ${
-                                      v.status === "APPROVED"
+                                    className={`mt-2 inline-flex rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest ${v.status === "APPROVED"
                                         ? "bg-green-500/10 text-green-400"
                                         : v.status === "REJECTED"
                                           ? "bg-red-500/10 text-red-400"
                                           : "bg-amber-500/10 text-amber-400"
-                                    }`}
+                                      }`}
                                   >
                                     {v.status}
                                   </span>
@@ -1188,7 +1183,7 @@ const Campaigns = () => {
                   <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-primary">
                     Mission Blueprint
                   </p>
-                  <h2 className="mt-1 text-2xl font-black text-white">
+                  <h2 className="mt-1 text-2xl font-black text-black">
                     Create Campaign
                   </h2>
                   <p className="mt-2 text-sm opacity-70">
@@ -1208,7 +1203,7 @@ const Campaigns = () => {
                     {/* === HIGH CONTRAST INPUTS === */}
                     <Field label="Name">
                       <input
-                        className="w-full rounded-xl border border-white/20 bg-black/40 px-4 py-3 text-sm text-white placeholder-white/40 shadow-inner outline-none transition focus:border-primary focus:bg-black/60 focus:ring-1 focus:ring-primary"
+                        className="w-full rounded-xl border border-white/20 bg-white/40 px-4 py-3 text-sm text-black placeholder-black/40 shadow-inner outline-none transition focus:bg-slate-300 focus:ring-1 focus:ring-primary"
                         placeholder="e.g. Community Meal Drive"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
@@ -1217,7 +1212,7 @@ const Campaigns = () => {
 
                     <Field label="Description">
                       <textarea
-                        className="min-h-[120px] w-full rounded-xl border border-white/20 bg-black/40 px-4 py-3 text-sm text-white placeholder-white/40 shadow-inner outline-none transition focus:border-primary focus:bg-black/60 focus:ring-1 focus:ring-primary"
+                        className="min-h-[120px] w-full rounded-xl border border-white/20 bg-white/40 px-4 py-3 text-sm text-black placeholder-black/40 shadow-inner outline-none transition focus:bg-slate-300 focus:ring-1 focus:ring-primary"
                         placeholder="Brief description of operations..."
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
@@ -1229,7 +1224,7 @@ const Campaigns = () => {
                         <select
                           value={type}
                           onChange={(e) => setType(e.target.value)}
-                          className="w-full rounded-xl border border-white/20 bg-gray-900 px-4 py-3 text-sm text-white shadow-inner outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
+                          className="w-full rounded-xl border border-white/20 bg-gray-300 px-4 py-3 text-sm text-black shadow-inner outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
                         >
                           {TYPE_OPTIONS.map((opt) => (
                             <option key={opt} value={opt}>
