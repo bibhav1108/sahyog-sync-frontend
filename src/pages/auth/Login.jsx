@@ -79,7 +79,7 @@ const Login = () => {
 
           <form onSubmit={handleLogin} className="space-y-6">
             <Input
-              label="Email Address"
+              label="Username/Email"
               value={email}
               setValue={setEmail}
               type="text"
