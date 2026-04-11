@@ -7,7 +7,7 @@ import Volunteers from "./pages/Volunteers";
 import Landing from "./pages/Landing";
 import Marketplace from "./pages/Marketplace";
 import Inventory from "./pages/Inventory";
-import Layout from "./components/Layout";
+import Layout from "./components/Layout"; // ORG layout
 import ActiveNeeds from "./pages/ActiveNeeds";
 import DispatchHistory from "./pages/DispatchHistory";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -16,6 +16,11 @@ import MissionResponse from "./pages/MissionResponse";
 import CampaignHistory from "./pages/CampaignHistory";
 import MarketplaceAlerts from "./pages/MarketplaceAlerts";
 import MarketplaceStatsPage from "./pages/MarketplaceStats";
+import VolunteerProfile from "./pages/VolunteerProfile";
+import VerifyEmail from "./pages/VolunteerEmailVerification";
+// 👉 (you should create this later)
+import VolunteerLayout from "./components/VolunteerLayout";
+
 function App() {
   return (
     <BrowserRouter>
@@ -25,12 +30,12 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/missions/:campaign_id" element={<MissionResponse />} />
-
-        {/* 🔐 Protected routes */}
+        <Route path="/verify-email" element={<VerifyEmail />} />
+        {/* ================= ORG ROUTES ================= */}
         <Route
           path="/dashboard"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRole="NGO_COORDINATOR">
               <Layout>
                 <Dashboard />
               </Layout>
@@ -41,7 +46,7 @@ function App() {
         <Route
           path="/volunteers"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRole="NGO_COORDINATOR">
               <Layout>
                 <Volunteers />
               </Layout>
@@ -52,7 +57,7 @@ function App() {
         <Route
           path="/marketplace"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRole="NGO_COORDINATOR">
               <Layout>
                 <Marketplace />
               </Layout>
@@ -63,7 +68,7 @@ function App() {
         <Route
           path="/marketplace-stats"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRole="NGO_COORDINATOR">
               <Layout>
                 <MarketplaceStatsPage />
               </Layout>
@@ -74,7 +79,7 @@ function App() {
         <Route
           path="/alerts"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRole="NGO_COORDINATOR">
               <Layout>
                 <MarketplaceAlerts />
               </Layout>
@@ -85,7 +90,7 @@ function App() {
         <Route
           path="/inventory"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRole="NGO_COORDINATOR">
               <Layout>
                 <Inventory />
               </Layout>
@@ -96,7 +101,7 @@ function App() {
         <Route
           path="/needs"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRole="NGO_COORDINATOR">
               <Layout>
                 <ActiveNeeds />
               </Layout>
@@ -107,7 +112,7 @@ function App() {
         <Route
           path="/dispatches"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRole="NGO_COORDINATOR">
               <Layout>
                 <DispatchHistory />
               </Layout>
@@ -118,20 +123,34 @@ function App() {
         <Route
           path="/campaigns"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRole="NGO_COORDINATOR">
               <Layout>
                 <Campaigns />
               </Layout>
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/campaign-history"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRole="NGO_COORDINATOR">
               <Layout>
                 <CampaignHistory />
               </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ================= VOLUNTEER ROUTES ================= */}
+
+        <Route
+          path="/volunteer/profile"
+          element={
+            <ProtectedRoute allowedRole="VOLUNTEER">
+              <VolunteerLayout>
+                <VolunteerProfile />
+              </VolunteerLayout>
             </ProtectedRoute>
           }
         />
