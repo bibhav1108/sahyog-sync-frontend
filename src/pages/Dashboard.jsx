@@ -118,13 +118,17 @@ const Dashboard = () => {
           >
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
-            {activeNeeds.map((n) => (
+            {activeNeeds.filter(n => n.latitude && n.longitude).map((n) => (
               <Marker
                 key={n.id}
-                position={[24 + Math.random() * 6, 78 + Math.random() * 6]}
+                position={[n.latitude, n.longitude]}
               >
                 <Popup>
-                  {n.type} — {n.quantity}
+                  <div className="font-outfit">
+                    <p className="font-bold text-primary">{n.type}</p>
+                    <p className="text-xs">{n.quantity}</p>
+                    <p className="text-[10px] mt-1 text-on_surface_variant">{n.pickup_address}</p>
+                  </div>
                 </Popup>
               </Marker>
             ))}
