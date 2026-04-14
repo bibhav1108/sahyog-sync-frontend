@@ -23,12 +23,21 @@ const AuthPortal = () => {
 
   // Sync mode with URL path
   useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const type = params.get("type");
+
     if (location.pathname === "/register" || location.pathname === "/register-volunteer") {
-      setMode(MODES.PICK_ROLE);
+      if (type === "ngo") {
+        setMode(MODES.NGO_REG);
+      } else if (type === "volunteer") {
+        setMode(MODES.VOLUNTEER_REG);
+      } else {
+        setMode(MODES.PICK_ROLE);
+      }
     } else if (location.pathname === "/login") {
       setMode(MODES.LOGIN);
     }
-  }, [location.pathname]);
+  }, [location.pathname, location.search]);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -248,10 +257,15 @@ const LoginForm = ({ email, setEmail, password, setPassword, setError, setLoadin
       localStorage.setItem("role", data.role);
       localStorage.setItem("org_id", data.org_id || "");
 
-      if (data.role === "VOLUNTEER") navigate("/volunteer/profile");
+      if (data.role === "SYSTEM_ADMIN") navigate("/admin/dashboard");
+      else if (data.role === "VOLUNTEER") navigate("/volunteer/profile");
       else navigate("/dashboard");
     } catch (err) {
-      setError(err.response?.data?.detail || "Login failed. Check credentials.");
+      if (err.response?.status === 403) {
+        setError("Your organization registration is currently pending admin approval. Please wait for activation.");
+      } else {
+        setError(err.response?.data?.detail || "Login failed. Check credentials.");
+      }
     } finally {
       setLoading(false);
     }

@@ -34,7 +34,9 @@ const ProtectedRoute = ({ children, allowedRole, allowedRoles }) => {
   // 🎭 Role check
   if (roles && !roles.includes(role)) {
     // redirect smartly
-    if (role === "VOLUNTEER") {
+    if (role === "SYSTEM_ADMIN") {
+      return <Navigate to="/admin/dashboard" replace />;
+    } else if (role === "VOLUNTEER") {
       return <Navigate to="/volunteer/profile" replace />;
     } else {
       return <Navigate to="/dashboard" replace />;

@@ -66,17 +66,17 @@ const Landing = () => {
                 className="flex gap-4 flex-wrap pt-4"
               >
                 <Link
-                  to="/register"
+                  to="/register?type=ngo"
                   className="bg-primary hover:bg-primary_container text-white px-8 py-4 rounded-xl font-bold transition-all duration-300 shadow-soft hover:shadow-lg hover:-translate-y-1"
                 >
-                  For NGOs
+                  Join as NGO
                 </Link>
 
                 <Link
-                  to="/register"
+                  to="/register?type=volunteer"
                   className="bg-surface_highest text-primary hover:bg-white px-8 py-4 rounded-xl font-bold transition-all duration-300 border border-primary/20 shadow-soft hover:shadow-lg hover:-translate-y-1"
                 >
-                  For Volunteers
+                  Join as Volunteer
                 </Link>
               </motion.div>
             </motion.div>
@@ -383,17 +383,17 @@ const Landing = () => {
 
             <div className="flex flex-col md:flex-row gap-6 justify-center pt-8">
               <Link
-                to="/register"
+                to="/register?type=ngo"
                 className="group relative bg-primary text-white px-10 py-5 rounded-2xl font-bold transition-all hover:shadow-[0_0_30px_rgba(40,165,165,0.4)]"
               >
-                Start as NGO &rarr;
+                Join as NGO &rarr;
               </Link>
               
               <Link
-                to="/register"
+                to="/register?type=volunteer"
                 className="bg-white text-primary border-2 border-primary/10 px-10 py-5 rounded-2xl font-bold transition-all hover:border-primary/40 hover:shadow-soft"
               >
-                Start as Volunteer &rarr;
+                Join as Volunteer &rarr;
               </Link>
             </div>
           </motion.div>

@@ -81,7 +81,10 @@ const Layout = ({ children }) => {
 
       if (newOnes.length > 0) {
         try {
-          new Audio(pingSound).play();
+          const audio = new Audio(pingSound);
+          audio.play().catch(() => {
+            /* Playback blocked by browser until user interaction */
+          });
         } catch {}
 
         setToasts((prev) => [
@@ -297,11 +300,22 @@ const Layout = ({ children }) => {
             </button>
           )}
 
-          <div className="flex items-center gap-2">
-            <span className="text-on_surface_variant/40 text-sm">Operations</span>
-            <span className="material-symbols-outlined text-xs text-on_surface_variant/40">chevron_right</span>
-            <span className="text-sm font-bold text-on_surface uppercase tracking-widest text-[11px]">
-                {NAV_ITEMS.find(i => i.to === location.pathname)?.label || "Dashboard"}
+          <div className="flex items-center gap-2 overflow-hidden truncate">
+            <span className="text-on_surface_variant/40 text-[10px] md:text-sm uppercase tracking-widest font-black shrink-0">Operations</span>
+            <span className="material-symbols-outlined text-xs text-on_surface_variant/40 shrink-0">chevron_right</span>
+            
+            {location.pathname !== "/dashboard" && (
+              <>
+                <Link to="/dashboard" className="text-on_surface_variant hover:text-primary text-[10px] md:text-sm transition-colors shrink-0">Dashboard</Link>
+                <span className="material-symbols-outlined text-xs text-on_surface_variant/40 shrink-0">chevron_right</span>
+              </>
+            )}
+
+            <span className="text-sm font-bold text-on_surface uppercase tracking-widest text-[11px] truncate">
+                {NAV_ITEMS.find(i => i.to === location.pathname)?.label || 
+                 (location.pathname.includes("history") ? "History" : 
+                  location.pathname.split("/").pop().replace(/-/g, " ")) || 
+                 "Dashboard"}
             </span>
           </div>
         </div>

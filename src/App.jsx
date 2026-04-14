@@ -18,8 +18,9 @@ import MarketplaceStatsPage from "./pages/MarketplaceStats";
 import VolunteerProfile from "./pages/VolunteerProfile";
 import VerifyEmail from "./pages/VolunteerEmailVerification";
 import NGOBrowser from "./pages/NGOBrowser";
-// 👉 (you should create this later)
 import VolunteerLayout from "./components/VolunteerLayout";
+import AdminDashboard from "./pages/AdminDashboard";
+import ActivityHistory from "./pages/ActivityHistory";
 
 function App() {
   return (
@@ -144,6 +145,16 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/activity-history"
+          element={
+            <ProtectedRoute allowedRoles={["NGO_COORDINATOR"]}>
+              <Layout>
+                <ActivityHistory />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
 
         {/* ================= VOLUNTEER ROUTES ================= */}
 
@@ -164,6 +175,14 @@ function App() {
               <VolunteerLayout>
                 <NGOBrowser />
               </VolunteerLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/dashboard"
+          element={
+            <ProtectedRoute allowedRoles={["SYSTEM_ADMIN"]}>
+               <AdminDashboard />
             </ProtectedRoute>
           }
         />

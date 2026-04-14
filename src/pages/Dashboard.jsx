@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import API from "../services/api";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import Skeleton from "../components/Skeleton";
@@ -9,18 +11,23 @@ const Dashboard = () => {
   const [needs, setNeeds] = useState([]);
   const [campaigns, setCampaigns] = useState([]);
   const [volunteers, setVolunteers] = useState([]);
+  const [auditLogs, setAuditLogs] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const load = async () => {
       try {
-        const n = await API.get("/needs");
-        const v = await API.get("/volunteers/");
-        const c = await API.get("/campaigns");
+        const [n, v, c, a] = await Promise.all([
+          API.get("/needs"),
+          API.get("/volunteers/"),
+          API.get("/campaigns"),
+          API.get("/audit/"),
+        ]);
 
         setNeeds(n.data || []);
         setVolunteers(v.data || []);
         setCampaigns(c.data || []);
+        setAuditLogs(a.data.items || []);
       } catch (err) {
         console.error(err);
       } finally {
@@ -29,7 +36,7 @@ const Dashboard = () => {
     };
 
     load();
-    const i = setInterval(load, 5000);
+    const i = setInterval(load, 10000);
     return () => clearInterval(i);
   }, []);
 
@@ -37,6 +44,28 @@ const Dashboard = () => {
 
   const activeNeeds = needs.filter((n) => n.status === "OPEN");
   const activeCampaigns = campaigns.filter((c) => c.status !== "COMPLETED");
+
+  const getEventIcon = (type) => {
+    switch (type) {
+      case "MISSION_LAUNCHED": return "rocket_launch";
+      case "MISSION_COMPLETED": return "task_alt";
+      case "PARTICIPANT_APPROVED": return "person_add_alt";
+      case "VOLUNTEER_REGISTERED": return "person_add";
+      case "INVENTORY_ADDED": return "inventory_2";
+      case "INVENTORY_UPDATED": return "edit_note";
+      default: return "notifications";
+    }
+  };
+
+  const getEventColor = (type) => {
+    switch (type) {
+      case "MISSION_LAUNCHED": return "text-blue-500 bg-blue-50";
+      case "MISSION_COMPLETED": return "text-green-500 bg-green-50";
+      case "INVENTORY_ADDED": return "text-amber-500 bg-amber-50";
+      case "VOLUNTEER_REGISTERED": return "text-primary bg-primary/5";
+      default: return "text-on_surface_variant bg-surface";
+    }
+  };
 
   return (
     <div className="grid grid-cols-12 gap-8">
@@ -129,10 +158,10 @@ const Dashboard = () => {
                 </div>
               ))
             : volunteers
-                .sort((a, b) => b.completions - a.completions)
+                .sort((a, b) => (b.completions || 0) - (a.completions || 0))
                 .slice(0, 5)
                 .map((v, i) => {
-                  const progress = Math.min((v.completions / 10) * 100, 100);
+                  const progress = Math.min(((v.completions || 0) / 10) * 100, 100);
 
                   return (
                     <div
@@ -155,7 +184,7 @@ const Dashboard = () => {
                             <VerificationBadge trustTier={v.trust_tier} telegramActive={v.telegram_active} />
                           </div>
                           <p className="text-xs text-on_surface_variant">
-                            {v.completions} completions
+                            {v.completions || 0} completions
                           </p>
                         </div>
 
@@ -177,11 +206,53 @@ const Dashboard = () => {
       </div>
 
       <div className="col-span-12 lg:col-span-4">
-        <div className="h-full min-h-[500px] rounded-xl bg-surface_high p-5">
-          <h3 className="mb-4 font-semibold">Recent Events</h3>
+        <div className="h-full min-h-[500px] rounded-xl bg-surface_high p-5 overflow-hidden flex flex-col">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="font-semibold">Recent Events</h3>
+            <Link to="/activity-history" className="text-xs font-bold text-primary hover:underline flex items-center gap-1">
+              View All <span className="material-symbols-outlined text-sm">arrow_forward</span>
+            </Link>
+          </div>
 
-          <div className="flex h-[400px] items-center justify-center text-sm text-on_surface_variant">
-            No events yet
+          <div className="flex-1 overflow-y-auto pr-2 space-y-6 custom-scrollbar">
+            {loading ? (
+              Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="flex gap-4">
+                  <Skeleton className="h-10 w-10 shrink-0" variant="circle" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-3 w-3/4" variant="text" />
+                    <Skeleton className="h-2 w-1/4" variant="text" />
+                  </div>
+                </div>
+              ))
+            ) : auditLogs.length > 0 ? (
+              auditLogs.map((log, i) => (
+                <motion.div 
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                  key={log.id} 
+                  className="flex gap-4 group"
+                >
+                  <div className={`w-10 h-10 shrink-0 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 ${getEventColor(log.event_type)}`}>
+                    <span className="material-symbols-outlined text-xl">{getEventIcon(log.event_type)}</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-on_surface leading-snug">
+                      {log.notes}
+                    </p>
+                    <p className="text-[10px] text-on_surface_variant/60 font-black uppercase tracking-widest mt-1">
+                      {new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • {new Date(log.created_at).toLocaleDateString([], { day: 'numeric', month: 'short' })}
+                    </p>
+                  </div>
+                </motion.div>
+              ))
+            ) : (
+              <div className="flex h-full items-center justify-center text-sm text-on_surface_variant opacity-50 flex-col gap-2">
+                <span className="material-symbols-outlined text-4xl">history</span>
+                No events yet
+              </div>
+            )}
           </div>
         </div>
       </div>
