@@ -1,10 +1,10 @@
 import axios from "axios";
 
-export const BACKEND_BASE_URL = "http://localhost:8005";
+export const BACKEND_BASE_URL = "https://sahyog-setu-backend.onrender.com";
 
 const API = axios.create({
 
-  baseURL: "http://localhost:8005/api/v1/",
+  baseURL: "https://sahyog-setu-backend.onrender.com/api/v1/",
 
 });
 
