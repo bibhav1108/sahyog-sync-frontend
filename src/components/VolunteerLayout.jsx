@@ -13,6 +13,7 @@ const VolunteerLayout = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loadingUser, setLoadingUser] = useState(true);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 768);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -42,12 +43,25 @@ const VolunteerLayout = ({ children }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-surface flex selection:bg-primary/10">
+    <div className="min-h-screen bg-surface flex selection:bg-primary/10 overflow-x-hidden">
+      {/* Mobile Backdrop */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-[990] bg-black/50 backdrop-blur-sm md:hidden transition-opacity"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* 🔹 PREMIUM SIDEBAR */}
-      <aside className="w-72 bg-surface_lowest/80 backdrop-blur-glass border-r border-white/20 p-8 flex flex-col h-screen sticky top-0">
+      <aside className={`fixed left-0 top-0 z-[999] w-72 bg-surface_lowest/80 backdrop-blur-glass border-r border-white/20 p-8 flex flex-col h-screen transition-transform duration-300 ${
+        sidebarOpen ? "translate-x-0" : "-translate-x-full"
+      }`}>
         <div>
           {/* LOGO AREA */}
-          <div className="flex items-center gap-3 mb-12">
+          <div 
+            className="flex items-center gap-3 mb-12 cursor-pointer transition-transform hover:scale-[1.02] active:scale-95"
+            onClick={() => setSidebarOpen(false)}
+          >
             <img src={logo} alt="logo" className="h-10 w-10 drop-shadow-sm" />
             <div className="flex flex-col">
               <span className="text-lg font-outfit font-bold text-primary leading-none">Sahyog Sync</span>
@@ -62,6 +76,9 @@ const VolunteerLayout = ({ children }) => {
                 <Link
                   key={item.path}
                   to={item.path}
+                  onClick={() => {
+                    if (window.innerWidth < 768) setSidebarOpen(false);
+                  }}
                   className={`
                     flex items-center gap-4 px-4 py-3 rounded-2xl text-sm font-bold transition-all group
                     ${isActive 
@@ -93,15 +110,27 @@ const VolunteerLayout = ({ children }) => {
       </aside>
 
       {/* 🔹 MAIN CONTENT AREA */}
-      <main className="flex-1 flex flex-col min-w-0">
+      <main className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${
+        sidebarOpen ? "md:ml-72" : "ml-0"
+      }`}>
         {/* HEADER BAR */}
-        <header className="h-20 bg-surface_lowest/40 backdrop-blur-sm border-b border-white/20 flex items-center justify-between px-10 sticky top-0 z-10 transition-all">
-          <div className="flex items-center gap-2">
-            <span className="text-on_surface_variant/40 text-sm">Volunteer</span>
-            <span className="material-symbols-outlined text-xs text-on_surface_variant/40">chevron_right</span>
-            <span className="text-sm font-bold text-on_surface uppercase tracking-widest text-[11px]">
-                {navItems.find(i => i.path === location.pathname)?.label || "Workspace"}
-            </span>
+        <header className="h-20 bg-surface_lowest/40 backdrop-blur-sm border-b border-white/20 flex items-center justify-between px-6 md:px-10 sticky top-0 z-10 transition-all">
+          <div className="flex items-center gap-2 md:gap-4">
+            {!sidebarOpen && (
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="flex items-center justify-center rounded-xl p-2 bg-white shadow-sm border border-white hover:bg-surface_high transition-colors"
+              >
+                <span className="material-symbols-outlined text-[24px]">menu</span>
+              </button>
+            )}
+            <div className="hidden sm:flex items-center gap-2">
+              <span className="text-on_surface_variant/40 text-sm">Volunteer</span>
+              <span className="material-symbols-outlined text-xs text-on_surface_variant/40">chevron_right</span>
+              <span className="text-sm font-bold text-on_surface uppercase tracking-widest text-[11px]">
+                  {navItems.find(i => i.path === location.pathname)?.label || "Workspace"}
+              </span>
+            </div>
           </div>
           
           <div className="flex items-center gap-4">
@@ -115,18 +144,18 @@ const VolunteerLayout = ({ children }) => {
                 ) : (
                     <button
                         onClick={() => setProfileOpen(!profileOpen)}
-                        className="flex items-center gap-3 rounded-xl bg-white px-2 py-1.5 pr-4 shadow-sm transition-all hover:scale-[1.01] hover:bg-surface_high border border-white"
+                        className="flex items-center gap-2 rounded-xl bg-white p-1 pr-2 sm:pr-4 shadow-sm transition-all hover:scale-[1.01] hover:bg-surface_high border border-white"
                     >
-                        <div className="w-9 h-9 rounded-full overflow-hidden border border-primary/10 shadow-sm">
+                        <div className="w-8 h-8 rounded-full overflow-hidden border border-primary/10 shadow-sm shrink-0">
                             <img 
                                 src={resolveProfileImage(user?.profile_image_url)} 
                                 alt="pfp" 
                                 className="w-full h-full object-cover"
                             />
                         </div>
-                        <div className="hidden sm:flex flex-col items-start leading-none ml-1">
-                            <div className="flex items-center gap-1.5 font-bold text-on_surface text-sm">
-                                <span>{user?.full_name || "Volunteer"}</span>
+                        <div className="flex flex-col items-start leading-none min-w-0 max-w-[80px] sm:max-w-none">
+                            <div className="flex items-center gap-1.5 font-bold text-on_surface text-xs sm:text-sm">
+                                <span className="truncate">{user?.full_name?.split(' ')[0] || "Volunteer"}</span>
                                 <VerificationBadge trustTier={user?.trust_tier} telegramActive={user?.telegram_active} />
                             </div>
                         </div>
@@ -163,6 +192,30 @@ const VolunteerLayout = ({ children }) => {
                             >
                                 <span className="material-symbols-outlined text-[20px]">person</span>
                                 View My Profile
+                            </Link>
+                            <Link
+                                to="/volunteer/reviews"
+                                className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-on_surface_variant hover:bg-surface_high hover:text-primary transition-colors mt-1"
+                                onClick={() => setProfileOpen(false)}
+                            >
+                                <span className="material-symbols-outlined text-[20px]">star</span>
+                                Review Us
+                            </Link>
+                            <Link
+                                to="/volunteer/contact"
+                                className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-on_surface_variant hover:bg-surface_high hover:text-primary transition-colors mt-1"
+                                onClick={() => setProfileOpen(false)}
+                            >
+                                <span className="material-symbols-outlined text-[20px]">support_agent</span>
+                                Contact & Support
+                            </Link>
+                            <Link
+                                to="/volunteer/help"
+                                className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-on_surface_variant hover:bg-surface_high hover:text-primary transition-colors mt-1"
+                                onClick={() => setProfileOpen(false)}
+                            >
+                                <span className="material-symbols-outlined text-[20px]">help_center</span>
+                                Knowledge Base
                             </Link>
                             <button
                                 onClick={handleLogout}

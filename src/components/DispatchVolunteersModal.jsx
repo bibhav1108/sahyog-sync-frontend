@@ -72,7 +72,7 @@ const DispatchVolunteersModal = ({ open, onClose, needId, onSuccess }) => {
     >
       {/* MODAL CONTAINER */}
       <div
-        className="relative w-full max-w-6xl h-[80vh] rounded-2xl border border-white/10 bg-surface_high/95 backdrop-blur-xl shadow-2xl flex gap-6 p-6 pt-10"
+        className="relative w-full max-w-6xl h-[95vh] md:h-[80vh] rounded-2xl border border-white/10 bg-surface_high/95 backdrop-blur-xl shadow-2xl flex flex-col md:flex-row gap-4 md:gap-6 p-4 md:p-6 pt-12 md:pt-10 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* MAIN MODAL CLOSE BUTTON - NOW ACTUALLY RED */}
@@ -98,8 +98,8 @@ const DispatchVolunteersModal = ({ open, onClose, needId, onSuccess }) => {
         </button>
 
         {/* LEFT PANEL: AVAILABLE VOLUNTEERS */}
-        <div className="flex-[3] flex flex-col bg-surface/40 border border-white/5 rounded-xl p-5">
-          <h2 className="text-lg font-semibold mb-4">Available Volunteers</h2>
+        <div className="flex-[3] min-h-[45%] md:min-h-0 flex flex-col bg-surface/40 border border-white/5 rounded-xl p-4 md:p-5 overflow-hidden">
+          <h2 className="text-base md:text-lg font-semibold mb-3 md:mb-4">Available Volunteers</h2>
           <input
             placeholder="Search volunteers..."
             value={search}
@@ -172,9 +172,9 @@ const DispatchVolunteersModal = ({ open, onClose, needId, onSuccess }) => {
         </div>
 
         {/* RIGHT PANEL: SELECTED VOLUNTEERS */}
-        <div className="flex-[2] flex flex-col bg-surface/40 border border-white/5 rounded-xl p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Selected</h3>
+        <div className="flex-[2] min-h-[35%] md:min-h-0 flex flex-col bg-surface/40 border border-white/5 rounded-xl p-4 md:p-5 overflow-hidden">
+          <div className="flex items-center justify-between mb-3 md:mb-4">
+            <h3 className="text-base md:text-lg font-semibold">Selected</h3>
             <span className="bg-primary/20 text-primary px-3 py-1 rounded-full text-xs font-bold">
               {selected.length}{" "}
               {selected.length === 1 ? "Volunteer" : "Volunteers"}

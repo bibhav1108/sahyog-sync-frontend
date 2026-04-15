@@ -24,6 +24,11 @@ import AdminOrganizations from "./pages/AdminOrganizations";
 import AdminLayout from "./components/AdminLayout";
 import ActivityHistory from "./pages/ActivityHistory";
 import MarketplaceInventory from "./pages/MarketplaceInventory";
+import CoordinatorProfile from "./pages/CoordinatorProfile";
+import OrganizationProfile from "./pages/OrganizationProfile";
+import ReviewPage from "./pages/ReviewPage";
+import ContactPage from "./pages/ContactPage";
+import HelpCenter from "./pages/HelpCenter";
 
 function App() {
   return (
@@ -168,6 +173,56 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute allowedRoles={["NGO_COORDINATOR"]}>
+              <Layout>
+                <CoordinatorProfile />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/organization"
+          element={
+            <ProtectedRoute allowedRoles={["NGO_COORDINATOR"]}>
+              <Layout>
+                <OrganizationProfile />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/reviews"
+          element={
+            <ProtectedRoute allowedRoles={["NGO_COORDINATOR"]}>
+              <Layout>
+                <ReviewPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/contact"
+          element={
+            <ProtectedRoute allowedRoles={["NGO_COORDINATOR"]}>
+              <Layout>
+                <ContactPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/help"
+          element={
+            <ProtectedRoute allowedRoles={["NGO_COORDINATOR"]}>
+              <Layout>
+                <HelpCenter />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
 
         {/* ================= VOLUNTEER ROUTES ================= */}
 
@@ -187,6 +242,36 @@ function App() {
             <ProtectedRoute allowedRoles={["VOLUNTEER"]}>
               <VolunteerLayout>
                 <NGOBrowser />
+              </VolunteerLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/volunteer/reviews"
+          element={
+            <ProtectedRoute allowedRoles={["VOLUNTEER"]}>
+              <VolunteerLayout>
+                <ReviewPage />
+              </VolunteerLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/volunteer/contact"
+          element={
+            <ProtectedRoute allowedRoles={["VOLUNTEER"]}>
+              <VolunteerLayout>
+                <ContactPage />
+              </VolunteerLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/volunteer/help"
+          element={
+            <ProtectedRoute allowedRoles={["VOLUNTEER"]}>
+              <VolunteerLayout>
+                <HelpCenter />
               </VolunteerLayout>
             </ProtectedRoute>
           }

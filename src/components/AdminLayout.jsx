@@ -36,16 +36,13 @@ const AdminLayout = ({ children }) => {
         }`}
       >
         <div className="mb-8 flex items-center justify-between px-1">
-          <Link to="/" className="flex flex-col">
+          <div 
+            onClick={() => setSidebarOpen(false)} 
+            className="flex flex-col cursor-pointer transition-transform hover:scale-[1.02] active:scale-95"
+          >
              <span className="text-xs font-black text-primary tracking-[0.2em] uppercase mb-1">System Admin</span>
              <img src={logo} className="w-32" alt="Sahyog Sync" />
-          </Link>
-          <button
-            onClick={() => setSidebarOpen(false)}
-            className="md:hidden flex items-center justify-center rounded-lg p-1.5 text-on_surface_variant hover:bg-white/5 hover:text-on_surface transition-colors"
-          >
-            <span className="material-symbols-outlined text-[20px]">menu_open</span>
-          </button>
+          </div>
         </div>
 
         <nav className="flex-1 space-y-1.5 text-sm">
@@ -55,6 +52,9 @@ const AdminLayout = ({ children }) => {
               <Link
                 key={item.to}
                 to={item.to}
+                onClick={() => {
+                  if (window.innerWidth < 768) setSidebarOpen(false);
+                }}
                 className={`flex items-center gap-3 rounded-xl px-4 py-3 transition-all duration-200 group ${
                   active
                     ? "bg-primary text-white shadow-lg shadow-primary/20"

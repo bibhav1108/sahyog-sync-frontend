@@ -14,6 +14,7 @@ const Inventory = () => {
 
   const [editingId, setEditingId] = useState(null);
   const [editValue, setEditValue] = useState("");
+  const [conflictId, setConflictId] = useState(null);
 
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
@@ -66,7 +67,18 @@ const Inventory = () => {
         quantity: finalQuantity,
       });
       fetchInventory(false);
-    } catch {
+    } catch (err) {
+      const msg = err?.response?.data?.detail || "Update failed";
+      
+      // Trigger visual feedback
+      setConflictId(id);
+      setTimeout(() => setConflictId(null), 3000);
+      
+      // If it's a reservation error, specifically alert the user
+      if (err?.response?.status === 400) {
+        alert(msg);
+      }
+      
       fetchInventory(false);
     }
     setEditingId(null);
@@ -177,7 +189,8 @@ const Inventory = () => {
 
       {/* LIST */}
       <div className="bg-surface_high rounded-xl overflow-hidden border border-black/5">
-        <div className="grid grid-cols-6 gap-4 px-4 py-3 text-xs font-semibold text-on_surface_variant border-b border-black/10">
+        {/* Desktop Header */}
+        <div className="hidden md:grid grid-cols-6 gap-4 px-4 py-3 text-xs font-semibold text-on_surface_variant border-b border-black/10">
           <div>Name</div>
           <div>Category</div>
           <div>Total</div>
@@ -197,46 +210,86 @@ const Inventory = () => {
               return (
                 <div
                   key={i.id}
-                  className="grid grid-cols-6 gap-4 px-4 py-3 items-center border-b border-black/5 hover:bg-black/5 transition"
+                  className="flex flex-col md:grid md:grid-cols-6 gap-4 px-4 py-5 md:py-3 md:items-center border-b border-black/5 hover:bg-black/5 transition relative"
                 >
-                  <div className="font-semibold">
-                    {i.item_name}
-                    {low && (
-                      <span className="ml-2 text-xs text-red-500">⚠</span>
-                    )}
+                  {/* Row 1: Item Name + Actions (Mobile Friendly) */}
+                  <div className="flex justify-between items-start md:block">
+                    <div className="font-semibold text-base md:text-sm">
+                      {i.item_name}
+                      {low && (
+                        <span className="ml-2 text-xs text-red-500">⚠</span>
+                      )}
+                    </div>
+                    {/* Actions moved here for mobile, but hidden for md+ (classic placement) */}
+                    <div className="flex md:hidden gap-2">
+                       <button
+                          onClick={() => {
+                            setEditingId(i.id);
+                            setEditValue(i.quantity);
+                          }}
+                          className="p-1.5 bg-primary/10 text-primary rounded-lg"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">edit</span>
+                        </button>
+                        <button
+                          onClick={() => setDeleteTarget(i)}
+                          className="p-1.5 bg-red-500/10 text-red-500 rounded-lg"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">delete</span>
+                        </button>
+                    </div>
                   </div>
 
-                  <div>
-                    <span className="text-xs bg-surface px-2 py-1 rounded">
+                  {/* Category Badge */}
+                  <div className="md:block">
+                    <span className="text-[10px] md:text-xs bg-surface px-2 py-1 rounded-full uppercase tracking-wider font-bold opacity-80">
                       {i.category}
                     </span>
                   </div>
 
-                  <div>
-                    {editingId === i.id ? (
-                      <input
-                        autoFocus
-                        type="number"
-                        className="w-20 px-2 py-1 bg-surface_highest rounded outline-none border border-primary/30"
-                        value={editValue}
-                        onBlur={() => handleUpdateQuantity(i.id, editValue)}
-                        onChange={(e) => setEditValue(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter")
-                            handleUpdateQuantity(i.id, editValue);
-                          if (e.key === "Escape") setEditingId(null);
-                        }}
-                      />
-                    ) : (
-                      <span>{i.quantity}</span>
-                    )}
-                  </div>
-                  <div>{i.reserved_quantity}</div>
-                  <div className={low ? "text-red-500 font-semibold" : ""}>
-                    {available}
+                  {/* Quantities (3-column grid on mobile) */}
+                  <div className="grid grid-cols-3 md:contents gap-2 mt-2 md:mt-0 pt-2 md:pt-0 border-t border-black/5 md:border-0 text-center md:text-left">
+                    {/* TOTAL */}
+                    <div>
+                      <div className="md:hidden text-[10px] uppercase font-bold opacity-40 mb-1">Total</div>
+                      {editingId === i.id ? (
+                        <input
+                          autoFocus
+                          type="number"
+                          className="w-full md:w-20 px-2 py-1 bg-surface_highest rounded outline-none border border-primary/30 text-sm"
+                          value={editValue}
+                          onBlur={() => handleUpdateQuantity(i.id, editValue)}
+                          onChange={(e) => setEditValue(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter")
+                              handleUpdateQuantity(i.id, editValue);
+                            if (e.key === "Escape") setEditingId(null);
+                          }}
+                        />
+                      ) : (
+                        <span className="text-sm md:text-base">{i.quantity}</span>
+                      )}
+                    </div>
+
+                    {/* RESERVED */}
+                    <div>
+                      <div className="md:hidden text-[10px] uppercase font-bold opacity-40 mb-1">Reserved</div>
+                      <div className={`transition-all duration-300 rounded px-2 py-1 inline-block ${conflictId === i.id ? "animate-pulse-red text-red-500 font-bold scale-110" : "text-sm md:text-base"}`}>
+                        {i.reserved_quantity}
+                      </div>
+                    </div>
+
+                    {/* AVAILABLE */}
+                    <div>
+                      <div className="md:hidden text-[10px] uppercase font-bold opacity-40 mb-1">Available</div>
+                      <div className={`text-sm md:text-base ${low ? "text-red-500 font-bold" : ""}`}>
+                        {available}
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="flex justify-end gap-2">
+                  {/* Desktop Actions (Hidden on mobile) */}
+                  <div className="hidden md:flex justify-end gap-2">
                     <button
                       onClick={() => {
                         setEditingId(i.id);
@@ -450,14 +503,22 @@ const SkeletonRows = () => (
     {[...Array(6)].map((_, idx) => (
       <div
         key={idx}
-        className="grid grid-cols-6 gap-4 px-4 py-3 items-center border-b border-black/5"
+        className="flex flex-col md:grid md:grid-cols-6 gap-4 px-4 py-5 md:py-3 md:items-center border-b border-black/5"
       >
-        <Skeleton className="h-4 w-24" variant="text" />
-        <Skeleton className="h-4 w-16" variant="text" />
-        <Skeleton className="h-4 w-10" variant="text" />
-        <Skeleton className="h-4 w-10" variant="text" />
-        <Skeleton className="h-4 w-10" variant="text" />
-        <div className="flex justify-end">
+        <div className="flex justify-between items-center md:block">
+            <Skeleton className="h-4 w-24" variant="text" />
+            <div className="md:hidden flex gap-2">
+                <Skeleton className="h-8 w-8 rounded-lg" />
+                <Skeleton className="h-8 w-8 rounded-lg" />
+            </div>
+        </div>
+        <Skeleton className="h-3 w-16" variant="text" />
+        <div className="grid grid-cols-3 md:contents gap-2 mt-2 md:mt-0 pt-2 md:pt-0 border-t md:border-0 border-black/5">
+            <Skeleton className="h-4 w-10 mx-auto md:mx-0" variant="text" />
+            <Skeleton className="h-4 w-10 mx-auto md:mx-0" variant="text" />
+            <Skeleton className="h-4 w-10 mx-auto md:mx-0" variant="text" />
+        </div>
+        <div className="hidden md:flex justify-end">
           <Skeleton className="h-4 w-12" variant="text" />
         </div>
       </div>

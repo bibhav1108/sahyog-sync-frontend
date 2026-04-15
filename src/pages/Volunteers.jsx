@@ -263,23 +263,23 @@ const Volunteers = () => {
           <motion.div 
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="bg-white w-full max-w-xl rounded-[3rem] shadow-2xl border border-white/20 relative overflow-hidden" 
+            className="bg-surface_high w-full max-w-xl rounded-2xl md:rounded-[3rem] shadow-2xl border border-white/20 relative overflow-y-auto max-h-[90vh] custom-scrollbar" 
             onClick={(e) => e.stopPropagation()}
           >
              {/* Profile Header Background */}
-             <div className="h-32 bg-gradient-to-br from-primary to-primary_dark relative">
+             <div className="h-24 md:h-32 bg-gradient-to-br from-primary to-primary_dark relative">
                 <button 
                   onClick={() => setSelected(null)}
-                  className="absolute top-6 right-6 w-10 h-10 bg-white/20 hover:bg-white/30 text-white rounded-full flex items-center justify-center transition-all"
+                  className="absolute top-4 md:top-6 right-4 md:right-6 w-10 h-10 bg-white/20 hover:bg-white/30 text-white rounded-full flex items-center justify-center transition-all"
                 >
                   <span className="material-symbols-outlined text-sm">close</span>
                 </button>
              </div>
 
-             <div className="px-10 pb-10">
+             <div className="px-6 md:px-10 pb-8 md:pb-10">
                 {/* Profile Picture Overlay */}
-                <div className="relative -mt-16 mb-6">
-                    <div className="w-32 h-32 rounded-[2.5rem] overflow-hidden border-8 border-white shadow-2xl mx-auto md:mx-0">
+                <div className="relative -mt-12 md:-mt-16 mb-4 md:mb-6">
+                    <div className="w-24 h-24 md:w-32 md:h-32 rounded-2xl md:rounded-[2.5rem] overflow-hidden border-4 md:border-8 border-white shadow-2xl mx-auto md:mx-0">
                         <img 
                             src={resolveProfileImage(selected.profile_image_url)} 
                             alt={selected.name} 
@@ -313,7 +313,7 @@ const Volunteers = () => {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 mt-8">
                      <div className="bg-surface_lowest p-5 rounded-3xl border border-surface_highest text-center group hover:bg-primary/5 transition-all">
                         <span className="text-[10px] text-on_surface_variant block mb-1 uppercase font-black tracking-widest">Completed</span>
                         <span className="text-2xl font-black text-on_surface">{selected.completions}</span>
@@ -329,7 +329,7 @@ const Volunteers = () => {
                 </div>
 
                 {/* Performance Meter */}
-                <div className="mt-8 space-y-3">
+                <div className="mt-6 md:mt-8 space-y-3">
                     <div className="flex justify-between items-end">
                         <label className="text-[10px] font-black uppercase tracking-widest text-on_surface_variant">Confidence Score</label>
                         <span className="text-xs font-black text-primary italic">
