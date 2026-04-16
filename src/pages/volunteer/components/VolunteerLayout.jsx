@@ -64,12 +64,12 @@ const VolunteerLayout = ({ children }) => {
         <div>
           {/* LOGO AREA */}
           <div 
-            className="flex items-center gap-3 mb-12 cursor-pointer transition-transform hover:scale-[1.02] active:scale-95"
+            className="flex items-center gap-4 mb-12 cursor-pointer transition-transform hover:scale-[1.02] active:scale-95"
             onClick={() => setSidebarOpen(false)}
           >
-            <img src={logo} alt="logo" className="h-10 w-10 drop-shadow-sm" />
+            <img src={logo} alt="logo" className="h-16 w-16 object-contain drop-shadow-sm" />
             <div className="flex flex-col">
-              <span className="text-lg font-outfit font-bold text-primary leading-none">Sahyog Sync</span>
+              <span className="text-xl font-outfit font-bold text-primary leading-none">Sahyog Sync</span>
               <span className="text-[10px] text-on_surface_variant uppercase tracking-[0.2em] mt-1 font-black">Volunteer</span>
             </div>
           </div>

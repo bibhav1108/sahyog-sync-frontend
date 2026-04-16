@@ -83,9 +83,9 @@ const AuthPortal = () => {
       {/* ⬅️ LEFT PANEL: BRANDING (Visible on Large Screens) */}
       <div className="hidden lg:flex lg:w-1/2 p-20 flex-col justify-between relative bg-primaryGradient">
         <div className="relative z-10">
-          <Link to="/" className="flex items-center gap-3 group">
-            <img src={logo} alt="Sahyog Sync" className="h-12 w-12 transition-transform group-hover:scale-110" />
-            <span className="text-2xl font-outfit font-black text-white tracking-tighter">Sahyog Sync</span>
+          <Link to="/" className="flex items-center gap-4 group">
+            <img src={logo} alt="Sahyog Sync" className="h-20 w-20 object-contain transition-transform group-hover:scale-110 drop-shadow-md" />
+            <span className="text-3xl font-outfit font-black text-white tracking-tighter">Sahyog Sync</span>
           </Link>
 
           <div className="mt-24 space-y-8 max-w-lg">
@@ -95,7 +95,7 @@ const AuthPortal = () => {
               className="text-6xl font-outfit font-extrabold text-white leading-[1.1]"
             >
               Unified Action. <br />
-              <span className="text-primary">Social Impact.</span>
+              <span className="text-white">Social Impact.</span>
             </motion.h1>
             <motion.p 
               initial={{ opacity: 0, x: -20 }}
@@ -115,9 +115,9 @@ const AuthPortal = () => {
       <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 relative">
         {/* MOBILE LOGO */}
         <div className="absolute top-8 left-8 lg:hidden">
-          <Link to="/" className="flex items-center gap-2">
-            <img src={logo} alt="logo" className="h-8 w-8" />
-            <span className="font-outfit font-bold text-primary">Sahyog Sync</span>
+          <Link to="/" className="flex items-center gap-3">
+            <img src={logo} alt="logo" className="h-12 w-12 object-contain" />
+            <span className="text-xl font-outfit font-bold text-primary">Sahyog Sync</span>
           </Link>
         </div>
 
@@ -631,12 +631,16 @@ const ForgotPassForm = ({ email, setEmail, setError, setSuccess, setLoading, loa
  * 🖋️ SHARED INPUT COMPONENT
  */
 const AuthInput = ({ label, value, setValue, type = "text", icon = null, disabled = false }) => {
+  const [showPassword, setShowPassword] = useState(false);
   const isActive = value && value.length > 0;
+  
+  const isPassword = type === "password";
+  const inputType = isPassword ? (showPassword ? "text" : "password") : type;
 
   return (
     <div className="relative group">
       <input
-        type={type}
+        type={inputType}
         value={value}
         disabled={disabled}
         onChange={(e) => setValue(e.target.value)}
@@ -648,10 +652,24 @@ const AuthInput = ({ label, value, setValue, type = "text", icon = null, disable
         "
       />
       
-      {icon && (
+      {icon && !isPassword && (
         <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-on_surface_variant/20 group-focus-within:text-primary transition-colors text-lg">
           {icon}
         </span>
+      )}
+
+      {isPassword && (
+        <button
+          type="button"
+          tabIndex="-1"
+          onClick={() => setShowPassword(!showPassword)}
+          className="absolute right-4 top-1/2 -translate-y-1/2 text-on_surface_variant/40 hover:text-primary transition-colors focus:outline-none"
+          title={showPassword ? "Hide password" : "Show password"}
+        >
+          <span className="material-symbols-outlined text-lg">
+            {showPassword ? "visibility" : "visibility_off"}
+          </span>
+        </button>
       )}
 
       <label

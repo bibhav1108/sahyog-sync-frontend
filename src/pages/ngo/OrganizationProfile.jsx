@@ -95,7 +95,7 @@ const OrganizationProfile = () => {
 
             <div className="grid grid-cols-12 gap-10">
                 <div className="col-span-12 lg:col-span-8 space-y-10">
-                    <ContentSection title="Institutional Intelligence" icon="public" noPadding>
+                    <ContentSection title="Organizational Details" icon="public" noPadding>
                         <div className="p-10 space-y-10">
                             <div className="flex justify-between items-start">
                                 <div>

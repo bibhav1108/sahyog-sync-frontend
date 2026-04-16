@@ -30,20 +30,20 @@ const PublicNavbar = () => {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 flex justify-between items-center gap-2">
         {/* LOGO + NAME */}
-        <Link to="/" className="flex items-center gap-2 sm:gap-4 group shrink-0">
+        <Link to="/" className="flex items-center gap-3 sm:gap-4 group shrink-0">
           <div className="relative">
             <div className="absolute inset-0 bg-primary/20 blur-lg rounded-full group-hover:bg-primary/40 transition-all duration-500" />
             <img
               src={logo}
               alt="Sahyog Sync Logo"
-              className="h-10 w-10 sm:h-16 sm:w-16 object-contain relative z-10 transition-transform duration-500 group-hover:scale-110"
+              className="h-16 w-16 sm:h-20 sm:w-20 object-contain relative z-10 transition-transform duration-500 group-hover:scale-110"
             />
           </div>
           <div className="flex flex-col">
-            <span className="text-lg sm:text-2xl font-outfit font-black text-on_surface tracking-tight group-hover:text-primary transition-colors duration-300">
+            <span className="text-xl sm:text-3xl font-outfit font-black text-on_surface tracking-tight group-hover:text-primary transition-colors duration-300">
               Sahyog <span className="text-primary group-hover:text-on_surface transition-colors">Sync</span>
             </span>
-            <span className="hidden sm:block text-[10px] font-black uppercase tracking-[0.3em] text-on_surface_variant/40 leading-none mt-0.5">Tactics & Logistics</span>
+            <span className="hidden sm:block text-[10px] font-black uppercase tracking-[0.3em] text-on_surface_variant/40 leading-none mt-1"></span>
           </div>
         </Link>
 

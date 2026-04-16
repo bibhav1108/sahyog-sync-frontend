@@ -86,7 +86,7 @@ const MarketplaceInventory = () => {
             <div className="flex flex-col lg:flex-row justify-between items-center lg:items-center gap-8 text-center lg:text-left">
                 <div>
                     <p className="text-primary text-[10px] sm:text-[10px] font-black uppercase tracking-[0.3em] mb-1">Post-Mission Logistics</p>
-                    <h1 className="text-3xl sm:text-4xl font-outfit font-black text-on_surface tracking-tight">Recovery Hub</h1>
+                    <h1 className="text-3xl sm:text-4xl font-outfit font-black text-on_surface tracking-tight">Collection Hub</h1>
                     <p className="text-xs font-bold text-on_surface_variant/60 mt-1">Sorting assets collected from marketplace theaters onto verified stock.</p>
                 </div>
                 <div className="flex justify-center w-full lg:w-auto">
@@ -140,9 +140,9 @@ const MarketplaceInventory = () => {
 
                                     {/* QUANTITY (Desktop) */}
                                     <div className="hidden lg:block lg:col-span-2">
-                                        <span className="text-sm font-black text-primary bg-primary/5 px-4 py-1.5 rounded-xl border border-primary/10">
+                                        <div className="inline-block text-sm font-black text-primary bg-primary/5 px-4 py-2 rounded-xl border border-primary/10 leading-snug break-words max-w-full">
                                             {item.quantity} {item.unit}
-                                        </span>
+                                        </div>
                                     </div>
 
                                     {/* TIMELINE (Desktop) */}
@@ -154,11 +154,11 @@ const MarketplaceInventory = () => {
                                     </div>
 
                                     {/* Mobile Consolidated Info */}
-                                    <div className="lg:hidden flex justify-between items-center py-2 px-1 border-y border-on_surface/5 my-2">
-                                        <span className="text-sm font-black text-primary bg-primary/5 px-3 py-1 rounded-lg border border-primary/10">
+                                    <div className="lg:hidden flex justify-between items-center py-2 px-1 border-y border-on_surface/5 my-2 gap-4">
+                                        <div className="inline-block text-sm font-black text-primary bg-primary/5 px-3 py-1.5 rounded-lg border border-primary/10 leading-snug break-words flex-1">
                                             {item.quantity} {item.unit}
-                                        </span>
-                                        <span className="text-[10px] font-bold uppercase tracking-widest opacity-60">
+                                        </div>
+                                        <span className="text-[10px] font-bold uppercase tracking-widest opacity-60 text-right whitespace-nowrap">
                                             {new Date(item.collected_at).toLocaleDateString()}
                                         </span>
                                     </div>
