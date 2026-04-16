@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import API from "../../services/api";
 
 const ContactPage = () => {
@@ -30,58 +31,76 @@ const ContactPage = () => {
     { label: "Telegram Support", value: "@SahyogSyncSupport", icon: "send", color: "bg-[#0088cc]" },
     { label: "Instagram Hub", value: "@sahyogsync_ngo", icon: "camera", color: "bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7]" },
     { label: "Official Email", value: "ops@sahyogsync.org", icon: "mail", color: "bg-primary" },
-    { label: "Office Line", value: "+91 11 2345 6789", icon: "call", color: "bg-emerald-500" },
+    { label: "Direct Line", value: "+91 11 2345 6789", icon: "call", color: "bg-emerald-500" },
   ];
 
   if (submitted) {
     return (
-      <div className="max-w-2xl mx-auto py-20 text-center animate-slide-up">
-        <div className="w-24 h-24 bg-primaryGradient text-white rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-xl rotate-12">
-            <span className="material-symbols-outlined text-[48px]">support_agent</span>
-        </div>
-        <h1 className="text-4xl font-black mb-4 tracking-tighter">Issue Reported!</h1>
-        <p className="text-on_surface_variant mb-10 text-xl max-w-md mx-auto">Your request has been prioritizedized and sent to the technical team. Ticket ID: #ISS-{Math.floor(Math.random() * 9000) + 1000}</p>
-        <button 
-            onClick={() => setSubmitted(false)}
-            className="px-10 py-4 bg-primary text-white rounded-2xl font-bold transition shadow-lg shadow-primary/30"
+      <div className="max-w-xl mx-auto py-24 px-6 text-center font-outfit">
+        <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white/60 backdrop-blur-xl border border-white/50 p-12 rounded-[3.5rem] shadow-2xl relative"
         >
-            Back to Support
-        </button>
+            <div className="w-24 h-24 bg-primaryGradient text-white rounded-[2rem] flex items-center justify-center mx-auto mb-8 shadow-xl rotate-12">
+                <span className="material-symbols-outlined text-[48px]">support_agent</span>
+            </div>
+            <h1 className="text-4xl font-black mb-4 tracking-tighter text-on_surface uppercase">Transmission Success</h1>
+            <p className="text-on_surface_variant mb-10 text-lg font-medium opacity-80 leading-relaxed">
+                Your report has been prioritized in the administrative queue. An operative will assess the situation soon.
+            </p>
+            <button 
+                onClick={() => setSubmitted(false)}
+                className="px-10 py-5 bg-primaryGradient text-white rounded-2xl font-black uppercase tracking-widest text-xs transition shadow-xl shadow-primary/25"
+            >
+                Return to Support
+            </button>
+        </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-5xl mx-auto space-y-12 pb-24">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div>
-            <h1 className="text-5xl font-black mb-3 tracking-tighter">Support Center</h1>
-            <p className="text-on_surface_variant text-xl opacity-70">Connect with us directly for partnership or technical inquiries.</p>
+    <div className="max-w-6xl mx-auto space-y-12 pb-24 px-6 font-outfit relative">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+          <div className="space-y-4">
+            <div className="inline-block px-4 py-1.5 bg-red-500/5 text-red-600 rounded-full text-[10px] font-black uppercase tracking-[0.2em] border border-red-500/10">
+                Operations Status: Active
+            </div>
+            <h1 className="text-6xl font-black tracking-tighter text-on_surface leading-[0.9]">
+                Global <br />
+                <span className="text-transparent bg-clip-text bg-primaryGradient">Support Hub</span>
+            </h1>
+            <p className="text-on_surface_variant text-xl font-medium opacity-60 max-w-lg">
+                Facing a technical blockade or scaling challenges? Connect with the core operations team.
+            </p>
           </div>
-          <div className="bg-surface_high px-6 py-3 rounded-2xl border border-white/5 flex items-center gap-3">
-               <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-               <span className="text-xs font-bold uppercase tracking-widest opacity-60">Avg. Response: 2 Hours</span>
+          <div className="bg-white/40 backdrop-blur-glass px-8 py-5 rounded-[2rem] border border-white/50 flex items-center gap-4 shadow-soft">
+               <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
+               <div className="flex flex-col">
+                   <span className="text-[9px] font-black uppercase tracking-[0.2em] opacity-40">System Response Time</span>
+                   <span className="text-lg font-black text-on_surface">~ 120 Minutes</span>
+               </div>
           </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-12">
         {/* SOCIAL CARDS */}
         <div className="lg:col-span-2 space-y-4">
-          <h2 className="text-sm font-black uppercase tracking-[0.2em] opacity-40 mb-6 flex items-center gap-2">
-              <span className="material-symbols-outlined text-[18px]">share</span>
-              Instant Channels
+          <h2 className="text-[10px] font-black uppercase tracking-[0.3em] opacity-30 mb-6 flex items-center gap-2 ml-4">
+              Direct Channels
           </h2>
           <div className="grid grid-cols-1 gap-4">
             {socialLinks.map((link) => (
-              <div key={link.label} className="group relative bg-surface_high p-6 rounded-3xl border border-white/5 overflow-hidden transition-all hover:-translate-y-1 hover:shadow-xl">
+              <div key={link.label} className="group relative bg-white/60 backdrop-blur-glass p-6 rounded-[2.5rem] border border-white/50 overflow-hidden transition-all hover:-translate-y-1 hover:shadow-xl hover:bg-white">
                 <div className={`absolute left-0 top-0 w-1.5 h-full ${link.color}`} />
-                <div className="flex items-center gap-5">
-                   <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white ${link.color} shadow-lg group-hover:scale-110 transition-transform`}>
-                        <span className="material-symbols-outlined">{link.icon}</span>
+                <div className="flex items-center gap-6">
+                   <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white ${link.color} shadow-lg transition-transform group-hover:scale-105 group-hover:rotate-3`}>
+                        <span className="material-symbols-outlined text-2xl">{link.icon}</span>
                    </div>
                    <div>
-                        <p className="text-[10px] font-black uppercase opacity-40 tracking-widest">{link.label}</p>
-                        <p className="font-bold text-lg">{link.value}</p>
+                        <p className="text-[10px] font-black uppercase opacity-40 tracking-[0.2em] mb-1">{link.label}</p>
+                        <p className="font-black text-lg text-on_surface">{link.value}</p>
                    </div>
                 </div>
               </div>
@@ -91,29 +110,33 @@ const ContactPage = () => {
 
         {/* ISSUE REQUEST FORM */}
         <div className="lg:col-span-3">
-           <div className="bg-surface_high p-8 md:p-10 rounded-[32px] border border-white/5 shadow-soft relative overflow-hidden h-full">
-                <div className="absolute top-0 right-0 p-8 opacity-5">
-                    <span className="material-symbols-outlined text-[120px]">bug_report</span>
+           <motion.div 
+             initial={{ opacity: 0, x: 20 }}
+             animate={{ opacity: 1, x: 0 }}
+             className="bg-white/80 backdrop-blur-[20px] p-8 md:p-12 rounded-[3.5rem] border border-white/50 shadow-2xl relative overflow-hidden h-full"
+           >
+                <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none">
+                    <span className="material-symbols-outlined text-[180px]">support</span>
                 </div>
                 
-                <h2 className="text-2xl font-black mb-8 flex items-center gap-2">
-                    <span className="material-symbols-outlined text-primary">campaign</span>
-                    Direct Issue Request
+                <h2 className="text-2xl font-black mb-10 flex items-center gap-3 text-on_surface uppercase tracking-tight">
+                    <span className="material-symbols-outlined text-primary text-3xl">terminal</span>
+                    Submit Priority Ticket
                 </h2>
 
-                <form onSubmit={handleSubmit} className="space-y-6 relative">
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-30 pl-2">Issue Category</label>
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <form onSubmit={handleSubmit} className="space-y-8 relative">
+                    <div className="space-y-3">
+                        <label className="text-[10px] font-black uppercase tracking-[0.3em] opacity-30 ml-4">Incident Category</label>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                             {["BUG", "FEATURE", "UI", "LOGISTICS"].map(cat => (
                                 <button
                                     key={cat}
                                     type="button"
                                     onClick={() => setFormData({...formData, category: cat})}
-                                    className={`py-3 rounded-xl text-[10px] font-black tracking-widest border transition-all ${
+                                    className={`py-4 rounded-2xl text-[10px] font-black tracking-widest border transition-all ${
                                         formData.category === cat 
-                                        ? "bg-primary border-primary text-white shadow-lg shadow-primary/20 scale-105" 
-                                        : "bg-surface_highest/40 border-white/5 hover:bg-surface_highest"
+                                        ? "bg-on_surface border-on_surface text-white shadow-xl scale-105" 
+                                        : "bg-surface_high/50 border-white/50 text-on_surface_variant hover:bg-white"
                                     }`}
                                 >
                                     {cat}
@@ -122,13 +145,13 @@ const ContactPage = () => {
                         </div>
                     </div>
 
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-[0.2em] opacity-30 pl-2">Description of Event</label>
+                    <div className="space-y-3">
+                        <label className="text-[10px] font-black uppercase tracking-[0.3em] opacity-30 ml-4">Brief Narrative</label>
                         <textarea
                             required
-                            rows={5}
-                            className="w-full bg-surface_highest/40 rounded-2xl p-6 border border-white/5 outline-none focus:border-primary/50 transition-colors text-lg"
-                            placeholder="Please explain the issue or your request in detail..."
+                            rows={6}
+                            className="w-full bg-surface_high/50 backdrop-blur-sm rounded-[2rem] p-8 border border-white/50 outline-none focus:border-primary/40 focus:ring-4 focus:ring-primary/5 transition-all text-lg font-medium"
+                            placeholder="Describe the technical blockade or your feature request..."
                             value={formData.content}
                             onChange={(e) => setFormData({...formData, content: e.target.value})}
                         />
@@ -137,13 +160,19 @@ const ContactPage = () => {
                     <button
                         type="submit"
                         disabled={submitting}
-                        className="w-full py-5 bg-primary text-white font-black rounded-2xl shadow-xl shadow-primary/30 hover:shadow-primary/40 hover:-translate-y-1 transition-all disabled:opacity-50 flex items-center justify-center gap-3 text-lg"
+                        className="w-full py-6 bg-primaryGradient text-white font-black rounded-2xl shadow-2xl shadow-primary/25 hover:shadow-primary/40 hover:scale-[1.01] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-4 text-sm uppercase tracking-[0.2em]"
                     >
-                        {submitting ? "Transmitting..." : "Report Issue to Admin"}
-                        <span className="material-symbols-outlined">shield</span>
+                        {submitting ? (
+                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        ) : (
+                            <>
+                                Initiate Uplink
+                                <span className="material-symbols-outlined text-[20px]">shield</span>
+                            </>
+                        )}
                     </button>
                 </form>
-           </div>
+           </motion.div>
         </div>
       </div>
     </div>

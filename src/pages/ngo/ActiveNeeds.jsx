@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import API from "../../services/api";
+import DispatchVolunteersModal from "./components/DispatchVolunteersModal";
 
 // Shared UI Components
 import MetricCard from "../../components/shared/MetricCard";
@@ -12,6 +13,7 @@ const ActiveNeeds = () => {
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
     const [filterCategory, setFilterCategory] = useState("ALL");
+    const [dispatchModal, setDispatchModal] = useState({ open: false, needId: null });
 
     useEffect(() => {
         loadNeeds();
@@ -145,7 +147,10 @@ const ActiveNeeds = () => {
                                             </div>
                                         </div>
 
-                                        <button className="w-full mt-8 py-4 bg-on_surface text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl group-hover:bg-primary transition-all">
+                                        <button 
+                                            onClick={() => setDispatchModal({ open: true, needId: need.id })}
+                                            className="w-full mt-8 py-4 bg-on_surface text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl group-hover:bg-primary transition-all active:scale-95"
+                                        >
                                             Deploy Resources
                                         </button>
                                     </motion.div>
@@ -155,6 +160,13 @@ const ActiveNeeds = () => {
                     )}
                 </div>
             </div>
+
+            <DispatchVolunteersModal 
+                open={dispatchModal.open}
+                needId={dispatchModal.needId}
+                onClose={() => setDispatchModal({ open: false, needId: null })}
+                onSuccess={loadNeeds}
+            />
         </div>
     );
 };

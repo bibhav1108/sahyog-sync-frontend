@@ -9,7 +9,9 @@ import { resolveProfileImage } from "../utils/imageUtils";
 const ADMIN_NAV_ITEMS = [
   { to: "/admin/dashboard", label: "Overview", icon: "dashboard" },
   { to: "/admin/organizations", label: "Organizations", icon: "corporate_fare" },
-  { to: "/admin/stats", label: "System Health", icon: "query_stats" },
+  { to: "/admin/volunteers", label: "Volunteers", icon: "groups" },
+  { to: "/admin/reviews", label: "Reviews", icon: "reviews" },
+  { to: "/admin/issues", label: "System Issues", icon: "bug_report" },
 ];
 
 const AdminLayout = ({ children }) => {
@@ -71,7 +73,7 @@ const AdminLayout = ({ children }) => {
           </div>
         </div>
 
-        <nav className="flex-1 space-y-1.5 text-sm">
+        <nav className="flex-1 space-y-1.5 text-sm overflow-y-auto custom-scrollbar pr-1">
           {ADMIN_NAV_ITEMS.map((item) => {
             const active = location.pathname === item.to;
             return (
@@ -126,7 +128,7 @@ const AdminLayout = ({ children }) => {
           )}
           
           <div className="flex flex-col">
-            <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest font-black text-on_surface_variant/60">
+            <div className="hidden sm:flex items-center gap-2 text-[10px] uppercase tracking-widest font-black text-on_surface_variant/60">
                 <span>Portal Control</span>
                 <span className="material-symbols-outlined text-[10px]">chevron_right</span>
                 <span className="text-primary">Admin</span>
@@ -146,9 +148,9 @@ const AdminLayout = ({ children }) => {
                         onClick={() => setProfileOpen(!profileOpen)}
                         className="flex items-center gap-3 group"
                     >
-                        <div className="hidden sm:flex flex-col items-end leading-none">
+                        <div className="flex flex-col items-end leading-none">
                             <span className="text-xs font-black text-on_surface">{user?.full_name || "Admin"}</span>
-                            <span className="text-[10px] font-bold text-on_surface_variant uppercase">System Superuser</span>
+                            <span className="text-[9px] font-black text-primary uppercase bg-primary/10 px-1.5 py-0.5 rounded mt-1">System Admin</span>
                         </div>
                         <div className="w-10 h-10 rounded-xl overflow-hidden shadow-lg shadow-primary/20 ring-2 ring-primary/20 transition-transform group-hover:scale-105">
                             <img 

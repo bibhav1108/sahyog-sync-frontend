@@ -7,13 +7,14 @@ export default {
       colors: {
         primary: "#0D7377",
         primary_container: "#14919B",
+        primary_subtle: "#F0F9F8", // New light green subtle background
         azure: "#14919B",
 
-        surface: "#FFF8F1",
-        surface_low: "#F9F3EB",
+        surface: "#FDF7F0", // Adjusted from #FFF8F1
+        surface_low: "#F7EFEC", // Adjusted from #F9F3EB
         surface_lowest: "#FFFFFF",
-        surface_high: "#EEE7DF",
-        surface_highest: "#E8E1DA",
+        surface_high: "#E9E1DB", // Darkened from #EEE7DF
+        surface_highest: "#DED5CD", // Darkened from #E8E1DA
 
         on_surface: "#1E1B17",
         on_surface_variant: "#5C4A3A",
@@ -41,7 +42,7 @@ export default {
         primaryGradient: "linear-gradient(135deg, #0D7377 0%, #14919B 100%)",
 
         shimmer:
-          "linear-gradient(90deg, transparent 0%, rgba(232,225,218,0.6) 50%, transparent 100%)",
+          "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)",
       },
 
       keyframes: {

@@ -3,6 +3,8 @@ import API from "../../../services/api";
 import { resolveProfileImage } from "../../../utils/imageUtils";
 import VerificationBadge from "../../../components/shared/VerificationBadge";
 import SkeletonStructure from "../../../components/shared/SkeletonStructure";
+import Modal from "../../../components/shared/Modal";
+import { useToast } from "../../../context/ToastContext";
 
 const DispatchVolunteersModal = ({ open, onClose, needId, onSuccess }) => {
   const [volunteers, setVolunteers] = useState([]);
@@ -11,6 +13,17 @@ const DispatchVolunteersModal = ({ open, onClose, needId, onSuccess }) => {
 
   const [loading, setLoading] = useState(false);
   const [volunteersLoading, setVolunteersLoading] = useState(false);
+  const { addToast } = useToast();
+
+  const filtered = volunteers.filter((v) =>
+    (v.name || "").toLowerCase().includes(search.toLowerCase()),
+  );
+
+  const selectedVols = volunteers.filter((v) => selected.includes(v.id));
+
+  const volunteerSkeletonLayout = [
+    { type: 'stack', gap: 3, items: Array(6).fill({ type: 'rect', height: 72, className: "rounded-2xl" }) }
+  ];
 
   useEffect(() => {
     if (open) loadVolunteers();
@@ -36,7 +49,7 @@ const DispatchVolunteersModal = ({ open, onClose, needId, onSuccess }) => {
 
   const handleDispatch = async () => {
     if (selected.length === 0) {
-      return alert("Select at least one volunteer");
+      return addToast("Select at least one volunteer", "warning");
     }
 
     try {
@@ -47,52 +60,41 @@ const DispatchVolunteersModal = ({ open, onClose, needId, onSuccess }) => {
         volunteer_ids: selected.map(Number),
       });
 
+      addToast("Team deployed successfully! 🚀", "success");
       onSuccess?.();
       onClose();
       setSelected([]);
     } catch (err) {
-      alert(err?.response?.data?.detail || "Failed to dispatch");
+      addToast(err?.response?.data?.detail || "Failed to dispatch", "error");
     } finally {
       setLoading(false);
     }
   };
 
-  if (!open) return null;
-
-  const filtered = volunteers.filter((v) =>
-    v.name.toLowerCase().includes(search.toLowerCase()) &&
-    v.status === "AVAILABLE"
-  );
-
-  const selectedVols = volunteers.filter((v) => selected.includes(v.id));
-
-  const volunteerSkeletonLayout = [
-    { type: 'stack', gap: 3, items: Array(6).fill({ type: 'rect', height: 64, className: "rounded-2xl" }) }
-  ];
-
   return (
-    <div
-      className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-xl flex items-center justify-center p-4 animate-fadeIn"
-      onClick={onClose}
+    <Modal
+      isOpen={open}
+      onClose={onClose}
+      title="Team Selection & Deployment"
+      maxWidth="max-w-6xl"
+      className="h-auto md:h-[85vh] !p-0"
+      showClose={false}
     >
-      <div
-        className="relative w-full max-w-6xl h-[95vh] md:h-[85vh] rounded-[3rem] border border-white/10 bg-surface_high/95 backdrop-blur-3xl shadow-2xl flex flex-col md:flex-row gap-6 p-6 pt-16 md:pt-14 overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div className="relative w-full h-auto md:h-full flex flex-col md:flex-row gap-4 sm:gap-6 p-4 sm:p-6 overflow-y-auto md:overflow-hidden">
         {/* CLOSE BUTTON */}
         <button
           onClick={onClose}
-          className="absolute top-6 right-6 w-12 h-12 flex items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-on_surface_variant hover:bg-error hover:text-white hover:border-error transition-all duration-300 shadow-lg z-10"
+          className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-xl bg-surface_high border border-on_surface/5 text-on_surface_variant hover:bg-error hover:text-white hover:border-error transition-all duration-300 shadow-lg z-20"
         >
-          <span className="material-symbols-outlined text-xl">close</span>
+          <span className="material-symbols-outlined text-base">close</span>
         </button>
 
         {/* LEFT PANEL: SELECTION */}
-        <div className="flex-[3] min-h-[45%] md:min-h-0 flex flex-col bg-white/5 border border-white/10 rounded-[2.5rem] p-8 overflow-hidden">
-          <div className="mb-8">
-            <p className="text-primary text-[10px] font-black uppercase tracking-[0.3em] mb-1">Resource Allocation</p>
-            <h2 className="text-3xl font-outfit font-black text-on_surface tracking-tight">Personnel Roster</h2>
-            <p className="text-xs font-bold text-on_surface_variant/40 mt-1">Select available operatives for deployment.</p>
+        <div className="flex-[3] min-h-0 flex flex-col bg-surface_high/30 border border-on_surface/5 rounded-[1.5rem] sm:rounded-[2.5rem] p-5 sm:p-8 overflow-hidden relative">
+          <div className="mb-6 sm:mb-8">
+            <p className="text-primary text-[9px] sm:text-[10px] font-black uppercase tracking-[0.3em] mb-1">Resource Allocation</p>
+            <h2 className="text-2xl sm:text-3xl font-outfit font-black text-on_surface tracking-tight">Personnel Roster</h2>
+            <p className="text-[10px] sm:text-xs font-bold text-on_surface_variant/40 mt-1">Select available operatives for deployment.</p>
           </div>
 
           <div className="relative mb-6">
@@ -101,11 +103,11 @@ const DispatchVolunteersModal = ({ open, onClose, needId, onSuccess }) => {
               placeholder="Search personnel database..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-12 pr-6 py-4 rounded-2xl bg-surface border border-white/10 focus:outline-none focus:border-primary/50 focus:ring-4 focus:ring-primary/5 transition-all text-sm font-bold"
+              className="w-full pl-12 pr-6 py-4 rounded-2xl bg-white border border-on_surface/5 focus:outline-none focus:border-primary/50 focus:ring-4 focus:ring-primary/5 transition-all text-sm font-bold shadow-sm"
             />
           </div>
 
-          <div className="flex-1 overflow-y-auto space-y-3 pr-4 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto min-h-[300px] md:min-h-0 space-y-3 pr-2 sm:pr-4 custom-scrollbar">
             {volunteersLoading ? (
               <SkeletonStructure layout={volunteerSkeletonLayout} />
             ) : filtered.length === 0 ? (
@@ -117,12 +119,12 @@ const DispatchVolunteersModal = ({ open, onClose, needId, onSuccess }) => {
                   key={v.id}
                   onClick={() => toggle(v.id)}
                   className={`group p-4 rounded-2xl cursor-pointer flex justify-between items-center border-2 transition-all duration-300
-                    ${isSelected ? "bg-primary/10 border-primary" : "bg-white/5 border-transparent hover:border-white/20 hover:bg-white/10"}
+                    ${isSelected ? "bg-primary/5 border-primary shadow-lg shadow-primary/5" : "bg-white/50 border-white hover:border-primary/20 hover:bg-white"}
                   `}
                 >
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-[1rem] overflow-hidden border border-white/10 shadow-lg">
-                      <img src={resolveProfileImage(v.profile_image_url)} alt={v.name} className="w-full h-full object-cover" />
+                    <div className="w-12 h-12 rounded-[1rem] overflow-hidden border border-on_surface/5 shadow-lg relative group">
+                      <img src={resolveProfileImage(v.profile_image_url)} alt={v.name} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
                     </div>
                     <div>
                         <div className="flex items-center gap-2">
@@ -132,7 +134,7 @@ const DispatchVolunteersModal = ({ open, onClose, needId, onSuccess }) => {
                         <p className="text-[9px] font-black uppercase tracking-[0.2em] text-green-500 mt-0.5">Ready for insertion</p>
                     </div>
                   </div>
-                  <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${isSelected ? "bg-primary border-primary scale-110 shadow-lg" : "border-white/20"}`}>
+                  <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${isSelected ? "bg-primary border-primary scale-110 shadow-lg" : "border-on_surface/10"}`}>
                     {isSelected && <span className="material-symbols-outlined text-white text-xs font-black">check</span>}
                   </div>
                 </div>
@@ -142,12 +144,12 @@ const DispatchVolunteersModal = ({ open, onClose, needId, onSuccess }) => {
         </div>
 
         {/* RIGHT PANEL: SUMMARY */}
-        <div className="flex-[2] min-h-[35%] md:min-h-0 flex flex-col bg-on_surface p-8 rounded-[2.5rem] shadow-2xl relative overflow-hidden group">
+        <div className="flex-[2] min-h-0 flex flex-col bg-primary/5 border-2 border-primary/10 p-5 sm:p-8 rounded-[1.5rem] sm:rounded-[2.5rem] shadow-2xl relative overflow-hidden group">
           <div className="absolute -right-20 -top-20 w-64 h-64 bg-primary opacity-10 blur-[100px] group-hover:opacity-20 transition-opacity" />
           
           <div className="relative z-10 flex flex-col h-full">
             <div className="flex items-center justify-between mb-8">
-              <h3 className="text-xl font-outfit font-black text-white tracking-tight">Active Team</h3>
+              <h3 className="text-lg sm:text-xl font-outfit font-black text-on_surface tracking-tight">Active Team</h3>
               <span className="bg-primary/20 text-primary border border-primary/20 px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest">
                 {selected.length} Units
               </span>
@@ -157,20 +159,20 @@ const DispatchVolunteersModal = ({ open, onClose, needId, onSuccess }) => {
               {volunteersLoading ? (
                 <SkeletonStructure layout={[{type: 'stack', gap: 3, items: Array(3).fill({type: 'rect', height: 48, className: "rounded-xl"})}]} />
               ) : selectedVols.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center opacity-20 space-y-4 py-20">
-                  <span className="material-symbols-outlined text-6xl">group_add</span>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-center">Team configuration pending selection</p>
+                <div className="h-full flex flex-col items-center justify-center opacity-20 space-y-4 py-10 sm:py-20">
+                  <span className="material-symbols-outlined text-4xl sm:text-5xl">group_add</span>
+                  <p className="text-[9px] font-black uppercase tracking-widest text-center">Team configuration pending selection</p>
                 </div>
               ) : (
                 selectedVols.map((v) => (
                   <div key={v.id} className="flex items-center justify-between bg-white/5 border border-white/5 p-3 rounded-2xl group/item hover:border-white/10 transition-all">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl overflow-hidden border border-white/10">
-                        <img src={resolveProfileImage(v.profile_image_url)} alt={v.name} className="w-full h-full object-cover" />
+                      <div className="w-10 h-10 rounded-xl overflow-hidden border border-white/10 shadow-lg">
+                        <img src={resolveProfileImage(v.profile_image_url)} alt={v.name} className="w-full h-full object-cover transition-transform group-hover/item:scale-110" />
                       </div>
-                      <span className="text-[11px] font-black text-white uppercase tracking-tight">{v.name}</span>
+                      <span className="text-[11px] font-black text-on_surface uppercase tracking-tight">{v.name}</span>
                     </div>
-                    <button onClick={() => toggle(v.id)} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-error/20 text-white/20 hover:text-error transition-all">
+                    <button onClick={() => toggle(v.id)} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-error/20 text-on_surface/20 hover:text-error transition-all">
                       <span className="material-symbols-outlined text-sm">close</span>
                     </button>
                   </div>
@@ -187,12 +189,12 @@ const DispatchVolunteersModal = ({ open, onClose, needId, onSuccess }) => {
                   : "bg-primaryGradient text-white hover:scale-[1.02] active:scale-95 shadow-primary/20 border-t border-white/20"}
               `}
             >
-              {loading ? "Initializing Deployment..." : `Confirm Dispatch Operations`}
+              {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto" /> : `Confirm Dispatch Operations`}
             </button>
           </div>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 };
 

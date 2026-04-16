@@ -22,13 +22,14 @@ const Skeleton = ({ variant = "rect", width, height, className = "" }) => {
         relative overflow-hidden bg-surface_highest
         ${isCircle ? "rounded-full" : isText ? "rounded" : "rounded-2xl"}
         ${className}
-        animate-pulse
       `}
       style={{
         width: typeof width === 'number' ? `${width}px` : width,
         height: typeof height === 'number' ? `${height}px` : height,
       }}
-    />
+    >
+      <div className="absolute inset-0 bg-shimmer animate-shimmer" />
+    </div>
   );
 };
 

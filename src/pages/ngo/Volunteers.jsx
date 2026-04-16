@@ -11,6 +11,7 @@ import ContentSection from "../../components/shared/ContentSection";
 import DataRow from "../../components/shared/DataRow";
 import ActionInput from "../../components/shared/ActionInput";
 import SkeletonStructure from "../../components/shared/SkeletonStructure";
+import Modal from "../../components/shared/Modal";
 
 const Volunteers = () => {
   const [activeTab, setActiveTab] = useState("members"); // "members" or "requests"
@@ -131,40 +132,40 @@ const Volunteers = () => {
       <div className="grid grid-cols-12 gap-6">
         <div className="col-span-12 lg:col-span-8">
             <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-                <p className="text-primary text-[10px] font-black uppercase tracking-[0.3em] mb-1">Resource Management</p>
-                <h1 className="text-4xl font-outfit font-black text-on_surface tracking-tight">Volunteer Force</h1>
+                <p className="text-primary text-[10px] sm:text-[10px] font-black uppercase tracking-[0.3em] mb-1">Resource Management</p>
+                <h1 className="text-3xl sm:text-4xl font-outfit font-black text-on_surface tracking-tight">Volunteer Force</h1>
                 <p className="text-xs font-bold text-on_surface_variant/60 mt-1">Deploying human intelligence across active operations.</p>
             </motion.div>
         </div>
-        <div className="col-span-12 lg:col-span-4 flex justify-end items-center gap-4">
-             <MetricCard label="Active Personnel" value={volunteers.length} icon="groups" className="w-full max-w-[200px]" />
+        <div className="col-span-12 lg:col-span-4 flex justify-center lg:justify-end items-center gap-4">
+             <MetricCard label="Active Personnel" value={volunteers.length} icon="groups" className="w-full max-w-[220px]" />
         </div>
       </div>
 
       {/* TABS & ACTIONS */}
-      <div className="flex flex-wrap items-center justify-between gap-6 border-b border-white/10 pb-4">
-        <div className="flex gap-2 p-1 bg-surface_high rounded-2xl">
-          {[
-            { id: "members", label: "Team Members", icon: "badge" },
-            { id: "requests", label: "Join Requests", icon: "person_add", badge: requests.length > 0 }
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
-                activeTab === tab.id
-                  ? "bg-white text-on_surface shadow-xl"
-                  : "text-on_surface_variant/60 hover:text-on_surface"
-              }`}
-            >
-              <span className="material-symbols-outlined text-sm">{tab.icon}</span>
-              {tab.label}
-              {tab.badge && <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span>}
-            </button>
-          ))}
-        </div>
-
-        <div className="flex items-center gap-3 flex-1 lg:flex-none justify-end">
+        <div className="flex flex-col sm:flex-row items-center sm:items-center justify-between gap-6 border-b border-white/10 pb-6">
+          <div className="flex gap-2 p-1.5 bg-surface_high rounded-2xl overflow-x-auto custom-scrollbar shadow-inner">
+            {[
+              { id: "members", label: "Members", icon: "badge" },
+              { id: "requests", label: "Requests", icon: "person_add", badge: requests.length > 0 }
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-2 px-4 sm:px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${
+                  activeTab === tab.id
+                    ? "bg-white text-on_surface shadow-xl"
+                    : "text-on_surface_variant/60 hover:text-on_surface"
+                }`}
+              >
+                <span className="material-symbols-outlined text-sm">{tab.icon}</span>
+                {tab.label}
+                {tab.badge && <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span>}
+              </button>
+            ))}
+          </div>
+  
+          <div className="flex items-center gap-3 flex-1 lg:flex-none justify-between sm:justify-end">
             {activeTab === "members" && (
                 <div className="relative flex-1 lg:w-64">
                     <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-sm opacity-30">search</span>
@@ -190,9 +191,9 @@ const Volunteers = () => {
                         <SkeletonStructure layout={volunteerSkeletonLayout} />
                     </div>
                 ) : (
-                    <div className="divide-y divide-white/5">
+                    <div className="divide-y divide-white/10 bg-surface_high/40 rounded-[2rem] border border-white/20 overflow-hidden shadow-inner">
                         {filtered.map((v) => (
-                            <div key={v.id} onClick={() => setSelected(v)} className="group flex items-center justify-between p-4 px-6 hover:bg-white/40 cursor-pointer transition-all">
+                            <div key={v.id} onClick={() => setSelected(v)} className="group flex items-center justify-between p-4 px-6 hover:bg-white/60 cursor-pointer transition-all">
                                 <div className="flex items-center gap-4">
                                     <div className="w-10 h-10 rounded-xl overflow-hidden border border-primary/10 shadow-sm group-hover:scale-110 transition-transform">
                                         <img src={resolveProfileImage(v.profile_image_url)} alt={v.name} className="w-full h-full object-cover" />
@@ -236,7 +237,7 @@ const Volunteers = () => {
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 0.9 }}
-                                className="bg-surface_high/60 backdrop-blur-sm p-6 rounded-[2rem] border border-white hover:bg-white/80 transition-all group"
+                                className="bg-surface_high/80 backdrop-blur-md p-6 rounded-[2.5rem] border border-white/40 shadow-xl hover:bg-white transition-all group"
                             >
                                 <div className="flex items-center gap-4 mb-6">
                                     <div className="w-14 h-14 rounded-2xl overflow-hidden border-2 border-primary/10 shadow-xl group-hover:rotate-3 transition-transform">
@@ -275,108 +276,116 @@ const Volunteers = () => {
       </div>
 
       {/* CREATE FORM MODAL */}
-      <AnimatePresence>
-        {showForm && (
-            <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4">
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setShowForm(false)} />
-                <motion.div initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }} className="bg-surface_high w-full max-w-md p-8 rounded-[3rem] border border-white/20 relative shadow-2xl overflow-hidden">
-                    <div className="absolute top-0 left-0 w-full h-2 bg-primaryGradient opacity-50" />
-                    <h2 className="font-outfit font-black text-3xl text-on_surface tracking-tight mb-6">New Personnel</h2>
-                    <div className="space-y-4">
-                        <ActionInput label="Full Operational Name" placeholder="e.g. John Wick" value={form.name} onChange={(val) => setForm({...form, name: val})} />
-                        <ActionInput label="Secured Phone Number" placeholder="+91..." value={form.phone_number} onChange={(val) => setForm({...form, phone_number: val})} />
-                        <ActionInput label="Deployable Zone" placeholder="e.g. Central Sector" value={form.zone} onChange={(val) => setForm({...form, zone: val})} />
-                        <button onClick={handleCreate} disabled={creating} className="w-full py-4 bg-on_surface text-white rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-xl hover:-translate-y-1 transition-all">
-                            {creating ? "Integrating..." : "Authorize Personnel"}
-                        </button>
-                    </div>
-                </motion.div>
+      <Modal
+        isOpen={showForm}
+        onClose={() => setShowForm(false)}
+        title="New Personnel"
+        maxWidth="max-w-md"
+      >
+        <div className="space-y-6">
+            <p className="text-xs font-bold text-on_surface_variant/60 leading-relaxed italic border-l-4 border-primary/20 pl-4">Authorize and integrate new human resources into the operational network.</p>
+            <div className="space-y-4">
+                <ActionInput label="Full Operational Name" placeholder="e.g. John Wick" value={form.name} onChange={(val) => setForm({...form, name: val})} />
+                <ActionInput label="Secured Phone Number" placeholder="+91..." value={form.phone_number} onChange={(val) => setForm({...form, phone_number: val})} />
+                <ActionInput label="Deployable Zone" placeholder="e.g. Central Sector" value={form.zone} onChange={(val) => setForm({...form, zone: val})} />
+                <button onClick={handleCreate} disabled={creating} className="w-full py-4 mt-4 bg-on_surface text-white rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-xl hover:-translate-y-1 transition-all flex items-center justify-center gap-3">
+                    {creating && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+                    {creating ? "Integrating..." : "Authorize Personnel"}
+                </button>
             </div>
-        )}
-      </AnimatePresence>
+        </div>
+      </Modal>
 
       {/* DETAIL MODAL */}
-      <AnimatePresence>
+      <Modal
+        isOpen={!!selected}
+        onClose={() => setSelected(null)}
+        maxWidth="max-w-2xl"
+        className="!p-0"
+        showClose={false}
+      >
         {selected && (
-            <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4">
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => setSelected(null)} />
-                <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.8, opacity: 0 }} className="bg-surface_high w-full max-w-2xl rounded-[3rem] border border-white/20 relative shadow-2xl overflow-hidden max-h-[90vh] custom-scrollbar">
-                    <div className="h-40 bg-primaryGradient relative">
-                        <button onClick={() => setSelected(null)} className="absolute top-6 right-6 w-10 h-10 bg-white/20 hover:bg-white/30 text-white rounded-full flex items-center justify-center backdrop-blur-md transition-all">
-                            <span className="material-symbols-outlined text-sm">close</span>
-                        </button>
+            <div className="relative">
+                <div className="h-40 bg-primaryGradient relative">
+                    <button onClick={() => setSelected(null)} className="absolute top-6 right-6 w-10 h-10 bg-white/20 hover:bg-white/30 text-white rounded-full flex items-center justify-center backdrop-blur-md transition-all z-10">
+                        <span className="material-symbols-outlined text-sm">close</span>
+                    </button>
+                    <div className="absolute inset-0 bg-gradient-to-t from-surface_high to-transparent opacity-60" />
+                </div>
+                
+                <div className="px-10 pb-12">
+                    <div className="relative -mt-16 mb-8 flex justify-center sm:justify-start">
+                        <div className="w-32 h-32 rounded-[2.5rem] overflow-hidden border-8 border-surface_high shadow-2xl relative group">
+                            <img src={resolveProfileImage(selected.profile_image_url)} alt={selected.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                            <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
                     </div>
-                    
-                    <div className="px-10 pb-12">
-                        <div className="relative -mt-16 mb-8 flex justify-center sm:justify-start">
-                            <div className="w-32 h-32 rounded-[2.5rem] overflow-hidden border-8 border-surface_high shadow-2xl">
-                                <img src={resolveProfileImage(selected.profile_image_url)} alt={selected.name} className="w-full h-full object-cover" />
+
+                    <div className="flex flex-col sm:flex-row justify-between items-start gap-8">
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-3">
+                                <h2 className="text-4xl font-outfit font-black text-on_surface tracking-tight">{selected.name}</h2>
+                                <VerificationBadge trustTier={selected.trust_tier} telegramActive={selected.telegram_active} />
+                            </div>
+                            <div className="flex items-center gap-4 text-xs font-bold text-on_surface_variant/60">
+                                <span className="flex items-center gap-1.5 bg-surface_high px-3 py-1 rounded-lg"><span className="material-symbols-outlined text-sm">call</span>{selected.phone_number}</span>
+                                {selected.zone && <span className="flex items-center gap-1.5 bg-surface_high px-3 py-1 rounded-lg"><span className="material-symbols-outlined text-sm">location_on</span>{selected.zone}</span>}
                             </div>
                         </div>
-
-                        <div className="flex flex-col sm:flex-row justify-between items-start gap-8">
-                            <div className="space-y-2">
-                                <div className="flex items-center gap-3">
-                                    <h2 className="text-4xl font-outfit font-black text-on_surface tracking-tight">{selected.name}</h2>
-                                    <VerificationBadge trustTier={selected.trust_tier} telegramActive={selected.telegram_active} />
-                                </div>
-                                <div className="flex items-center gap-4 text-xs font-bold text-on_surface_variant/60">
-                                    <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-sm">call</span>{selected.phone_number}</span>
-                                    {selected.zone && <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-sm">location_on</span>{selected.zone}</span>}
-                                </div>
-                            </div>
-                            
-                            <div className={`px-6 py-3 rounded-2xl border-2 flex flex-col items-center ${
-                                selected.status === 'AVAILABLE' ? "border-green-500/20 bg-green-500/5 text-green-500" : 
-                                selected.status === 'ON_MISSION' ? "border-primary/20 bg-primary/5 text-primary" : 
-                                "border-white/10 bg-white/5 text-on_surface_variant"
-                            }`}>
-                                <span className="text-[9px] font-black uppercase tracking-widest opacity-50 mb-1">Current Status</span>
-                                <span className="text-xl font-black">{selected.status}</span>
-                            </div>
+                        
+                        <div className={`px-6 py-3 rounded-2xl border-2 flex flex-col items-center shadow-lg ${
+                            selected.status === 'AVAILABLE' ? "border-green-500/20 bg-green-500/5 text-green-500 shadow-green-500/5" : 
+                            selected.status === 'ON_MISSION' ? "border-primary/20 bg-primary/5 text-primary shadow-primary/5" : 
+                            "border-white/10 bg-white/5 text-on_surface_variant shadow-on_surface/5"
+                        }`}>
+                            <span className="text-[9px] font-black uppercase tracking-widest opacity-50 mb-1">Current Status</span>
+                            <span className="text-xl font-black uppercase tracking-tight">{selected.status}</span>
                         </div>
+                    </div>
 
-                        <div className="grid grid-cols-3 gap-4 mt-10">
-                            {[
-                                { label: "Confidence", value: `${selected.trust_score}%`, color: "text-primary" },
-                                { label: "Missions", value: selected.completions, color: "text-on_surface" },
-                                { label: "Service", value: `${(selected.hours_served || 0).toFixed(1)}h`, color: "text-on_surface" }
-                            ].map((stat, i) => (
-                                <div key={i} className="bg-white/40 p-5 rounded-3xl border border-white text-center">
-                                    <p className="text-[9px] font-black uppercase tracking-widest text-on_surface_variant/40 mb-1 leading-none">{stat.label}</p>
-                                    <p className={`text-2xl font-black ${stat.color}`}>{stat.value}</p>
-                                </div>
-                            ))}
-                        </div>
+                    <div className="grid grid-cols-3 gap-4 mt-10">
+                        {[
+                            { label: "Confidence", value: `${selected.trust_score}%`, color: "text-primary" },
+                            { label: "Missions", value: selected.completions, color: "text-on_surface" },
+                            { label: "Service", value: `${(selected.hours_served || 0).toFixed(1)}h`, color: "text-on_surface" }
+                        ].map((stat, i) => (
+                            <div key={i} className="bg-white p-6 rounded-[2rem] border border-on_surface/5 text-center shadow-sm hover:shadow-md transition-shadow">
+                                <p className="text-[9px] font-black uppercase tracking-widest text-on_surface_variant/40 mb-1 leading-none">{stat.label}</p>
+                                <p className={`text-2xl font-black ${stat.color}`}>{stat.value}</p>
+                            </div>
+                        ))}
+                    </div>
 
-                        {/* ID Panel */}
-                        {!selected.id_verified && selected.aadhaar_last_4 && (
-                            <div className="mt-10 p-6 bg-primary/10 rounded-[2.5rem] border-2 border-primary/20 animate-pulse">
-                                <div className="flex flex-col sm:flex-row justify-between items-center gap-6">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-primary shadow-lg">
-                                            <span className="material-symbols-outlined text-3xl">fingerprint</span>
-                                        </div>
-                                        <div>
-                                            <p className="text-[10px] font-black uppercase tracking-widest text-primary mb-1">Identity Control Locked</p>
-                                            <p className="text-sm font-bold text-on_surface truncate">Aadhaar Verification: <span className="text-primary font-black ml-1 tracking-widest">****{selected.aadhaar_last_4}</span></p>
-                                        </div>
+                    {/* ID Panel */}
+                    {!selected.id_verified && selected.aadhaar_last_4 && (
+                        <div className="mt-10 p-8 bg-primaryGradient/10 rounded-[2.5rem] border-2 border-primary/20 relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                                <span className="material-symbols-outlined text-9xl">verified_user</span>
+                            </div>
+                            <div className="relative flex flex-col sm:flex-row justify-between items-center gap-6">
+                                <div className="flex items-center gap-5">
+                                    <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-primary shadow-xl rotate-3 group-hover:rotate-0 transition-transform">
+                                        <span className="material-symbols-outlined text-3xl font-black">fingerprint</span>
                                     </div>
-                                    <button
-                                        disabled={actionLoading === `verify-${selected.id}`}
-                                        onClick={() => handleVerifyId(selected.id)}
-                                        className="w-full sm:w-auto px-8 py-3 bg-primaryGradient text-white text-[11px] font-black uppercase tracking-widest rounded-2xl shadow-xl hover:-translate-y-1 transition-all disabled:opacity-50"
-                                    >
-                                        {actionLoading === `verify-${selected.id}` ? "Authorizing..." : "Confirm Identity"}
-                                    </button>
+                                    <div>
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-primary mb-1">Identity Control Pending</p>
+                                        <p className="text-sm font-bold text-on_surface">Aadhaar Key: <span className="text-primary font-black ml-1 tracking-widest">****{selected.aadhaar_last_4}</span></p>
+                                    </div>
                                 </div>
+                                <button
+                                    disabled={actionLoading === `verify-${selected.id}`}
+                                    onClick={() => handleVerifyId(selected.id)}
+                                    className="w-full sm:w-auto px-10 py-4 bg-on_surface text-white text-[11px] font-black uppercase tracking-widest rounded-2xl shadow-xl hover:bg-primary transition-all disabled:opacity-50"
+                                >
+                                    {actionLoading === `verify-${selected.id}` ? "Authorizing..." : "Confirm Identity"}
+                                </button>
                             </div>
-                        )}
-                    </div>
-                </motion.div>
+                        </div>
+                    )}
+                </div>
             </div>
         )}
-      </AnimatePresence>
+      </Modal>
     </div>
   );
 };

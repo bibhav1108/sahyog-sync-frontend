@@ -6,7 +6,7 @@ const MetricCard = ({ label, value, icon, highlight = false, delay = "0ms", clas
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ delay: parseFloat(delay) / 1000 }}
-    className={`p-6 rounded-[2rem] flex flex-col items-center justify-center text-center border-2 border-white shadow-soft hover:scale-[1.03] transition-all cursor-default group ${
+    className={`p-4 sm:p-6 rounded-[2rem] flex flex-col items-center justify-center text-center border-2 border-white shadow-soft hover:scale-[1.03] transition-all cursor-default group ${
       highlight ? "bg-primaryGradient text-white shadow-lg shadow-primary/25 border-none" : "bg-surface_lowest"
     } ${className}`}
   >

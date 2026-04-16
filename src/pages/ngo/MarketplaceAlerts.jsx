@@ -20,7 +20,7 @@ const MarketplaceAlerts = () => {
     try {
       if (init) setInitialLoading(true);
       if (!init && !silent) setRefreshing(true);
-      const res = await API.get("/marketplace/needs/alerts");
+      const res = await API.get("marketplace/needs/alerts");
       setAlerts(res.data || []);
     } catch {
       addToast("Failed to sync marketplace signals", "error");
@@ -41,7 +41,7 @@ const MarketplaceAlerts = () => {
   const claimAlert = async (id) => {
     try {
       setLoadingId(id);
-      await API.post(`/marketplace/needs/alerts/${id}/convert`);
+      await API.post(`marketplace/needs/alerts/${id}/convert`);
       setAlerts((prev) => prev.filter((a) => a.id !== id));
       addToast("Signal converted into high-priority need! 📡", "success");
     } catch (err) {
@@ -115,15 +115,24 @@ const MarketplaceAlerts = () => {
                                             <span className="material-symbols-outlined text-3xl">priority_high</span>
                                         </div>
                                         <div className="space-y-1">
-                                            <h4 className="text-lg font-black text-on_surface uppercase tracking-tight">{alert.description}</h4>
+                                            <div className="flex items-center gap-3">
+                                                <h4 className="text-lg font-black text-on_surface uppercase tracking-tight">
+                                                    {alert.item && alert.item !== "N/A" ? alert.item : "Donation Item"}
+                                                </h4>
+                                                {alert.quantity && alert.quantity !== "N/A" && (
+                                                    <span className="px-3 py-1 bg-primary/10 text-primary text-[10px] font-black rounded-lg border border-primary/20">
+                                                        {alert.quantity}
+                                                    </span>
+                                                )}
+                                            </div>
                                             <div className="flex flex-wrap gap-4 pt-1">
                                                 <div className="flex items-center gap-1.5 opacity-40">
                                                     <span className="material-symbols-outlined text-sm font-black text-primary">person</span>
-                                                    <span className="text-[9px] font-black uppercase tracking-widest">{alert.donor_name}</span>
+                                                    <span className="text-[9px] font-black uppercase tracking-widest">{alert.donor_name || "Anonymous"}</span>
                                                 </div>
                                                 <div className="flex items-center gap-1.5 opacity-40">
                                                     <span className="material-symbols-outlined text-sm font-black text-primary">location_on</span>
-                                                    <span className="text-[9px] font-black uppercase tracking-widest">{alert.location_address}</span>
+                                                    <span className="text-[9px] font-black uppercase tracking-widest">{alert.location && alert.location !== "N/A" ? alert.location : "Location not specified"}</span>
                                                 </div>
                                             </div>
                                         </div>

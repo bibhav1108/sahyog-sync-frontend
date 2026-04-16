@@ -52,10 +52,10 @@ const NGODashboard = () => {
     const load = async () => {
       try {
         const [n, v, c, a] = await Promise.all([
-          API.get("/needs"),
-          API.get("/volunteers/"),
-          API.get("/campaigns"),
-          API.get("/audit/"),
+          API.get("needs"),
+          API.get("volunteers/"),
+          API.get("campaigns"),
+          API.get("audit/"),
         ]);
 
         setNeeds(n.data || []);
@@ -121,19 +121,19 @@ const NGODashboard = () => {
     <div className="grid grid-cols-12 gap-8 selection:bg-primary/10">
       <div className="col-span-12 lg:col-span-8 space-y-8">
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-          <p className="text-primary text-[10px] font-black uppercase tracking-[0.3em] mb-1">
+          <p className="text-primary text-[10px] sm:text-[10px] font-black uppercase tracking-[0.3em] mb-1">
             Operations Intelligence
           </p>
-          <h1 className="text-4xl font-outfit font-black text-on_surface tracking-tight">NGO Dashboard</h1>
+          <h1 className="text-3xl sm:text-4xl font-outfit font-black text-on_surface tracking-tight">NGO Dashboard</h1>
         </motion.div>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          <MetricCard title="Active Needs" value={activeNeeds.length} icon="inventory_2" delay="100ms" />
-          <MetricCard title="Active Campaigns" value={activeCampaigns.length} icon="campaign" delay="200ms" />
-          <MetricCard title="Total Volunteers" value={volunteers.length} icon="groups" highlight delay="300ms" />
+        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-3">
+          <MetricCard label="Active Needs" value={activeNeeds.length} icon="inventory_2" delay="100ms" className="bg-white/80" />
+          <MetricCard label="Active Campaigns" value={activeCampaigns.length} icon="campaign" delay="200ms" className="bg-white/80" />
+          <MetricCard label="Total Volunteers" value={volunteers.length} icon="groups" highlight delay="300ms" />
         </div>
 
-        <div className="relative z-0 h-[420px] rounded-[2rem] bg-surface_high border-2 border-white overflow-hidden shadow-soft animate-fadeIn" style={{ animationDelay: '400ms' }}>
+        <div className="relative z-0 h-[300px] sm:h-[420px] rounded-[1.5rem] sm:rounded-[2rem] bg-surface_high/60 border-2 border-white/20 overflow-hidden shadow-soft animate-fadeIn" style={{ animationDelay: '400ms' }}>
           <MapContainer center={center} zoom={6} className="z-0 h-full w-full">
             <TileLayer 
               url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}" 

@@ -1,45 +1,90 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import logo from "../assets/logo.png";
 
 const PublicNavbar = () => {
+  const [scrolled, setScrolled] = useState(false);
+
+  // Handle scroll effect
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const navLinks = [
+    { name: "Live Insights", path: "/#features" },
+    { name: "NGO Network", path: "/#network" },
+    { name: "About Us", path: "/#about" },
+  ];
+
   return (
-    <nav className="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md border-b border-white/5">
-      <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+    <nav 
+      className={`fixed top-0 w-full z-[100] transition-all duration-500 ${
+        scrolled 
+          ? "py-3 bg-white/90 backdrop-blur-xl border-b border-primary/10 shadow-lg" 
+          : "py-6 bg-transparent"
+      }`}
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 flex justify-between items-center gap-2">
         {/* LOGO + NAME */}
-        <Link to="/" className="flex items-center gap-3">
-          <img
-            src={logo}
-            alt="Sahyog Sync Logo"
-            className="h-10 w-10 object-contain"
-          />
-          <span className="text-lg font-outfit font-semibold text-primary tracking-tight">
-            Sahyog Sync
-          </span>
+        <Link to="/" className="flex items-center gap-2 sm:gap-4 group shrink-0">
+          <div className="relative">
+            <div className="absolute inset-0 bg-primary/20 blur-lg rounded-full group-hover:bg-primary/40 transition-all duration-500" />
+            <img
+              src={logo}
+              alt="Sahyog Sync Logo"
+              className="h-10 w-10 sm:h-16 sm:w-16 object-contain relative z-10 transition-transform duration-500 group-hover:scale-110"
+            />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-lg sm:text-2xl font-outfit font-black text-on_surface tracking-tight group-hover:text-primary transition-colors duration-300">
+              Sahyog <span className="text-primary group-hover:text-on_surface transition-colors">Sync</span>
+            </span>
+            <span className="hidden sm:block text-[10px] font-black uppercase tracking-[0.3em] text-on_surface_variant/40 leading-none mt-0.5">Tactics & Logistics</span>
+          </div>
         </Link>
 
-        {/* BUTTONS */}
-        <div className="flex items-center gap-4">
-          <Link
-            to="/login"
-            className="text-sm font-bold text-on_surface_variant hover:text-primary transition-colors px-3 py-2"
-          >
-            Log In
-          </Link>
+        {/* ACTIONS & NAV */}
+        <div className="flex items-center gap-3 sm:gap-8">
+          {/* DESKTOP LINKS */}
+          <div className="hidden lg:flex items-center gap-6 pr-6 border-r border-on_surface/5">
+            {navLinks.map((link) => (
+              <Link
+                key={link.name}
+                to={link.path}
+                className="text-[10px] font-black uppercase tracking-widest text-on_surface_variant/70 hover:text-primary transition-colors relative group"
+              >
+                {link.name}
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full" />
+              </Link>
+            ))}
+          </div>
 
-          <Link
-            to="/register"
-            className="
-              px-6 py-2.5 rounded-xl
-              bg-primaryGradient
-              text-white text-sm font-bold
-              shadow-[0_4px_15px_rgba(var(--color-primary),0.3)]
-              hover:shadow-[0_6px_20px_rgba(var(--color-primary),0.4)]
-              hover:scale-105 active:scale-95
-              transition-all duration-300
-            "
-          >
-            Get Started
-          </Link>
+          <div className="flex items-center gap-2 sm:gap-4">
+            <Link
+              to="/login"
+              className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-on_surface hover:text-primary transition-colors px-2 sm:px-4 py-2"
+            >
+              Log In
+            </Link>
+
+            <Link
+              to="/register"
+              className="
+                px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl
+                bg-primaryGradient
+                text-white text-[10px] sm:text-xs font-black uppercase tracking-[0.2em]
+                shadow-lg shadow-primary/10
+                hover:shadow-xl hover:shadow-primary/20
+                hover:-translate-y-0.5 transition-all duration-300
+              "
+            >
+              Join Now
+            </Link>
+          </div>
         </div>
       </div>
     </nav>

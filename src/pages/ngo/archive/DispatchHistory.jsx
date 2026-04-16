@@ -74,13 +74,13 @@ const DispatchHistory = () => {
     return (
         <div className="space-y-8 selection:bg-primary/10 animate-fadeIn">
             {/* HEADER */}
-            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+            <div className="flex flex-col lg:flex-row justify-between items-center lg:items-center gap-8 text-center lg:text-left">
                 <div>
                     <p className="text-primary text-[10px] font-black uppercase tracking-[0.3em] mb-1">Execution Intelligence</p>
                     <h1 className="text-4xl font-outfit font-black text-on_surface tracking-tight">Dispatch Timeline</h1>
                     <p className="text-xs font-bold text-on_surface_variant/60 mt-1">Archived logs of completed tactical deployments and resource transfers.</p>
                 </div>
-                <div className="flex gap-4">
+                <div className="flex justify-center w-full lg:w-auto">
                     <MetricCard label="Archived Ops" value={dispatches.length} icon="history" variant="primary" />
                 </div>
             </div>

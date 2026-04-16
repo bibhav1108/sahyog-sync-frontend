@@ -44,7 +44,7 @@ const Landing = () => {
 
               <motion.h1
                 variants={fadeIn}
-                className="text-5xl md:text-7xl font-outfit font-extrabold leading-[1.1] tracking-tight text-on_surface"
+                className="text-4xl sm:text-5xl md:text-7xl font-outfit font-extrabold leading-[1.1] tracking-tight text-on_surface"
               >
                 Empower Your NGO with{" "}
                 <span className="text-primary bg-clip-text text-transparent bg-primaryGradient">
@@ -92,7 +92,7 @@ const Landing = () => {
                 <img
                   src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=2070&auto=format&fit=crop"
                   alt="NGO Coordination"
-                  className="rounded-xl w-full h-[500px] object-cover shadow-inner"
+                  className="rounded-xl w-full h-[300px] sm:h-[400px] md:h-[500px] object-cover shadow-inner"
                 />
 
                 <motion.div
@@ -117,16 +117,16 @@ const Landing = () => {
         </section>
 
         {/* ================= PROBLEM ================= */}
-        <section className="py-32 px-6 md:px-16 bg-surface_lowest relative overflow-hidden">
+        <section className="py-20 md:py-32 px-6 md:px-16 bg-surface_lowest relative overflow-hidden">
           <div className="absolute top-0 right-0 w-full h-px bg-gradient-to-r from-transparent via-primary/10 to-transparent"></div>
 
-          <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-20 items-center">
+          <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             <motion.div
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, margin: "-100px" }}
               variants={staggerContainer}
-              className="grid grid-cols-2 gap-6"
+              className="grid grid-cols-1 sm:grid-cols-2 gap-6"
             >
               {[
                 {
@@ -149,7 +149,7 @@ const Landing = () => {
                 <motion.div
                   variants={fadeIn}
                   key={i}
-                  className="bg-surface p-6 rounded-2xl shadow-soft hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border border-primary/5 hover:border-primary/20 group"
+                  className="bg-surface p-5 sm:p-6 rounded-2xl shadow-soft hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border border-primary/5 hover:border-primary/20 group"
                 >
                   <div className="w-10 h-10 rounded-full bg-azure/10 flex items-center justify-center mb-4 group-hover:bg-primary transition-colors duration-300">
                     <span className="text-primary group-hover:text-white font-bold text-sm">
@@ -199,7 +199,7 @@ const Landing = () => {
         </section>
 
         {/* ================= FEATURES ================= */}
-        <section className="py-32 px-6 md:px-16 bg-surface relative">
+        <section className="py-20 md:py-32 px-6 md:px-16 bg-surface relative">
           <div className="max-w-7xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -226,7 +226,7 @@ const Landing = () => {
               {/* Feature 1 */}
               <motion.div
                 variants={fadeIn}
-                className="md:col-span-8 bg-white/60 backdrop-blur-glass p-10 rounded-3xl shadow-soft hover:shadow-lg transition-all duration-300 border border-white hover:border-primary/20 relative overflow-hidden group"
+                className="md:col-span-8 bg-white/60 backdrop-blur-glass p-6 sm:p-10 rounded-3xl shadow-soft hover:shadow-lg transition-all duration-300 border border-white hover:border-primary/20 relative overflow-hidden group"
               >
                 <div className="absolute top-0 right-0 w-64 h-64 bg-azure/5 rounded-full blur-3xl group-hover:bg-azure/10 transition-colors" />
                 <h3 className="text-3xl font-outfit font-bold mb-4 text-on_surface">
@@ -242,7 +242,7 @@ const Landing = () => {
               {/* Feature 2 */}
               <motion.div
                 variants={fadeIn}
-                className="md:col-span-4 bg-primaryGradient text-white p-10 rounded-3xl shadow-lg hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group"
+                className="md:col-span-4 bg-primaryGradient text-white p-6 sm:p-10 rounded-3xl shadow-lg hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group"
               >
                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-all" />
                 <div className="h-full flex flex-col justify-between relative z-10">
@@ -304,7 +304,7 @@ const Landing = () => {
         </section>
 
         {/* ================= DARK ================= */}
-        <section className="py-32 px-6 md:px-16 bg-[#1A2F2F] text-white overflow-hidden relative">
+        <section className="py-20 md:py-32 px-6 md:px-16 bg-[#1A2F2F] text-white overflow-hidden relative">
           <div className="absolute top-0 right-0 w-96 h-96 bg-primary/20 blur-[120px] rounded-full"></div>
 
           <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-20 items-center">
@@ -356,14 +356,14 @@ const Landing = () => {
               <img
                 src="https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&w=1200&q=80"
                 alt="Logistics Coordination"
-                className="w-full h-[500px] object-cover scale-105 hover:scale-100 transition-transform duration-700"
+                className="w-full h-[300px] md:h-[500px] object-cover scale-105 hover:scale-100 transition-transform duration-700"
               />
             </motion.div>
           </div>
         </section>
 
         {/* ================= CTA ================= */}
-        <section className="py-32 px-6 text-center bg-surface relative overflow-hidden">
+        <section className="py-20 md:py-32 px-6 text-center bg-surface relative overflow-hidden">
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5 mix-blend-overlay"></div>
 
           <motion.div

@@ -259,14 +259,14 @@ const Layout = ({ children }) => {
           )}
 
 
-          <div className="hidden sm:flex items-center gap-2 overflow-hidden truncate">
-            <span className="text-on_surface_variant/40 text-[10px] md:text-sm uppercase tracking-widest font-black shrink-0">Operations</span>
-            <span className="material-symbols-outlined text-xs text-on_surface_variant/40 shrink-0">chevron_right</span>
+          <div className="hidden min-[400px]:flex items-center gap-2 overflow-hidden truncate">
+            <span className="text-on_surface_variant/40 text-[9px] sm:text-sm uppercase tracking-widest font-black shrink-0">Operations</span>
+            <span className="material-symbols-outlined text-[10px] sm:text-xs text-on_surface_variant/40 shrink-0">chevron_right</span>
             
             {location.pathname !== "/ngo/dashboard" && (
               <>
-                <Link to="/ngo/dashboard" className="text-on_surface_variant hover:text-primary text-[10px] md:text-sm transition-colors shrink-0">Dashboard</Link>
-                <span className="material-symbols-outlined text-xs text-on_surface_variant/40 shrink-0">chevron_right</span>
+                <Link to="/ngo/dashboard" className="text-on_surface_variant hover:text-primary text-[9px] sm:text-sm transition-colors shrink-0">Dashboard</Link>
+                <span className="material-symbols-outlined text-[10px] sm:text-xs text-on_surface_variant/40 shrink-0">chevron_right</span>
               </>
             )}
 
@@ -381,7 +381,7 @@ const Layout = ({ children }) => {
                     setProfileOpen((p) => !p);
                     setShowNotifications(false);
                   }}
-                  className="flex items-center gap-2 rounded-xl bg-surface_high p-1 pr-2 sm:pr-4 transition-all duration-200 hover:scale-[1.01] hover:bg-white/5 border border-white/10"
+                  className="flex items-center gap-2 rounded-xl bg-surface_high p-1 pr-1.5 sm:pr-4 transition-all duration-200 hover:scale-[1.01] hover:bg-white/5 border border-white/10"
                 >
                   <div className="w-8 h-8 rounded-full overflow-hidden border border-primary/10 shadow-soft shrink-0">
                     <img 
@@ -473,7 +473,7 @@ const Layout = ({ children }) => {
           sidebarOpen ? "md:ml-64 ml-0" : "ml-0"
         }`}
       >
-        <div className="p-4 md:p-6 min-w-0">
+        <div className="p-3 sm:p-6 min-w-0">
           {children && React.cloneElement(children, { sidebarOpen })}
         </div>
       </main>

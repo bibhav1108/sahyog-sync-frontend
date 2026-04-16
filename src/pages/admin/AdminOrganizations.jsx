@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import API from "../../services/api";
+import SkeletonStructure from "../../components/shared/SkeletonStructure";
 
 const AdminOrganizations = () => {
   const [organizations, setOrganizations] = useState([]);
@@ -55,13 +56,28 @@ const AdminOrganizations = () => {
     org.contact_email.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const skeletonLayout = [
+    { type: 'stack', gap: 4, items: Array(5).fill({ 
+      type: 'row', 
+      className: "items-center justify-between py-6 px-4 bg-surface_lowest/50 rounded-2xl", 
+      cols: [
+        { type: 'row', className: "w-1/3 gap-4", cols: [ { type: 'rect', width: 48, height: 48, className: "rounded-2xl" }, { type: 'stack', items: [{ type: 'text', width: 120 }, { type: 'text', width: 60 }] } ] },
+        { type: 'stack', className: "w-1/4", items: [{ type: 'text', width: 150 }, { type: 'text', width: 120 }] },
+        { type: 'stack', className: "w-1/6", items: [{ type: 'text', width: 80 }, { type: 'text', width: 60 }] },
+        { type: 'rect', width: 100, height: 40, className: "rounded-xl" }
+      ]
+    }) }
+  ];
+
   return (
     <div className="space-y-8 animate-[fadeIn_0.4s_ease]">
       {/* 🚀 HEADER & SEARCH */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-outfit font-black tracking-tight">Organization Hub</h1>
-          <p className="text-sm text-on_surface_variant">Manage and verify non-profit across the platform.</p>
+          <p className="text-sm text-on_surface_variant border-l-2 border-primary pl-3 ml-1 mt-1 font-medium">
+             Consolidated verification and management console
+          </p>
         </div>
         
         <div className="relative group max-w-md w-full">
@@ -99,113 +115,148 @@ const AdminOrganizations = () => {
 
       {/* 🏢 CONTENT */}
       <div className="bg-white rounded-[2rem] border border-surface_highest shadow-soft overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead className="bg-surface_lowest/50 text-[10px] uppercase font-black tracking-widest text-on_surface_variant border-b border-surface_highest">
-              <tr>
-                <th className="px-8 py-5">General Information</th>
-                <th className="px-8 py-5">Contact Details</th>
-                <th className="px-8 py-5">Status & Time</th>
-                <th className="px-8 py-5 text-right">Operations</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-surface_highest">
-              {loading ? (
-                Array.from({ length: 5 }).map((_, i) => (
-                  <tr key={i}>
-                    <td colSpan="4" className="px-8 py-4">
-                      <Skeleton height={60} className="rounded-xl" />
-                    </td>
+        {loading ? (
+            <div className="p-10">
+                <SkeletonStructure layout={skeletonLayout} />
+            </div>
+        ) : (
+          <>
+            {/* Desktop View */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left">
+                <thead className="bg-surface_lowest/50 text-[10px] uppercase font-black tracking-widest text-on_surface_variant border-b border-surface_highest">
+                  <tr>
+                    <th className="px-8 py-5">Organization</th>
+                    <th className="px-8 py-5">Contact</th>
+                    <th className="px-8 py-5">Status</th>
+                    <th className="px-8 py-5 text-right">Actions</th>
                   </tr>
-                ))
-              ) : (
-                <AnimatePresence mode="popLayout">
-                  {filteredOrgs.map((org) => (
-                    <motion.tr 
-                      key={org.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      className="group hover:bg-surface_lowest/50 transition-colors"
-                    >
-                      <td className="px-8 py-6">
-                        <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-2xl bg-surface_highest flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300">
-                                <span className="material-symbols-outlined">{activeTab === 'active' ? 'corporate_fare' : 'hourglass_empty'}</span>
+                </thead>
+                <tbody className="divide-y divide-surface_highest">
+                  <AnimatePresence mode="popLayout">
+                    {filteredOrgs.map((org) => (
+                      <motion.tr 
+                        key={org.id}
+                        initial={{ opacity: 0, scale: 0.98 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="group hover:bg-surface_lowest/50 transition-colors"
+                      >
+                        <td className="px-8 py-6">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-2xl bg-surface_highest flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300">
+                                    <span className="material-symbols-outlined">corporate_fare</span>
+                                </div>
+                                <div>
+                                    <h4 className="font-black text-on_surface text-lg leading-tight">{org.name}</h4>
+                                    <p className="text-[10px] font-black uppercase tracking-tighter text-on_surface_variant">System ID: #{org.id}</p>
+                                </div>
                             </div>
-                            <div>
-                                <div className="font-black text-on_surface text-lg leading-tight">{org.name}</div>
-                                <div className="text-[10px] font-black uppercase tracking-tighter text-on_surface_variant">ID: #{org.id}</div>
+                        </td>
+                        <td className="px-8 py-6">
+                            <div className="space-y-1">
+                                <p className="text-sm font-bold text-on_surface_variant">{org.contact_email}</p>
+                                <p className="text-[10px] font-medium text-on_surface_variant opacity-60 uppercase">{org.contact_phone}</p>
                             </div>
-                        </div>
-                      </td>
-                      <td className="px-8 py-6">
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2 text-sm text-on_surface_variant">
-                            <span className="material-symbols-outlined text-xs">mail</span> {org.contact_email}
-                          </div>
-                          <div className="flex items-center gap-2 text-sm text-on_surface_variant">
-                            <span className="material-symbols-outlined text-xs">call</span> {org.contact_phone}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-8 py-6">
-                        <div className="flex flex-col">
-                            <div className={`text-[10px] font-black uppercase tracking-widest mb-1 ${activeTab === 'active' ? 'text-green-500' : 'text-amber-500'}`}>
-                                {org.status}
+                        </td>
+                        <td className="px-8 py-6">
+                            <div className={`px-2 py-0.5 rounded-full text-[9px] font-black tracking-widest inline-block ${org.status === 'active' ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-white'}`}>
+                                {org.status.toUpperCase()}
                             </div>
-                            <div className="text-xs text-on_surface_variant">
-                                Joined {new Date(org.created_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
-                            </div>
-                        </div>
-                      </td>
-                      <td className="px-8 py-6">
-                        <div className="flex items-center justify-end gap-3">
+                        </td>
+                        <td className="px-8 py-6 text-right">
                            {activeTab === 'pending' ? (
-                             <>
-                                <motion.button
-                                  whileHover={{ scale: 1.05 }}
-                                  whileTap={{ scale: 0.95 }}
-                                  disabled={actionLoading === org.id}
-                                  onClick={() => handleApprove(org.id)}
-                                  className="px-6 py-2.5 bg-primaryGradient text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-primary/20 disabled:opacity-50 flex items-center gap-2"
-                                >
-                                  {actionLoading === org.id && <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />}
-                                  {actionLoading === org.id ? "Working..." : "Approve"}
-                                </motion.button>
-                                <motion.button
-                                  whileHover={{ scale: 1.05 }}
-                                  whileTap={{ scale: 0.95 }}
-                                  disabled={actionLoading === org.id}
-                                  onClick={() => handleReject(org.id)}
-                                  className="px-6 py-2.5 bg-white text-red-500 border border-red-100 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all disabled:opacity-50"
-                                >
-                                  Reject
-                                </motion.button>
-                             </>
+                               <div className="flex items-center justify-end gap-2">
+                                   <button 
+                                      onClick={() => handleApprove(org.id)}
+                                      disabled={actionLoading === org.id}
+                                      className="h-9 px-5 bg-primaryGradient text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:scale-105 transition-all shadow-lg shadow-primary/20"
+                                   >
+                                      {actionLoading === org.id ? "..." : "Approve"}
+                                   </button>
+                                   <button 
+                                      onClick={() => handleReject(org.id)}
+                                      disabled={actionLoading === org.id}
+                                      className="h-9 px-5 bg-white text-red-500 border border-red-50 border-b-red-100 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-50 transition-all"
+                                   >
+                                      Reject
+                                   </button>
+                               </div>
                            ) : (
-                             <button className="p-2.5 bg-surface_highest text-on_surface_variant rounded-xl hover:text-primary transition-colors">
-                               <span className="material-symbols-outlined">more_vert</span>
-                             </button>
+                               <div className="text-emerald-500 font-black text-[10px] uppercase tracking-widest flex items-center justify-end gap-1">
+                                   <span className="material-symbols-outlined text-sm">verified</span>
+                                   ACTIVE PORTAL
+                               </div>
                            )}
-                        </div>
-                      </td>
-                    </motion.tr>
-                  ))}
+                        </td>
+                      </motion.tr>
+                    ))}
+                  </AnimatePresence>
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden divide-y divide-surface_highest">
+                <AnimatePresence mode="popLayout">
+                    {filteredOrgs.map((org) => (
+                        <motion.div 
+                            key={org.id}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="p-6 space-y-4"
+                        >
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-black">
+                                       {org.name[0]}
+                                    </div>
+                                    <div>
+                                        <h4 className="font-black text-on_surface leading-tight">{org.name}</h4>
+                                        <p className="text-[10px] font-bold text-on_surface_variant uppercase opacity-40">System ID: #{org.id}</p>
+                                    </div>
+                                </div>
+                                <div className={`px-2 py-0.5 rounded-full text-[9px] font-black tracking-widest ${org.status === 'active' ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-white'}`}>
+                                    {org.status.toUpperCase()}
+                                </div>
+                            </div>
+                            
+                            <div className="space-y-1">
+                                <p className="text-xs font-bold text-on_surface_variant">{org.contact_email}</p>
+                                <p className="text-[10px] font-medium text-on_surface_variant opacity-60 uppercase">{org.contact_phone}</p>
+                            </div>
+
+                            {activeTab === 'pending' && (
+                                <div className="flex gap-2">
+                                    <button 
+                                        onClick={() => handleApprove(org.id)}
+                                        disabled={actionLoading === org.id}
+                                        className="flex-1 py-3 bg-primaryGradient text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg shadow-primary/20"
+                                    >
+                                        Approve
+                                    </button>
+                                    <button 
+                                        onClick={() => handleReject(org.id)}
+                                        disabled={actionLoading === org.id}
+                                        className="flex-1 py-3 bg-white text-red-500 border border-red-50 text-[10px] font-black uppercase tracking-widest rounded-xl"
+                                    >
+                                        Reject
+                                    </button>
+                                </div>
+                            )}
+                        </motion.div>
+                    ))}
                 </AnimatePresence>
-              )}
-              {!loading && filteredOrgs.length === 0 && (
-                 <tr>
-                    <td colSpan="4" className="px-8 py-20 text-center">
-                        <span className="material-symbols-outlined text-4xl text-on_surface_variant/20 mb-4 block">empty_dashboard</span>
-                        <h3 className="text-sm font-bold text-on_surface">No results found</h3>
-                        <p className="text-xs text-on_surface_variant">Try a different search or change the active tab.</p>
-                    </td>
-                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+            </div>
+
+            {filteredOrgs.length === 0 && (
+                <div className="py-20 text-center text-on_surface_variant border-t border-surface_highest">
+                    <span className="material-symbols-outlined text-4xl mb-4 block opacity-20">empty_dashboard</span>
+                    <h3 className="text-sm font-bold">No results found</h3>
+                    <p className="text-xs">Try a different search or change the active tab.</p>
+                </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );

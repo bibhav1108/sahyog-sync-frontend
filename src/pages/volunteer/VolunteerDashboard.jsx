@@ -59,12 +59,12 @@ const VolunteerDashboard = () => {
   }, []);
 
   const profileSkeletonLayout = [
-    { type: 'row', className: "justify-between", cols: [
-        { type: 'row', cols: [
-            { type: 'circle', size: 96 },
+    { type: 'row', className: "flex-col lg:flex-row justify-between items-start lg:items-center gap-6", cols: [
+        { type: 'row', className: "w-full lg:w-auto", cols: [
+            { type: 'circle', size: 96, className: "shrink-0" },
             { type: 'stack', items: [ { type: 'text', width: 200, height: 32 }, { type: 'text', width: 150 } ] }
         ]},
-        { type: 'row', cols: [ { type: 'rect', width: 180, height: 56 }, { type: 'rect', width: 140, height: 56 } ] }
+        { type: 'row', className: "w-full lg:w-auto", cols: [ { type: 'rect', width: 180, height: 56 }, { type: 'rect', width: 140, height: 56 } ] }
     ]},
     { type: 'grid', cols: 4, item: { type: 'rect', height: 140 } },
     { type: 'grid', cols: 3, items: [

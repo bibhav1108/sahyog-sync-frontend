@@ -18,11 +18,14 @@ import CampaignHistory from "./pages/ngo/archive/CampaignHistory";
 import MarketplaceAlerts from "./pages/ngo/MarketplaceAlerts";
 import MarketplaceStatsPage from "./pages/ngo/archive/MarketplaceStats";
 import VolunteerDashboard from "./pages/volunteer/VolunteerDashboard";
-import VerifyEmail from "./pages/public/VolunteerEmailVerification";
+
 import NGOBrowser from "./pages/volunteer/NGOBrowser";
 import VolunteerLayout from "./pages/volunteer/components/VolunteerLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminOrganizations from "./pages/admin/AdminOrganizations";
+import AdminReviews from "./pages/admin/AdminReviews";
+import AdminIssues from "./pages/admin/AdminIssues";
+import AdminVolunteers from "./pages/admin/AdminVolunteers";
 import AdminLayout from "./components/AdminLayout";
 import ActivityHistory from "./pages/ngo/archive/ActivityHistory";
 import MarketplaceInventory from "./pages/ngo/MarketplaceInventory";
@@ -45,7 +48,7 @@ function App() {
           <Route path="/register" element={<AuthPortal />} />
           <Route path="/auth" element={<AuthPortal />} />
           <Route path="/missions/:campaign_id" element={<MissionResponse />} />
-          <Route path="/verify-email" element={<VerifyEmail />} />
+
           <Route path="/alert-location/:alert_id" element={<PickLocation />} />
           
           <Route path="/register-volunteer" element={<AuthPortal />} />
@@ -298,6 +301,36 @@ function App() {
               <ProtectedRoute allowedRoles={["SYSTEM_ADMIN"]}>
                 <AdminLayout>
                   <AdminOrganizations />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/volunteers"
+            element={
+              <ProtectedRoute allowedRoles={["SYSTEM_ADMIN"]}>
+                <AdminLayout>
+                  <AdminVolunteers />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/reviews"
+            element={
+              <ProtectedRoute allowedRoles={["SYSTEM_ADMIN"]}>
+                <AdminLayout>
+                  <AdminReviews />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/issues"
+            element={
+              <ProtectedRoute allowedRoles={["SYSTEM_ADMIN"]}>
+                <AdminLayout>
+                  <AdminIssues />
                 </AdminLayout>
               </ProtectedRoute>
             }

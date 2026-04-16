@@ -121,18 +121,18 @@ const Marketplace = ({ sidebarOpen }) => {
     <div className="grid grid-cols-12 gap-8 selection:bg-primary/10">
       {/* LEFT: Live Alerts */}
       <div className="col-span-12 lg:col-span-8 space-y-8">
-        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center justify-between">
+        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <p className="text-primary text-[10px] font-black uppercase tracking-[0.3em] mb-1">Live Information Network</p>
-              <h1 className="text-4xl font-outfit font-black text-on_surface tracking-tight">Marketplace</h1>
+              <h1 className="text-3xl sm:text-4xl font-outfit font-black text-on_surface tracking-tight">Marketplace</h1>
               <div className="mt-2 flex items-center gap-2 text-xs font-bold text-on_surface_variant/60">
                 <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
                 <span>Live Feed • Updated {timeAgo()}</span>
               </div>
             </div>
             <div className="flex gap-2">
-                <button onClick={() => navigate("/dispatches")} className="px-4 py-2 bg-surface_high hover:bg-surface_highest rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">History</button>
-                <button onClick={() => navigate("/marketplace-stats")} className="px-4 py-2 bg-primary/10 text-primary hover:bg-primary/20 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">Statistics</button>
+                <button onClick={() => navigate("/dispatches")} className="px-3 sm:px-4 py-2 bg-surface_high hover:bg-surface_highest rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all">History</button>
+                <button onClick={() => navigate("/marketplace-stats")} className="px-3 sm:px-4 py-2 bg-primary/10 text-primary hover:bg-primary/20 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all">Statistics</button>
             </div>
         </motion.div>
 
@@ -154,7 +154,7 @@ const Marketplace = ({ sidebarOpen }) => {
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, scale: 0.95 }}
-                                className="group bg-surface_high/40 p-5 rounded-2xl border border-white hover:bg-white/50 transition-all flex items-center justify-between gap-4"
+                                className="group bg-surface_high/60 p-5 rounded-2xl border border-white/20 hover:bg-white/80 shadow-sm transition-all flex items-center justify-between gap-4"
                             >
                                 <div className="space-y-1">
                                     <div className="flex items-center gap-2 mb-1">
@@ -209,10 +209,10 @@ const Marketplace = ({ sidebarOpen }) => {
                             key={n.id}
                             initial={{ opacity: 0, x: 10 }}
                             animate={{ opacity: 1, x: 0 }}
-                            className={`p-5 rounded-2xl border-2 transition-all group ${
-                                n.urgency === "HIGH" ? "border-red-500/10 bg-red-500/5 hover:bg-red-500/10" : 
-                                n.urgency === "MEDIUM" ? "border-amber-500/10 bg-amber-500/5 hover:bg-amber-500/10" : 
-                                "border-primary/10 bg-primary/5 hover:bg-primary/10"
+                            className={`p-6 rounded-[2rem] border-2 transition-all group ${
+                                n.urgency === "HIGH" ? "border-red-500/20 bg-red-500/5 hover:bg-red-500/10 shadow-lg shadow-red-500/5" : 
+                                n.urgency === "MEDIUM" ? "border-amber-500/20 bg-amber-500/5 hover:bg-amber-500/10 shadow-lg shadow-amber-500/5" : 
+                                "border-primary/20 bg-primary/5 hover:bg-primary/10 shadow-lg shadow-primary/5"
                             } ${newNeedId === n.id ? "ring-2 ring-primary animate-pulse" : ""}`}
                         >
                             <div className="flex justify-between items-start mb-2">
@@ -236,7 +236,7 @@ const Marketplace = ({ sidebarOpen }) => {
                                 {n.status === "OPEN" ? (
                                     <button
                                         onClick={() => setDispatchModal({ open: true, needId: n.id })}
-                                        className="shrink-0 bg-on_surface text-white px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest hover:-translate-y-0.5 transition-all"
+                                        className="shrink-0 bg-primary text-white px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest hover:-translate-y-0.5 transition-all shadow-lg shadow-primary/20"
                                     >
                                         Dispatch
                                     </button>
