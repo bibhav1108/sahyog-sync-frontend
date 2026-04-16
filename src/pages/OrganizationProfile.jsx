@@ -42,9 +42,14 @@ const OrganizationProfile = () => {
     };
 
     if (loading) return (
-        <div className="max-w-4xl mx-auto space-y-8 animate-pulse">
-            <div className="h-48 bg-surface_high rounded-3xl" />
-            <div className="h-64 bg-surface_high rounded-3xl" />
+        <div className="max-w-4xl mx-auto space-y-8">
+            <Skeleton height={200} className="rounded-3xl" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="md:col-span-2">
+                    <Skeleton height={300} className="rounded-3xl" />
+                </div>
+                <Skeleton height={300} className="rounded-3xl" />
+            </div>
         </div>
     );
 

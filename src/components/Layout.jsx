@@ -7,6 +7,7 @@ import React from "react";
 import Skeleton from "../components/Skeleton";
 import { resolveProfileImage } from "../utils/imageUtils";
 import VerificationBadge from "../components/VerificationBadge";
+import { useToast } from "../context/ToastContext";
 
 const NAV_ITEMS = [
   { to: "/dashboard", label: "Overview", icon: "dashboard" },
@@ -34,7 +35,7 @@ const Layout = ({ children }) => {
   const [isDragging, setIsDragging] = useState(false);
 
   const [notifications, setNotifications] = useState([]);
-  const [toasts, setToasts] = useState([]);
+  const { addToast } = useToast();
 
   const [user, setUser] = useState(null);
 
@@ -64,6 +65,10 @@ const Layout = ({ children }) => {
     };
 
     loadProfile();
+
+    const handleSync = () => loadProfile();
+    window.addEventListener('user-profile-updated', handleSync);
+    return () => window.removeEventListener('user-profile-updated', handleSync);
   }, []);
   const loadNotifications = async () => {
     if (loadingRef.current.notifications) return;
@@ -80,20 +85,9 @@ const Layout = ({ children }) => {
       const newOnes = sorted.filter((a) => !a.is_read && !prevIds.has(a.id));
 
       if (newOnes.length > 0) {
-        try {
-          const audio = new Audio(pingSound);
-          audio.play().catch(() => {
-            /* Playback blocked by browser until user interaction */
-          });
-        } catch {}
-
-        setToasts((prev) => [
-          ...newOnes.map((a) => ({
-            ...a,
-            toastId: Math.random(),
-          })),
-          ...prev,
-        ]);
+        newOnes.forEach((a) => {
+          addToast(a.message_body || a.message || "New activity recorded.", "info");
+        });
       }
 
       prevIdsRef.current = new Set(sorted.map((a) => a.id));
@@ -140,17 +134,6 @@ const Layout = ({ children }) => {
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    if (toasts.length === 0) return;
-
-    const timers = toasts.map((toast) =>
-      setTimeout(() => {
-        setToasts((prev) => prev.filter((t) => t.toastId !== toast.toastId));
-      }, 5000),
-    );
-
-    return () => timers.forEach(clearTimeout);
-  }, [toasts]);
 
   useEffect(() => {
     const handleMove = (e) => {
@@ -207,31 +190,6 @@ const Layout = ({ children }) => {
         />
       )}
 
-      {/* Toasts */}
-      <div
-        className={`fixed top-20 z-[9999] space-y-3 transition-all duration-300 ${
-          sidebarOpen ? "md:left-[17rem] left-4" : "left-4"
-        }`}
-      >
-        {toasts.map((t) => (
-          <div
-            key={t.toastId}
-            onClick={() => {
-              handleMarkRead(t.id, t.is_read);
-              navigate("/marketplace");
-              setToasts((prev) => prev.filter((x) => x.toastId !== t.toastId));
-            }}
-            className="cursor-pointer rounded-xl border-l-4 border-primary bg-surface_lowest p-4 shadow-soft transition hover:scale-[1.02] w-80"
-          >
-            <p className="text-sm font-semibold text-primary">
-              {t.title || "📦 New Alert"}
-            </p>
-            <p className="mt-1 text-xs text-on_surface_variant">
-              {t.message_body || t.message || "You have a new notification."}
-            </p>
-          </div>
-        ))}
-      </div>
 
       <aside
         className={`fixed left-0 top-0 z-[999] flex h-screen w-64 flex-col border-r border-white/5 bg-surface/95 px-5 pb-6 pt-5 shadow-soft backdrop-blur-xl transition-transform duration-300 ${

@@ -1,7 +1,10 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import API from "../services/api";
 import logo from "../assets/logo.png";
 import React from "react";
+import Skeleton from "../components/Skeleton";
+import { resolveProfileImage } from "../utils/imageUtils";
 
 const ADMIN_NAV_ITEMS = [
   { to: "/admin/dashboard", label: "Overview", icon: "dashboard" },
@@ -13,6 +16,29 @@ const AdminLayout = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 768);
+
+  const [user, setUser] = useState(null);
+  const [loadingUser, setLoadingUser] = useState(true);
+  const [profileOpen, setProfileOpen] = useState(false);
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const res = await API.get("/users/me");
+        setUser(res.data);
+      } catch (err) {
+        console.error("Failed to load admin profile", err);
+      } finally {
+        setLoadingUser(false);
+      }
+    };
+
+    loadProfile();
+
+    const handleSync = () => loadProfile();
+    window.addEventListener('user-profile-updated', handleSync);
+    return () => window.removeEventListener('user-profile-updated', handleSync);
+  }, []);
 
   const logout = () => {
     localStorage.clear();
@@ -112,12 +138,47 @@ const AdminLayout = ({ children }) => {
         </div>
 
         <div className="flex items-center gap-3">
-            <div className="hidden sm:flex flex-col items-end">
-                <span className="text-xs font-black text-on_surface">Main Controller</span>
-                <span className="text-[10px] font-bold text-on_surface_variant uppercase">Super Admin</span>
-            </div>
-            <div className="w-10 h-10 rounded-xl bg-primaryGradient flex items-center justify-center text-white font-black shadow-lg shadow-primary/20 ring-2 ring-primary/20">
-                ADM
+            <div className="relative">
+                {loadingUser ? (
+                    <Skeleton className="h-10 w-10 rounded-xl" />
+                ) : (
+                    <button
+                        onClick={() => setProfileOpen(!profileOpen)}
+                        className="flex items-center gap-3 group"
+                    >
+                        <div className="hidden sm:flex flex-col items-end leading-none">
+                            <span className="text-xs font-black text-on_surface">{user?.full_name || "Admin"}</span>
+                            <span className="text-[10px] font-bold text-on_surface_variant uppercase">System Superuser</span>
+                        </div>
+                        <div className="w-10 h-10 rounded-xl overflow-hidden shadow-lg shadow-primary/20 ring-2 ring-primary/20 transition-transform group-hover:scale-105">
+                            <img 
+                                src={resolveProfileImage(user?.profile_image_url)} 
+                                alt="admin-pfp" 
+                                className="w-full h-full object-cover"
+                            />
+                        </div>
+                    </button>
+                )}
+
+                {profileOpen && user && (
+                    <div className="absolute right-0 mt-3 w-64 rounded-2xl border border-white/10 bg-surface_lowest p-2 shadow-2xl animate-[fadeIn_0.2s_ease] z-[100]">
+                        <div className="absolute right-5 top-0 h-3 w-3 -translate-y-1/2 rotate-45 border-l border-t border-white/10 bg-surface_lowest" />
+                        
+                        <div className="p-3 border-b border-white/5 mb-2">
+                             <p className="text-xs font-black text-primary uppercase tracking-widest mb-1 italic">Security Core</p>
+                             <div className="font-bold text-sm truncate">{user.full_name}</div>
+                             <div className="text-[10px] text-on_surface_variant truncate font-medium opacity-60">{user.email}</div>
+                        </div>
+
+                        <button
+                            onClick={logout}
+                            className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold text-red-500 hover:bg-red-500/10 transition-all"
+                        >
+                            <span className="material-symbols-outlined text-[20px]">logout</span>
+                            Terminate Session
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
       </header>

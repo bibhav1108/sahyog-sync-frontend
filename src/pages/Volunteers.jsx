@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import API from "../services/api";
 import Skeleton from "../components/Skeleton";
 import VerificationBadge from "../components/VerificationBadge";
 import { resolveProfileImage } from "../utils/imageUtils";
+import { useToast } from "../context/ToastContext";
 
 const Volunteers = () => {
   const [activeTab, setActiveTab] = useState("members"); // "members" or "requests"
@@ -13,6 +14,8 @@ const Volunteers = () => {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [requestsLoading, setRequestsLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState(null);
+  const { addToast } = useToast();
 
   const [seenIds, setSeenIds] = useState(new Set());
 
@@ -57,18 +60,25 @@ const Volunteers = () => {
 
   const handleRequestAction = async (requestId, status) => {
     try {
+      setActionLoading(requestId);
       await API.patch(`/volunteers/join-requests/${requestId}`, { status });
-      alert(`Request ${status === "APPROVED" ? "approved" : "rejected"} successfully!`);
-      loadRequests();
-      if (status === "APPROVED") loadVolunteers(false);
+      // Optimistic update
+      setRequests(prev => prev.filter(r => r.id !== requestId));
+      if (status === "APPROVED") {
+        addToast(`Volunteer ${status.toLowerCase()}! ✨`, "success");
+        loadVolunteers(false);
+      }
     } catch (err) {
-      alert(err.response?.data?.detail || "Action failed");
+      addToast(err.response?.data?.detail || "Action failed", "error");
+      loadRequests(); // Rollback if error
+    } finally {
+      setActionLoading(null);
     }
   };
 
   const handleCreate = async () => {
     if (!form.name || !form.phone_number) {
-      return alert("Name and phone required");
+      return addToast("Name and phone required", "warning");
     }
 
     try {
@@ -85,9 +95,24 @@ const Volunteers = () => {
       setShowForm(false);
       loadVolunteers(false);
     } catch (err) {
-      alert(err?.response?.data?.detail || "Failed to create volunteer");
+      addToast(err?.response?.data?.detail || "Failed to create volunteer", "error");
     } finally {
       setCreating(false);
+    }
+  };
+
+  const handleVerifyId = async (volId) => {
+    try {
+      setActionLoading(`verify-${volId}`);
+      const res = await API.post(`/volunteers/${volId}/verify-id`);
+      // Update local state
+      setVolunteers(prev => prev.map(v => v.id === volId ? res.data : v));
+      setSelected(res.data);
+      addToast("Identity officially verified! 🆔", "success");
+    } catch (err) {
+      addToast(err.response?.data?.detail || "Verification failed", "error");
+    } finally {
+      setActionLoading(null);
     }
   };
 
@@ -161,7 +186,9 @@ const Volunteers = () => {
             </div>
 
             {loading ? (
-               <Skeleton count={5} height={50} />
+               <div className="space-y-1">
+                  <Skeleton count={6} height={60} className="rounded-xl" />
+               </div>
             ) : filtered.map((v) => (
               <div
                 key={v.id}
@@ -181,9 +208,18 @@ const Volunteers = () => {
                 </div>
                 <div className="col-span-4 text-sm text-on_surface_variant">{v.phone_number}</div>
                 <div className="col-span-3 text-right">
-                   <span className={`text-[10px] px-2 py-0.5 rounded-full ${v.telegram_active ? "bg-green-500/10 text-green-500" : "bg-gray-500/10 text-gray-500"}`}>
-                     {v.telegram_active ? "Online" : "Offline"}
-                   </span>
+                   <div className="flex flex-col items-end gap-1">
+                      <span className={`text-[10px] px-3 py-1 rounded-full font-black uppercase tracking-widest border ${
+                        v.status === 'AVAILABLE' ? "bg-green-500/10 text-green-500 border-green-500/20" : 
+                        v.status === 'ON_MISSION' ? "bg-primary/10 text-primary border-primary/20" : 
+                        "bg-surface_highest text-on_surface_variant border-white/5"
+                      }`}>
+                        {v.status}
+                      </span>
+                      {v.status === 'AVAILABLE' && (
+                        <span className="text-[8px] text-green-600 font-bold uppercase tracking-tighter opacity-60">Ready for Dispatch</span>
+                      )}
+                   </div>
                 </div>
               </div>
             ))}
@@ -197,51 +233,69 @@ const Volunteers = () => {
              <p className="text-sm text-on_surface_variant">Volunteers waiting to join your team.</p>
           </div>
 
-          <div className="grid gap-4">
-             {requestsLoading ? (
-               <Skeleton count={3} height={80} />
-             ) : requests.length > 0 ? (
-               requests.map((req) => (
-                 <div key={req.id} className="bg-surface_lowest p-5 rounded-2xl border border-white/10 shadow-soft flex justify-between items-center">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-primary/10 shadow-soft">
-                            <img 
-                                src={resolveProfileImage(req.profile_image_url)} 
-                                alt={req.volunteer_name} 
-                                className="w-full h-full object-cover"
-                            />
-                        </div>
-                        <div>
-                            <div className="flex items-center gap-2 font-bold text-on_surface">
-                                <h3>{req.volunteer_name}</h3>
-                                <VerificationBadge trustTier={req.trust_tier} telegramActive={req.telegram_active} />
-                            </div>
-                            <p className="text-xs text-on_surface_variant">Applied on {new Date(req.created_at).toLocaleDateString()}</p>
-                        </div>
-                    </div>
-                    <div className="flex gap-2">
-                        <button 
-                            onClick={() => handleRequestAction(req.id, "REJECTED")}
-                            className="px-4 py-2 text-xs font-bold text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                        >
-                            Decline
-                        </button>
-                        <button 
-                            onClick={() => handleRequestAction(req.id, "APPROVED")}
-                            className="px-6 py-2 bg-primary text-white text-xs font-bold rounded-lg shadow-soft hover:shadow-lg transition-all"
-                        >
-                            Approve
-                        </button>
-                    </div>
+           <div className="grid gap-4">
+              {requestsLoading ? (
+                 <div className="grid gap-4">
+                   <Skeleton count={3} height={100} className="rounded-2xl" />
                  </div>
-               ))
-             ) : (
-               <div className="text-center py-20 bg-surface_lowest rounded-3xl border border-dashed border-gray-200">
-                  <span className="material-symbols-outlined text-4xl text-on_surface_variant mb-2">inbox</span>
-                  <p className="text-on_surface_variant">No pending join requests</p>
-               </div>
-             )}
-          </div>
+              ) : (
+                <AnimatePresence mode="popLayout">
+                  {requests.length > 0 ? (
+                    requests.map((req) => (
+                      <motion.div 
+                        key={req.id} 
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 20, scale: 0.95 }}
+                        className="bg-surface_lowest p-5 rounded-2xl border border-white/10 shadow-soft flex justify-between items-center"
+                      >
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-primary/10 shadow-soft">
+                                <img 
+                                    src={resolveProfileImage(req.profile_image_url)} 
+                                    alt={req.volunteer_name} 
+                                    className="w-full h-full object-cover"
+                                />
+                            </div>
+                            <div>
+                                <div className="flex items-center gap-2 font-bold text-on_surface">
+                                    <h3>{req.volunteer_name}</h3>
+                                    <VerificationBadge trustTier={req.trust_tier} telegramActive={req.telegram_active} />
+                                </div>
+                                <p className="text-xs text-on_surface_variant">Applied on {new Date(req.created_at).toLocaleDateString()}</p>
+                            </div>
+                        </div>
+                        <div className="flex gap-2">
+                            <motion.button 
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                disabled={actionLoading === req.id}
+                                onClick={() => handleRequestAction(req.id, "REJECTED")}
+                                className="px-4 py-2 text-xs font-bold text-red-500 hover:bg-red-50 rounded-lg transition-all disabled:opacity-50"
+                            >
+                                Decline
+                            </motion.button>
+                            <motion.button 
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                disabled={actionLoading === req.id}
+                                onClick={() => handleRequestAction(req.id, "APPROVED")}
+                                className="px-6 py-2 bg-primary text-white text-xs font-bold rounded-lg shadow-soft hover:shadow-lg transition-all disabled:opacity-50 flex items-center gap-2"
+                            >
+                                {actionLoading === req.id && <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+                                {actionLoading === req.id ? "Processing..." : "Approve"}
+                            </motion.button>
+                        </div>
+                      </motion.div>
+                    ))
+                  ) : (
+                    <div className="text-center py-12 opacity-50">
+                      <p className="text-sm">No pending join requests</p>
+                    </div>
+                  )}
+                </AnimatePresence>
+              )}
+           </div>
         </div>
       )}
 
@@ -307,9 +361,22 @@ const Volunteers = () => {
                         </div>
                     </div>
 
-                    <div className="bg-surface_high/50 px-4 py-2 rounded-2xl border border-surface_highest">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-on_surface_variant mb-1 text-center">Trust Score</p>
-                        <p className="text-xl font-black text-primary text-center">{selected.trust_score}</p>
+                    <div className="flex flex-col md:flex-row items-center gap-4">
+                        <div className="bg-surface_high/50 px-4 py-2 rounded-2xl border border-surface_highest">
+                            <p className="text-[10px] font-black uppercase tracking-widest text-on_surface_variant mb-1 text-center">Trust Score</p>
+                            <p className="text-xl font-black text-primary text-center">{selected.trust_score}</p>
+                        </div>
+                        <div className={`px-4 py-2 rounded-2xl border ${
+                            selected.status === 'AVAILABLE' ? "bg-green-500/5 border-green-500/20" : 
+                            selected.status === 'ON_MISSION' ? "bg-primary/5 border-primary/20" : 
+                            "bg-surface_high/50 border-surface_highest"
+                        }`}>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-on_surface_variant mb-1 text-center">Status</p>
+                            <p className={`text-xl font-black text-center ${
+                                selected.status === 'AVAILABLE' ? "text-green-500" : 
+                                selected.status === 'ON_MISSION' ? "text-primary" : "text-on_surface_variant"
+                            }`}>{selected.status}</p>
+                        </div>
                     </div>
                 </div>
 
@@ -355,6 +422,37 @@ const Volunteers = () => {
                                     {skill}
                                  </span>
                              ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* 🆔 ID Verification Panel (Admin) */}
+                {!selected.id_verified && selected.aadhaar_last_4 && (
+                    <div className="mt-8 p-6 bg-primary/5 rounded-[2rem] border-2 border-primary/10 animate-slide-up">
+                        <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-primary shadow-sm">
+                                    <span className="material-symbols-outlined text-3xl">fingerprint</span>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-primary mb-1">Identity Verification Pending</p>
+                                    <p className="text-sm font-bold text-on_surface">Submitted Aadhaar Fragment: <span className="text-primary tracking-[0.2em] font-black ml-1">****{selected.aadhaar_last_4}</span></p>
+                                </div>
+                            </div>
+                            <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                disabled={actionLoading === `verify-${selected.id}`}
+                                onClick={() => handleVerifyId(selected.id)}
+                                className="w-full md:w-auto px-8 py-3 bg-primary text-white text-sm font-black rounded-2xl shadow-lg shadow-primary/20 flex items-center justify-center gap-3 disabled:opacity-50"
+                            >
+                                {actionLoading === `verify-${selected.id}` ? (
+                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                ) : (
+                                    <span className="material-symbols-outlined text-sm">check_circle</span>
+                                )}
+                                {actionLoading === `verify-${selected.id}` ? "Verifying..." : "Confirm Identity"}
+                            </motion.button>
                         </div>
                     </div>
                 )}

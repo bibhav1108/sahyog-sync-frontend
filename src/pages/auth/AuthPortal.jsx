@@ -15,6 +15,26 @@ const MODES = {
   NGO_REG: "NGO_REG",
 };
 
+/**
+ * 🩺 VALIDATION HELPERS
+ */
+const validateEmail = (email) => {
+  return String(email)
+    .toLowerCase()
+    .match(
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+    );
+};
+
+const validatePhone = (phone) => {
+  return String(phone).match(/^\+?[\d\s-]{10,}$/);
+};
+
+const validatePassword = (password) => {
+  // Min 8 chars, at least one letter and one number
+  return password.length >= 8 && /[A-Za-z]/.test(password) && /\d/.test(password);
+};
+
 const AuthPortal = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -371,6 +391,8 @@ const VolunteerRegForm = ({ setError, setSuccess, setLoading, loading, switchMod
 
   const handleSendOTP = async () => {
     if (!email || !username) return setError("Email and Username required");
+    if (!validateEmail(email)) return setError("Please enter a valid email address");
+
     try {
       setLoading(true);
       await API.post("/volunteers/register/send-otp", { email, username });
@@ -400,6 +422,12 @@ const VolunteerRegForm = ({ setError, setSuccess, setLoading, loading, switchMod
 
   const finishRegistration = async (e) => {
     e.preventDefault();
+    setError("");
+
+    if (!name || !phone || !password) return setError("All fields are required");
+    if (!validatePhone(phone)) return setError("Please enter a valid phone number (at least 10 digits)");
+    if (!validatePassword(password)) return setError("Password must be at least 8 characters and include both letters and numbers");
+
     try {
       setLoading(true);
       await API.post("/volunteers/register/register", {
@@ -484,7 +512,15 @@ const NGORegForm = ({ setError, setSuccess, setLoading, loading, switchMode, MOD
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    if (!org.name || !admin.password) return setError("All fields are required");
+    setError("");
+    if (!org.name || !org.phone || !org.email || !admin.name || !admin.email || !admin.password) {
+        return setError("All fields are required");
+    }
+
+    if (!validateEmail(org.email)) return setError("Invalid organization email");
+    if (!validateEmail(admin.email)) return setError("Invalid admin email");
+    if (!validatePhone(org.phone)) return setError("Invalid organization phone number");
+    if (!validatePassword(admin.password)) return setError("Admin password must be at least 8 characters with letters and numbers");
 
     try {
       setLoading(true);
@@ -539,18 +575,32 @@ const ForgotPassForm = ({ email, setEmail, setError, setSuccess, setLoading, loa
   const [newPass, setNewPass] = useState("");
 
   const handleSend = async () => {
+    const isEmail = validateEmail(email);
+    const isPhone = validatePhone(email); // using email state for input
+
+    if (!isEmail && !isPhone) return setError("Please enter a valid email address or phone number");
+    
     try {
       setLoading(true);
-      const res = await API.post("/auth/forgot-password", { email });
+      const payload = isEmail ? { email } : { phone_number: email };
+      const res = await API.post("/auth/forgot-password", payload);
       setSuccess(res.data.message);
       setOtpSent(true);
     } catch { setError("Failed to send OTP"); } finally { setLoading(false); }
   };
 
   const handleReset = async () => {
+    if (!validatePassword(newPass)) return setError("New password must be at least 8 characters with letters and numbers");
+    const isEmail = validateEmail(email);
+    
     try {
       setLoading(true);
-      await API.post("/auth/reset-password", { email, otp, new_password: newPass });
+      const payload = { 
+        [isEmail ? "email" : "phone_number"]: email,
+        otp, 
+        new_password: newPass 
+      };
+      await API.post("/auth/reset-password", payload);
       setSuccess("Password reset success! Redirecting...");
       setTimeout(() => setMode(MODES.LOGIN), 2000);
     } catch { setError("Reset failed"); } finally { setLoading(false); }
@@ -558,7 +608,7 @@ const ForgotPassForm = ({ email, setEmail, setError, setSuccess, setLoading, loa
 
   return (
     <div className="space-y-5">
-       <AuthInput label="Your Email" value={email} setValue={setEmail} icon="mail" />
+       <AuthInput label="Email or Phone Number" value={email} setValue={setEmail} icon="mail" />
        {!otpSent ? (
          <button onClick={handleSend} disabled={loading} className="w-full py-4 bg-primary text-white font-bold rounded-2xl">
            {loading ? "Processing..." : "Send Reset Code"}

@@ -26,7 +26,12 @@ const VolunteerLayout = ({ children }) => {
         setLoadingUser(false);
       }
     };
+
     loadProfile();
+
+    const handleSync = () => loadProfile();
+    window.addEventListener('user-profile-updated', handleSync);
+    return () => window.removeEventListener('user-profile-updated', handleSync);
   }, []);
 
   const handleLogout = () => {

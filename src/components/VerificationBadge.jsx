@@ -3,24 +3,24 @@ const VerificationBadge = ({ trustTier, telegramActive }) => {
   let label = "";
 
   if (trustTier === "FIELD_VERIFIED") {
-    color = "text-green-500"; // Level 3
-    label = "Field Verified";
+    color = "text-primary"; // Level 3 (Premium)
+    label = "Field Verified (High Trust)";
   } else if (trustTier === "ID_VERIFIED") {
-    color = "text-orange-500"; // Level 2
-    label = "ID Verified";
+    color = "text-secondary"; // Level 2
+    label = "Identity Verified";
   } else if (telegramActive) {
-    color = "text-gray-500"; // Level 1 (darker silver)
-    label = "Telegram Verified";
+    color = "text-on_surface_variant/40"; // Level 1 (Entry)
+    label = "Telegram Linked";
   } else {
     return null;
   }
 
   return (
     <span
-      className={`material-symbols-outlined ${color} text-lg leading-none drop-shadow-sm`}
+      className={`material-symbols-outlined ${color} text-lg leading-none drop-shadow-sm cursor-help hover:scale-110 transition-transform`}
       title={label}
     >
-      verified
+      {trustTier === "FIELD_VERIFIED" ? "verified_user" : "verified"}
     </span>
   );
 };

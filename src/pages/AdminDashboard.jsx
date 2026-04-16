@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import API from "../services/api";
 import { Link } from "react-router-dom";
+import { resolveProfileImage } from "../utils/imageUtils";
+import ProfileImageModal from "../components/ProfileImageModal";
+import { useToast } from "../context/ToastContext";
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
@@ -16,6 +19,12 @@ const AdminDashboard = () => {
   const [error, setError] = useState("");
   const [actionLoading, setActionLoading] = useState(null);
   const [activeTab, setActiveTab] = useState("NGO_APPROVALS"); // NGO_APPROVALS or FEEDBACK
+  const { addToast } = useToast();
+  const [admin, setAdmin] = useState(null);
+  const [saving, setSaving] = useState(false);
+
+  // 📸 Image Flow States
+  const [pfpModalOpen, setPfpModalOpen] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -37,6 +46,53 @@ const AdminDashboard = () => {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+
+    try {
+      const userRes = await API.get("/users/me");
+      setAdmin(userRes.data);
+    } catch (err) {
+      console.error("Admin user load failed", err);
+    }
+  };
+
+  const handleCropComplete = async (croppedBlob) => {
+    setPfpModalOpen(false);
+    
+    const formData = new FormData();
+    formData.append("file", croppedBlob, "profile.jpg");
+
+    setSaving(true);
+    setMsg("");
+
+    try {
+      const res = await API.post("/users/me/image", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      setAdmin({ ...admin, profile_image_url: res.data.profile_image_url });
+      addToast("Admin identity updated! 🛡️", "success");
+      window.dispatchEvent(new Event('user-profile-updated'));
+    } catch (err) {
+      addToast(err.response?.data?.detail || "Upload failed", "error");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleRemoveImage = async () => {
+    setPfpModalOpen(false);
+    setSaving(true);
+    setMsg("");
+
+    try {
+      await API.delete("/users/me/image");
+      setAdmin({ ...admin, profile_image_url: null });
+      addToast("Admin photo removed. ✨", "success");
+      window.dispatchEvent(new Event('user-profile-updated'));
+    } catch (err) {
+      addToast(err.response?.data?.detail || "Removal failed", "error");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -68,8 +124,9 @@ const AdminDashboard = () => {
         pending_ngos: prev.pending_ngos - 1,
         total_ngos: prev.total_ngos - 1
       }));
+      addToast("Organization rejected", "info");
     } catch (err) {
-      alert("Rejection failed");
+      addToast("Rejection failed", "error");
     } finally {
       setActionLoading(null);
     }
@@ -81,7 +138,7 @@ const AdminDashboard = () => {
       await API.patch(`/feedback/${id}/status?status_val=RESOLVED`);
       setFeedback(prev => prev.map(fb => fb.id === id ? { ...fb, status: "RESOLVED" } : fb));
     } catch (err) {
-      alert("Status update failed");
+      addToast("Status update failed", "error");
     } finally {
       setActionLoading(null);
     }
@@ -89,8 +146,19 @@ const AdminDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-surface flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+      <div className="space-y-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Skeleton count={4} height={120} className="rounded-3xl" containerClassName="contents" />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+          <div className="lg:col-span-2 space-y-8">
+            <Skeleton height={50} width={250} className="rounded-2xl" />
+            <Skeleton height={400} className="rounded-3xl" />
+          </div>
+          <div className="space-y-6">
+            <Skeleton count={3} height={150} className="rounded-3xl" />
+          </div>
+        </div>
       </div>
     );
   }
@@ -155,6 +223,31 @@ const AdminDashboard = () => {
            </div>
 
            <div className="bg-white p-6 rounded-3xl border border-surface_highest shadow-soft">
+              <h4 className="text-xs font-black uppercase tracking-widest text-on_surface_variant mb-4">System Identity</h4>
+              <div className="flex items-center gap-4">
+                 <div 
+                    className="relative group cursor-pointer" 
+                    onClick={() => setPfpModalOpen(true)}
+                >
+                    <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-primary/20 group-hover:brightness-50 transition-all shadow-inner">
+                        <img 
+                            src={resolveProfileImage(admin?.profile_image_url)} 
+                            className="w-full h-full object-cover" 
+                            alt="admin"
+                        />
+                    </div>
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all pointer-events-none">
+                        <span className="material-symbols-outlined text-white text-xl">add_a_photo</span>
+                    </div>
+                 </div>
+                 <div className="min-w-0">
+                    <p className="text-sm font-black text-on_surface truncate">{admin?.full_name || "System Controller"}</p>
+                    <p className="text-[10px] text-on_surface_variant uppercase font-black tracking-tighter opacity-50">Main Cryptographic Identity</p>
+                 </div>
+              </div>
+           </div>
+
+           <div className="bg-white p-6 rounded-3xl border border-surface_highest shadow-soft">
               <h4 className="text-xs font-black uppercase tracking-widest text-on_surface_variant mb-4">System Status</h4>
               <div className="space-y-4">
                  <div className="flex items-center justify-between">
@@ -173,6 +266,16 @@ const AdminDashboard = () => {
            </div>
         </section>
       </div>
+
+
+      {pfpModalOpen && (
+        <ProfileImageModal 
+          currentImage={admin?.profile_image_url} 
+          onCropComplete={handleCropComplete} 
+          onRemove={handleRemoveImage}
+          onCancel={() => setPfpModalOpen(false)} 
+        />
+      )}
     </div>
   );
 };

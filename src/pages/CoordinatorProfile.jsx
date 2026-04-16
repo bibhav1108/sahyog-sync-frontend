@@ -2,11 +2,18 @@ import { useEffect, useState } from "react";
 import API from "../services/api";
 import Skeleton from "../components/Skeleton";
 import { resolveProfileImage } from "../utils/imageUtils";
+import ProfileImageModal from "../components/ProfileImageModal";
+import { useToast } from "../context/ToastContext";
 
 const CoordinatorProfile = () => {
   const [user, setUser] = useState(null);
   const [stats, setStats] = useState({ total_campaigns: 0, total_inventory: 0, total_volunteers: 0 });
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const { addToast } = useToast();
+
+  // 📸 Image Flow States
+  const [pfpModalOpen, setPfpModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -26,6 +33,44 @@ const CoordinatorProfile = () => {
     fetchProfile();
   }, []);
 
+  const handleCropComplete = async (croppedBlob) => {
+    setPfpModalOpen(false);
+    
+    const formData = new FormData();
+    formData.append("file", croppedBlob, "profile.jpg");
+
+    setSaving(true);
+
+    try {
+      const res = await API.post("/users/me/image", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      setUser({ ...user, profile_image_url: res.data.profile_image_url });
+      addToast("Profile picture updated! 📸", "success");
+      window.dispatchEvent(new Event('user-profile-updated'));
+    } catch (err) {
+      addToast(err.response?.data?.detail || "Upload failed", "error");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleRemoveImage = async () => {
+    setPfpModalOpen(false);
+    setSaving(true);
+
+    try {
+      await API.delete("/users/me/image");
+      setUser({ ...user, profile_image_url: null });
+      addToast("Profile picture removed. ✨", "success");
+      window.dispatchEvent(new Event('user-profile-updated'));
+    } catch (err) {
+      addToast(err.response?.data?.detail || "Removal failed", "error");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (loading) return (
     <div className="max-w-4xl mx-auto space-y-8 animate-pulse">
         <div className="h-64 bg-surface_high rounded-3xl" />
@@ -43,15 +88,21 @@ const CoordinatorProfile = () => {
       <div className="relative overflow-hidden rounded-3xl bg-surface_high border border-white/5 shadow-soft group">
         <div className="absolute inset-0 bg-primaryGradient opacity-10" />
         <div className="relative p-8 md:p-12 flex flex-col md:flex-row items-center gap-8">
-          <div className="relative">
-            <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-xl">
+          <div 
+            className="relative cursor-pointer group/pfp"
+            onClick={() => setPfpModalOpen(true)}
+          >
+            <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-xl group-hover/pfp:brightness-50 transition-all">
               <img 
                 src={resolveProfileImage(user?.profile_image_url)} 
                 alt="profile" 
                 className="w-full h-full object-cover"
               />
             </div>
-            <div className="absolute bottom-1 right-1 w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center shadow-lg cursor-pointer hover:scale-110 transition">
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/pfp:opacity-100 transition-all pointer-events-none">
+              <span className="material-symbols-outlined text-white text-3xl">add_a_photo</span>
+            </div>
+            <div className="absolute bottom-1 right-1 w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center shadow-lg transition group-hover/pfp:scale-110">
               <span className="material-symbols-outlined text-[18px]">photo_camera</span>
             </div>
           </div>
@@ -133,6 +184,16 @@ const CoordinatorProfile = () => {
             </button>
         </div>
       </div>
+
+
+      {pfpModalOpen && (
+        <ProfileImageModal 
+          currentImage={user?.profile_image_url} 
+          onCropComplete={handleCropComplete} 
+          onRemove={handleRemoveImage}
+          onCancel={() => setPfpModalOpen(false)} 
+        />
+      )}
     </div>
   );
 };

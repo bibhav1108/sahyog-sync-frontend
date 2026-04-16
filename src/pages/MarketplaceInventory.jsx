@@ -83,7 +83,7 @@ const MarketplaceInventory = () => {
 
             {loading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {[1, 2, 3].map(i => <div key={i} className="h-48 bg-surface_high rounded-3xl animate-pulse" />)}
+                    <Skeleton count={6} height={192} className="rounded-3xl" containerClassName="contents" />
                 </div>
             ) : items.length === 0 ? (
                 <div className="bg-surface_high/50 border-2 border-dashed border-surface_highest rounded-[2.5rem] p-20 text-center">

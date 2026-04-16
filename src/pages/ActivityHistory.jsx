@@ -100,14 +100,13 @@ const ActivityHistory = () => {
             <tbody className="divide-y divide-surface_highest">
               <AnimatePresence mode="wait">
                 {loading ? (
-                  <motion.tr initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                    <td colSpan="3" className="px-8 py-20 text-center">
-                       <div className="flex flex-col items-center gap-3">
-                         <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-                         <p className="text-sm font-medium text-on_surface_variant">Syncing history...</p>
-                       </div>
-                    </td>
-                  </motion.tr>
+                  Array.from({ length: 8 }).map((_, i) => (
+                    <tr key={i}>
+                      <td colSpan="3" className="px-8 py-4">
+                        <Skeleton height={60} className="rounded-xl" />
+                      </td>
+                    </tr>
+                  ))
                 ) : logs.length > 0 ? (
                   logs.map((log, i) => (
                     <motion.tr 

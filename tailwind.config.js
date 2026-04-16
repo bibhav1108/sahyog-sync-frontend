@@ -41,13 +41,13 @@ export default {
         primaryGradient: "linear-gradient(135deg, #0D7377 0%, #14919B 100%)",
 
         shimmer:
-          "linear-gradient(120deg, transparent 40%, rgba(232,225,218,0.6) 50%, transparent 60%)",
+          "linear-gradient(90deg, transparent 0%, rgba(232,225,218,0.6) 50%, transparent 100%)",
       },
 
       keyframes: {
         shimmer: {
-          "0%": { transform: "translateX(-120%)" },
-          "100%": { transform: "translateX(120%)" },
+          "0%": { transform: "translateX(-150%)" },
+          "100%": { transform: "translateX(150%)" },
         },
 
         fadeIn: {
@@ -63,7 +63,7 @@ export default {
       },
 
       animation: {
-        shimmer: "shimmer 1.8s ease-in-out infinite",
+        shimmer: "shimmer 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
 
         fadeIn: "fadeIn 0.4s ease-out forwards",
       },

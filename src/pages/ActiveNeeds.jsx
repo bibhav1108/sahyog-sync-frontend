@@ -109,23 +109,18 @@ const ActiveNeeds = ({ sidebarOpen }) => {
       {/* CONTENT */}
       {initialLoading ? (
         <div className="space-y-4">
-          {Array.from({ length: 5 }).map((_, i) => (
+          {Array.from({ length: 4 }).map((_, i) => (
             <div
               key={i}
-              className="relative overflow-hidden rounded-2xl border border-white/5 bg-surface_high p-5"
+              className="rounded-2xl border border-white/5 bg-surface_high p-5 space-y-3"
             >
-              <div className="absolute inset-0 -translate-x-full animate-shimmer bg-shimmer pointer-events-none" />
-
-              <div className="space-y-3">
-                <Skeleton className="h-4 w-40" />
-                <Skeleton className="h-3 w-full" />
-                <Skeleton className="h-3 w-3/4" />
-
+                <Skeleton className="h-5 w-48" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-3/4" />
                 <div className="flex justify-between items-center pt-2">
-                  <Skeleton className="h-3 w-32" />
-                  <Skeleton className="h-8 w-24" />
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-10 w-28 rounded-xl" />
                 </div>
-              </div>
             </div>
           ))}
         </div>

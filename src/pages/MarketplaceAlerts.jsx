@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import API from "../services/api";
 import Skeleton from "../components/Skeleton";
 
@@ -96,58 +97,20 @@ const MarketplaceAlerts = () => {
           <div className="col-span-12 space-y-4 lg:col-span-8">
             <div className="flex items-center justify-between">
               <Skeleton className="h-5 w-28" />
-              <Skeleton className="h-3 w-24" />
+              <Skeleton className="h-4 w-24" />
             </div>
 
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div
-                key={i}
-                className="relative overflow-hidden rounded-2xl border border-white/5 bg-surface_high p-5"
-              >
-                <div className="absolute inset-0 -translate-x-full animate-shimmer bg-shimmer pointer-events-none" />
-
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <Skeleton className="h-3 w-24" />
-                    <Skeleton className="h-3 w-20" />
-                  </div>
-
-                  <Skeleton className="h-4 w-5/6" />
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-2/3" />
-
-                  <div className="flex items-center gap-2 pt-1">
-                    <Skeleton className="h-3 w-3" />
-                    <Skeleton className="h-3 w-28" />
-                  </div>
-
-                  <div className="flex justify-end pt-2">
-                    <Skeleton className="h-10 w-36 rounded-lg" />
-                  </div>
-                </div>
-              </div>
-            ))}
+            <div className="space-y-4">
+              <Skeleton count={4} height={160} className="rounded-2xl" />
+            </div>
           </div>
 
           {/* RIGHT SKELETON INSIGHTS */}
           <div className="col-span-12 lg:col-span-4">
-            <div className="relative h-full min-h-[400px] overflow-hidden rounded-2xl border border-white/5 bg-surface_high p-5">
-              <div className="absolute inset-0 -translate-x-full animate-shimmer bg-shimmer pointer-events-none" />
-
+            <div className="rounded-2xl border border-white/5 bg-surface_high p-6 space-y-6">
+              <Skeleton className="h-6 w-32" />
               <div className="space-y-4">
-                <Skeleton className="h-5 w-24" />
-                <Skeleton className="h-4 w-40" />
-
-                <div className="space-y-3 pt-2">
-                  <Skeleton className="h-4 w-3/4" />
-                  <Skeleton className="h-4 w-5/6" />
-                  <Skeleton className="h-4 w-2/3" />
-                  <Skeleton className="h-4 w-4/5" />
-                </div>
-
-                <div className="pt-8">
-                  <Skeleton className="h-10 w-full rounded-xl" />
-                </div>
+                <Skeleton count={4} height={40} className="rounded-xl" />
               </div>
             </div>
           </div>
@@ -161,62 +124,67 @@ const MarketplaceAlerts = () => {
           {/* ALERT LIST */}
           <div className="col-span-12 space-y-4 lg:col-span-8">
             <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-semibold">Alert Feed</h3>
-                <p className="mt-1 text-sm text-on_surface_variant">
-                  Incoming donor signals ready to convert
-                </p>
-              </div>
-
-              <span className="text-xs text-on_surface_variant">
-                Auto-refresh every 5s
-              </span>
+              <h3 className="text-lg font-semibold">Alert Feed</h3>
+              <p className="text-xs text-on_surface_variant">
+                {refreshing ? "Checking for signals..." : "Real-time signals"}
+              </p>
             </div>
 
-            {alerts.map((a) => (
-              <div
-                key={a.id}
-                className="rounded-2xl border border-white/5 bg-surface_high p-5 shadow-lg shadow-black/5 transition hover:-translate-y-0.5 hover:bg-white/5"
-              >
-                <div className="mb-3 flex items-center justify-between gap-3">
-                  <span className="text-[10px] font-bold tracking-[0.24em] text-primary">
-                    DONOR SIGNAL
-                  </span>
-
-                  <span className="text-[10px] text-on_surface_variant">
-                    {new Date(a.created_at).toLocaleTimeString([], {
-                      hour: "numeric",
-                      minute: "2-digit",
-                    })}
-                  </span>
-                </div>
-
-                <p className="text-sm leading-relaxed text-on_surface">
-                  {a.message_body}
-                </p>
-
-                {a.donor_name && (
-                  <div className="mt-3 flex items-center gap-1 text-xs text-on_surface_variant">
-                    <span>👤</span>
-                    <span>{a.donor_name}</span>
-                  </div>
-                )}
-
-                <div className="mt-5 flex justify-end">
-                  <button
-                    disabled={loadingId === a.id}
-                    onClick={() => claimAlert(a.id)}
-                    className={`rounded-xl px-4 py-2 text-sm transition ${
-                      loadingId === a.id
-                        ? "bg-gray-400 text-white"
-                        : "bg-primary text-white hover:opacity-90"
-                    }`}
+            <div className="space-y-4">
+              <AnimatePresence mode="popLayout">
+                {alerts.map((alert) => (
+                  <motion.div
+                    key={alert.id}
+                    layout
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, filter: "blur(4px)" }}
+                    className="group relative overflow-hidden rounded-2xl border border-white/10 bg-surface_high/80 p-6 shadow-soft transition-all hover:bg-surface_high"
                   >
-                    {loadingId === a.id ? "Converting..." : "Convert to Need →"}
-                  </button>
-                </div>
-              </div>
-            ))}
+                    <div className="flex items-start justify-between">
+                      <div className="flex gap-4">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                          <span className="material-symbols-outlined">
+                            notifications_active
+                          </span>
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-on_surface underline decoration-primary/20 transition-all group-hover:decoration-primary">
+                            {alert.description}
+                          </h4>
+                          <div className="mt-2 flex items-center gap-3 text-sm text-on_surface_variant">
+                            <span className="flex items-center gap-1">
+                              <span className="material-symbols-outlined text-sm">
+                                person
+                              </span>
+                              {alert.donor_name}
+                            </span>
+                            <span className="h-1 w-1 rounded-full bg-white/20" />
+                            <span className="flex items-center gap-1">
+                              <span className="material-symbols-outlined text-sm">
+                                location_on
+                              </span>
+                              {alert.location_address}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => claimAlert(alert.id)}
+                        disabled={loadingId === alert.id}
+                        className="rounded-xl bg-primary/10 px-4 py-2 text-sm font-bold text-primary shadow-soft transition-all hover:bg-primary hover:text-white disabled:opacity-50 flex items-center gap-2"
+                      >
+                        {loadingId === alert.id && <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+                        {loadingId === alert.id ? "Converting..." : "Convert to Need"}
+                      </motion.button>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
           </div>
 
           {/* INSIGHTS */}

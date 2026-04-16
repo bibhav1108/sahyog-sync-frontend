@@ -111,12 +111,13 @@ const AdminOrganizations = () => {
             </thead>
             <tbody className="divide-y divide-surface_highest">
               {loading ? (
-                <tr>
-                  <td colSpan="4" className="px-8 py-20 text-center">
-                    <div className="flex justify-center"><div className="w-8 h-8 border-3 border-primary/30 border-t-primary rounded-full animate-spin" /></div>
-                    <p className="mt-4 text-xs font-bold text-on_surface_variant">Fetching Registry...</p>
-                  </td>
-                </tr>
+                Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={i}>
+                    <td colSpan="4" className="px-8 py-4">
+                      <Skeleton height={60} className="rounded-xl" />
+                    </td>
+                  </tr>
+                ))
               ) : (
                 <AnimatePresence mode="popLayout">
                   {filteredOrgs.map((org) => (
@@ -162,20 +163,25 @@ const AdminOrganizations = () => {
                         <div className="flex items-center justify-end gap-3">
                            {activeTab === 'pending' ? (
                              <>
-                                <button
+                                <motion.button
+                                  whileHover={{ scale: 1.05 }}
+                                  whileTap={{ scale: 0.95 }}
                                   disabled={actionLoading === org.id}
                                   onClick={() => handleApprove(org.id)}
-                                  className="px-6 py-2.5 bg-primaryGradient text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:scale-105 transition-all shadow-lg shadow-primary/20 disabled:opacity-50"
+                                  className="px-6 py-2.5 bg-primaryGradient text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-primary/20 disabled:opacity-50 flex items-center gap-2"
                                 >
-                                  Approve
-                                </button>
-                                <button
+                                  {actionLoading === org.id && <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+                                  {actionLoading === org.id ? "Working..." : "Approve"}
+                                </motion.button>
+                                <motion.button
+                                  whileHover={{ scale: 1.05 }}
+                                  whileTap={{ scale: 0.95 }}
                                   disabled={actionLoading === org.id}
                                   onClick={() => handleReject(org.id)}
-                                  className="px-6 py-2.5 bg-white text-red-500 border border-red-100 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-50 transition-all disabled:opacity-50"
+                                  className="px-6 py-2.5 bg-white text-red-500 border border-red-100 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all disabled:opacity-50"
                                 >
                                   Reject
-                                </button>
+                                </motion.button>
                              </>
                            ) : (
                              <button className="p-2.5 bg-surface_highest text-on_surface_variant rounded-xl hover:text-primary transition-colors">

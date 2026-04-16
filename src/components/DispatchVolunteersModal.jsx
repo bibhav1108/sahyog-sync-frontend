@@ -60,7 +60,8 @@ const DispatchVolunteersModal = ({ open, onClose, needId, onSuccess }) => {
   if (!open) return null;
 
   const filtered = volunteers.filter((v) =>
-    v.name.toLowerCase().includes(search.toLowerCase()),
+    v.name.toLowerCase().includes(search.toLowerCase()) &&
+    v.status === "AVAILABLE"
   );
 
   const selectedVols = volunteers.filter((v) => selected.includes(v.id));
@@ -140,12 +141,15 @@ const DispatchVolunteersModal = ({ open, onClose, needId, onSuccess }) => {
                             className="w-full h-full object-cover"
                           />
                         </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium">{v.name}</span>
-                          <VerificationBadge
-                            trustTier={v.trust_tier}
-                            telegramActive={v.telegram_active}
-                          />
+                        <div className="flex flex-col">
+                          <div className="flex items-center gap-2">
+                             <span className="text-sm font-medium">{v.name}</span>
+                             <VerificationBadge
+                               trustTier={v.trust_tier}
+                               telegramActive={v.telegram_active}
+                             />
+                          </div>
+                          <span className="text-[10px] text-green-500 font-bold uppercase tracking-widest leading-none mt-1">Ready for Dispatch</span>
                         </div>
                       </div>
                       {isSelected && (

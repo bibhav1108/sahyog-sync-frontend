@@ -181,36 +181,16 @@ const Dashboard = () => {
         <div className="space-y-5 rounded-xl bg-surface_high p-5">
           <h3 className="font-semibold">Top Volunteers</h3>
 
-          {loading
-            ? Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="space-y-2 rounded-lg bg-surface p-2">
-                  <div className="flex items-center gap-3">
-                    <Skeleton className="h-9 w-9" variant="circle" />
+          {loading ? (
+             <Skeleton count={5} height={60} className="rounded-xl" containerClassName="space-y-5" />
+          ) : (
+             volunteers
+               .sort((a, b) => (b.completions || 0) - (a.completions || 0))
+               .slice(0, 5)
+               .map((v, i) => {
+                 const progress = Math.min(((v.completions || 0) / 10) * 100, 100);
 
-                    <div className="flex-1 space-y-2">
-                      <Skeleton className="h-3 w-32" variant="text" />
-                      <Skeleton className="h-2 w-24" variant="text" />
-                    </div>
-
-                    <Skeleton
-                      className="h-5 w-14 rounded-full"
-                      variant="default"
-                    />
-                  </div>
-
-                  <Skeleton
-                    className="h-2 w-full rounded-full"
-                    variant="default"
-                  />
-                </div>
-              ))
-            : volunteers
-                .sort((a, b) => (b.completions || 0) - (a.completions || 0))
-                .slice(0, 5)
-                .map((v, i) => {
-                  const progress = Math.min(((v.completions || 0) / 10) * 100, 100);
-
-                  return (
+                 return (
                     <div
                       key={v.id}
                       className="space-y-2 animate-fadeIn"
@@ -248,7 +228,8 @@ const Dashboard = () => {
                       </div>
                     </div>
                   );
-                })}
+                 })
+           )}
         </div>
       </div>
 

@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import API from "../services/api";
 import Skeleton from "../components/Skeleton";
+import { useToast } from "../context/ToastContext";
 
 const Inventory = () => {
   const [items, setItems] = useState([]);
+  const { addToast } = useToast();
   const [loading, setLoading] = useState(false);
   const [adding, setAdding] = useState(false);
 
@@ -76,7 +78,7 @@ const Inventory = () => {
       
       // If it's a reservation error, specifically alert the user
       if (err?.response?.status === 400) {
-        alert(msg);
+        addToast(msg, "error");
       }
       
       fetchInventory(false);

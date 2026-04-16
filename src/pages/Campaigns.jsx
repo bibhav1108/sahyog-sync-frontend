@@ -41,6 +41,7 @@ const Campaigns = () => {
 
   const [showForm, setShowForm] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [actionLoadingId, setActionLoadingId] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
 
   const [showAIModal, setShowAIModal] = useState(false);
@@ -159,11 +160,13 @@ const Campaigns = () => {
 
   const triggerBroadcast = async (campaignId) => {
     try {
+      setActionLoadingId(`broadcast-${campaignId}`);
       await API.post(`/campaigns/${campaignId}/broadcast`);
-      alert("Broadcast triggered successfully.");
     } catch (err) {
       console.error(err);
       alert(err?.response?.data?.detail || "Failed to trigger broadcast");
+    } finally {
+      setActionLoadingId(null);
     }
   };
 
@@ -331,6 +334,7 @@ const Campaigns = () => {
 
   const completeCampaign = async (id) => {
     try {
+      setActionLoadingId(`complete-${id}`);
       await API.post(`/campaigns/${id}/complete`);
       setSelectedCampaign(null);
       setPool([]);
@@ -338,6 +342,8 @@ const Campaigns = () => {
     } catch (err) {
       console.error(err);
       alert(err?.response?.data?.detail || "Failed to complete campaign");
+    } finally {
+      setActionLoadingId(null);
     }
   };
 
@@ -527,22 +533,8 @@ const Campaigns = () => {
             </div>
 
             {loading ? (
-              <div className="space-y-5">
-                {Array.from({ length: MIN_CAMPAIGNS }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="relative overflow-hidden rounded-2xl border border-white/10 bg-surface_high/40 p-5"
-                  >
-                    <div className="flex justify-between items-start">
-                      <div className="space-y-3 w-2/3">
-                        <Skeleton className="h-3 w-20" />
-                        <Skeleton className="h-5 w-full" />
-                        <Skeleton className="h-3 w-3/4" />
-                      </div>
-                      <Skeleton className="h-4 w-16" />
-                    </div>
-                  </div>
-                ))}
+              <div className="contents">
+                <Skeleton count={MIN_CAMPAIGNS} height={120} className="rounded-2xl" containerClassName="space-y-5" />
               </div>
             ) : campaignList.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-white/10 bg-surface p-10 text-center">
@@ -716,15 +708,9 @@ const Campaigns = () => {
 
             <div className="space-y-3">
               {loadingReadiness ? (
-                Array.from({ length: MIN_READINESS }).map((_, i) => (
-                  <div key={i} className="space-y-2">
-                    <Skeleton className="h-4 w-full" />
-                    <div className="flex gap-2">
-                      <Skeleton className="h-8 w-16 rounded-lg" />
-                      <Skeleton className="h-8 w-16 rounded-lg" />
-                    </div>
-                  </div>
-                ))
+                <div className="space-y-4">
+                  <Skeleton count={MIN_READINESS} height={60} className="rounded-xl" />
+                </div>
               ) : readiness.length === 0 ? (
                 <div className="rounded-xl border border-dashed border-white/10 bg-surface/50 p-6 text-center">
                   <p className="text-sm opacity-70">
@@ -797,28 +783,35 @@ const Campaigns = () => {
 
             {selectedCampaign && (
               <div className="mt-6 space-y-3 border-t border-white/10 pt-6">
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={() => {
                     if (selectedCampaign.status === "COMPLETED") return;
                     triggerBroadcast(selectedCampaign.id);
                   }}
-                  disabled={selectedCampaign.status === "COMPLETED"}
-                  className={`w-full rounded-xl px-4 py-3 text-sm font-semibold text-white transition ${
+                  disabled={selectedCampaign.status === "COMPLETED" || actionLoadingId === `broadcast-${selectedCampaign.id}`}
+                  className={`w-full rounded-xl px-4 py-3 text-sm font-semibold text-white transition flex items-center justify-center gap-2 ${
                     selectedCampaign.status === "COMPLETED"
                       ? "cursor-not-allowed bg-white/10 opacity-50"
                       : "bg-blue-600 hover:bg-blue-500"
                   }`}
                 >
-                  Trigger Broadcast
-                </button>
+                  {actionLoadingId === `broadcast-${selectedCampaign.id}` && <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+                  {actionLoadingId === `broadcast-${selectedCampaign.id}` ? "Broadcasting..." : "Trigger Broadcast"}
+                </motion.button>
 
                 {selectedCampaign.status !== "COMPLETED" && (
-                  <button
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={() => completeCampaign(selectedCampaign.id)}
-                    className="w-full rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+                    disabled={actionLoadingId === `complete-${selectedCampaign.id}`}
+                    className="w-full rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2"
                   >
-                    Mark Campaign Completed
-                  </button>
+                    {actionLoadingId === `complete-${selectedCampaign.id}` && <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+                    {actionLoadingId === `complete-${selectedCampaign.id}` ? "Closing Mission..." : "Mark Campaign Completed"}
+                  </motion.button>
                 )}
               </div>
             )}
@@ -1125,13 +1118,16 @@ const Campaigns = () => {
                 />
 
                 <div className="mt-5 flex gap-3">
-                  <button
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={handleAIGenerate}
                     disabled={loadingAI}
-                    className="flex-1 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-white shadow-lg transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="flex-1 rounded-2xl bg-primaryGradient py-4 text-sm font-black uppercase tracking-widest text-white shadow-xl shadow-primary/20 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center gap-2"
                   >
-                    {loadingAI ? "Parsing Intelligence..." : "Generate Draft"}
-                  </button>
+                    {loadingAI && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+                    {loadingAI ? "Generating Draft..." : "Compose Mission"}
+                  </motion.button>
                   <button
                     onClick={() => setShowAIModal(false)}
                     className="rounded-xl border border-on_surface/10 bg-surface_high px-6 py-3 text-sm font-semibold transition hover:bg-surface_highest text-on_surface"
@@ -1346,13 +1342,16 @@ const Campaigns = () => {
                     </div>
 
                     <div className="flex gap-3 pt-6">
-                      <button
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
                         onClick={createCampaign}
                         disabled={creating}
-                        className="flex-1 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="flex-1 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center gap-2"
                       >
+                        {creating && <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />}
                         {creating ? "Processing..." : "Deploy Campaign"}
-                      </button>
+                      </motion.button>
                       <button
                         onClick={() => setShowForm(false)}
                         className="rounded-xl border border-on_surface/10 bg-surface_high px-6 py-3 text-sm font-semibold transition hover:bg-surface_highest text-on_surface"

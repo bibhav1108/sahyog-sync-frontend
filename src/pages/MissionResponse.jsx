@@ -61,7 +61,7 @@ const MissionResponse = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="animate-pulse h-40 w-80 rounded-2xl bg-slate-200" />
+        <Skeleton width={320} height={160} className="rounded-2xl" />
       </div>
     );
   }
