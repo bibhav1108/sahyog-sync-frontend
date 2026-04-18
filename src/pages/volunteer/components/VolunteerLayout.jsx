@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import API, { BACKEND_BASE_URL } from "../../../services/api";
 import logo from "../../../assets/logo.png";
 import SkeletonStructure from "../../../components/shared/SkeletonStructure";
-import { resolveProfileImage } from "../../../utils/imageUtils";
+import { resolveProfileImage, handleImageError } from "../../../utils/imageUtils";
 import VerificationBadge from "../../../components/shared/VerificationBadge";
 
 const VolunteerLayout = ({ children }) => {
@@ -153,6 +153,7 @@ const VolunteerLayout = ({ children }) => {
                                 src={resolveProfileImage(user?.profile_image_url)} 
                                 alt="pfp" 
                                 className="w-full h-full object-cover"
+                                onError={handleImageError}
                             />
                         </div>
                         <div className="flex flex-col items-start leading-none min-w-0 max-w-[80px] sm:max-w-none">
@@ -175,6 +176,7 @@ const VolunteerLayout = ({ children }) => {
                                     src={resolveProfileImage(user?.profile_image_url)} 
                                     alt="pfp" 
                                     className="w-full h-full object-cover"
+                                    onError={handleImageError}
                                 />
                             </div>
                             <div className="min-w-0">

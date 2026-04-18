@@ -11,7 +11,7 @@ import { BACKEND_BASE_URL } from "../services/api";
 export const resolveProfileImage = (url) => {
   // If no URL is provided, return the official backend default
   if (!url || url === "null" || url === "undefined") {
-    return `${BACKEND_BASE_URL}/static/default_pfp.jpg`;
+    return `https://res.cloudinary.com/dsu9ooawi/image/upload/v1776511334/sahyog_setu/assets/default_pfp.jpg`;
   }
 
   // If it's already a full HTTP(S) URL, return it as is
@@ -25,6 +25,17 @@ export const resolveProfileImage = (url) => {
   // Prefix with the backend base URL (removing any /api suffix if it accidentally exists there)
   const base = BACKEND_BASE_URL.replace("/api/v1", "").replace("/api", "");
   return `${base}${cleanUrl}`;
+};
+
+/**
+ * Handles image load errors by setting the src to the default profile picture.
+ * @param {Event} e - The error event from the <img> tag.
+ */
+export const handleImageError = (e) => {
+  const defaultUrl = resolveProfileImage(null);
+  if (e.target.src !== defaultUrl) {
+    e.target.src = defaultUrl;
+  }
 };
 
 /**

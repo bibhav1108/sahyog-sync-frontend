@@ -5,7 +5,7 @@ import logo from "../../../assets/logo.png";
 import pingSound from "../../../assets/ping.mp3";
 import React from "react";
 import SkeletonStructure from "../../../components/shared/SkeletonStructure";
-import { resolveProfileImage } from "../../../utils/imageUtils";
+import { resolveProfileImage, handleImageError } from "../../../utils/imageUtils";
 import VerificationBadge from "../../../components/shared/VerificationBadge";
 import { useToast } from "../../../context/ToastContext";
 
@@ -388,6 +388,7 @@ const Layout = ({ children }) => {
                       src={resolveProfileImage(user.profile_image_url)} 
                       alt="pfp" 
                       className="w-full h-full object-cover"
+                      onError={handleImageError}
                     />
                   </div>
                   <div className="flex flex-col items-start leading-none min-w-0 max-w-[80px] sm:max-w-none">
@@ -414,6 +415,7 @@ const Layout = ({ children }) => {
                       src={resolveProfileImage(user.profile_image_url)} 
                       alt="pfp" 
                       className="w-full h-full object-cover"
+                      onError={handleImageError}
                     />
                   </div>
                   <div className="min-w-0">

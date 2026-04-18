@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import API from "../../services/api";
 import VerificationBadge from "../../components/shared/VerificationBadge";
-import { resolveProfileImage } from "../../utils/imageUtils";
+import { resolveProfileImage, handleImageError } from "../../utils/imageUtils";
 import { useToast } from "../../context/ToastContext";
 
 // Shared UI Components
@@ -196,7 +196,7 @@ const Volunteers = () => {
                             <div key={v.id} onClick={() => setSelected(v)} className="group flex items-center justify-between p-4 px-6 hover:bg-white/60 cursor-pointer transition-all">
                                 <div className="flex items-center gap-4">
                                     <div className="w-10 h-10 rounded-xl overflow-hidden border border-primary/10 shadow-sm group-hover:scale-110 transition-transform">
-                                        <img src={resolveProfileImage(v.profile_image_url)} alt={v.name} className="w-full h-full object-cover" />
+                                        <img src={resolveProfileImage(v.profile_image_url)} alt={v.name} className="w-full h-full object-cover" onError={handleImageError} />
                                     </div>
                                     <div>
                                         <div className="flex items-center gap-2">
@@ -241,7 +241,7 @@ const Volunteers = () => {
                             >
                                 <div className="flex items-center gap-4 mb-6">
                                     <div className="w-14 h-14 rounded-2xl overflow-hidden border-2 border-primary/10 shadow-xl group-hover:rotate-3 transition-transform">
-                                        <img src={resolveProfileImage(req.profile_image_url)} alt={req.volunteer_name} className="w-full h-full object-cover" />
+                                        <img src={resolveProfileImage(req.profile_image_url)} alt={req.volunteer_name} className="w-full h-full object-cover" onError={handleImageError} />
                                     </div>
                                     <div className="min-w-0">
                                         <div className="flex items-center gap-2">
@@ -316,7 +316,7 @@ const Volunteers = () => {
                 <div className="px-10 pb-12">
                     <div className="relative -mt-16 mb-8 flex justify-center sm:justify-start">
                         <div className="w-32 h-32 rounded-[2.5rem] overflow-hidden border-8 border-surface_high shadow-2xl relative group">
-                            <img src={resolveProfileImage(selected.profile_image_url)} alt={selected.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                            <img src={resolveProfileImage(selected.profile_image_url)} alt={selected.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" onError={handleImageError} />
                             <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity" />
                         </div>
                     </div>

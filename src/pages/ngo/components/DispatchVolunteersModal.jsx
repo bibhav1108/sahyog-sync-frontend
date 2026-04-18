@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import API from "../../../services/api";
-import { resolveProfileImage } from "../../../utils/imageUtils";
+import { resolveProfileImage, handleImageError } from "../../../utils/imageUtils";
 import VerificationBadge from "../../../components/shared/VerificationBadge";
 import SkeletonStructure from "../../../components/shared/SkeletonStructure";
 import Modal from "../../../components/shared/Modal";
@@ -124,7 +124,7 @@ const DispatchVolunteersModal = ({ open, onClose, needId, onSuccess }) => {
                 >
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-[1rem] overflow-hidden border border-on_surface/5 shadow-lg relative group">
-                      <img src={resolveProfileImage(v.profile_image_url)} alt={v.name} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
+                      <img src={resolveProfileImage(v.profile_image_url)} alt={v.name} className="w-full h-full object-cover transition-transform group-hover:scale-110" onError={handleImageError} />
                     </div>
                     <div>
                         <div className="flex items-center gap-2">
@@ -168,7 +168,7 @@ const DispatchVolunteersModal = ({ open, onClose, needId, onSuccess }) => {
                   <div key={v.id} className="flex items-center justify-between bg-white/5 border border-white/5 p-3 rounded-2xl group/item hover:border-white/10 transition-all">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl overflow-hidden border border-white/10 shadow-lg">
-                        <img src={resolveProfileImage(v.profile_image_url)} alt={v.name} className="w-full h-full object-cover transition-transform group-hover/item:scale-110" />
+                        <img src={resolveProfileImage(v.profile_image_url)} alt={v.name} className="w-full h-full object-cover transition-transform group-hover/item:scale-110" onError={handleImageError} />
                       </div>
                       <span className="text-[11px] font-black text-on_surface uppercase tracking-tight">{v.name}</span>
                     </div>
