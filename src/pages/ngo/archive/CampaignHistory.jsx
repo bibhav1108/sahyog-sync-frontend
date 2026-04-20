@@ -76,7 +76,7 @@ const CampaignHistory = () => {
         <div>
             <p className="text-primary text-[10px] font-black uppercase tracking-[0.3em] mb-1">Operational Archives</p>
             <h1 className="text-5xl font-outfit font-black text-on_surface tracking-tight">Campaign History</h1>
-            <p className="text-xs font-bold text-on_surface_variant/60 mt-1">Full chronological mapping of successful humanitarian insertions and resource distribution missions.</p>
+            <p className="text-xs font-bold text-on_surface_variant/60 mt-1">Full chronological mapping of successful humanitarian activities and resource distribution campaigns.</p>
         </div>
         
         <div className="flex bg-surface_high p-1.5 rounded-2xl border border-on_surface/5 shadow-inner">
@@ -182,7 +182,7 @@ const CampaignHistory = () => {
                                                         <div className="flex items-center gap-6">
                                                             <div className="text-right hidden md:block">
                                                                 <p className="text-[11px] font-black text-on_surface uppercase tracking-tight">{new Date(c.created_at).toLocaleDateString([], { month: 'short', day: 'numeric' })}</p>
-                                                                <p className="text-[9px] font-bold text-on_surface_variant/40 tracking-widest text-right mt-1">Mission End</p>
+                                                                <p className="text-[9px] font-bold text-on_surface_variant/40 tracking-widest text-right mt-1">Campaign End</p>
                                                             </div>
                                                             <div className="flex items-center gap-2">
                                                                 <div className="px-5 py-2.5 bg-emerald-500/10 text-emerald-600 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] border border-emerald-500/20">

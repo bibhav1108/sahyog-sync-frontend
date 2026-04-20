@@ -13,7 +13,8 @@ const Modal = ({
   title, 
   maxWidth = "max-w-2xl", 
   className = "",
-  showClose = true
+  showClose = true,
+  bodyPadding = true
 }) => {
   return createPortal(
     <AnimatePresence>
@@ -57,7 +58,7 @@ const Modal = ({
             )}
 
             {/* Scrollable Body */}
-            <div className="flex-1 overflow-y-auto p-5 sm:p-8 pt-4 custom-scrollbar">
+            <div className={`flex-1 overflow-y-auto ${bodyPadding ? 'p-5 sm:p-8 pt-4' : ''} custom-scrollbar`}>
               {children}
             </div>
           </motion.div>

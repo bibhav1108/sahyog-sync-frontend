@@ -17,11 +17,11 @@ const ActivityHistory = () => {
   const [filter, setFilter] = useState("");
 
   const eventTypes = [
-    { id: "", label: "Sector Intelligence" },
-    { id: "MISSION_LAUNCHED", label: "Tactical Ops" },
-    { id: "VOLUNTEER_REGISTERED", label: "Personnel" },
-    { id: "INVENTORY_ADDED", label: "Logistics" },
-    { id: "PARTICIPANT_APPROVED", label: "Clearance" },
+    { id: "", label: "All Activity" },
+    { id: "MISSION_LAUNCHED", label: "Campaigns" },
+    { id: "VOLUNTEER_REGISTERED", label: "Volunteers" },
+    { id: "INVENTORY_ADDED", label: "Inventory" },
+    { id: "PARTICIPANT_APPROVED", label: "Approvals" },
   ];
 
   useEffect(() => {
@@ -69,9 +69,9 @@ const ActivityHistory = () => {
       {/* HEADER */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8">
         <div>
-            <p className="text-primary text-[10px] font-black uppercase tracking-[0.3em] mb-1">Operational Audit Trail</p>
-            <h1 className="text-5xl font-outfit font-black text-on_surface tracking-tight">Activity Archive</h1>
-            <p className="text-xs font-bold text-on_surface_variant/60 mt-1">Immutable records of mission deployments, personnel shifts, and logistics adjustments.</p>
+            <p className="text-primary text-[10px] font-black uppercase tracking-[0.3em] mb-1">Administrative Logs</p>
+            <h1 className="text-5xl font-outfit font-black text-on_surface tracking-tight">Activity History</h1>
+            <p className="text-xs font-bold text-on_surface_variant/60 mt-1">A detailed record of team actions, inventory updates, and volunteer activities across the network.</p>
         </div>
         
         <div className="flex bg-surface_high p-1.5 rounded-2xl border border-on_surface/5 shadow-inner">
@@ -91,14 +91,14 @@ const ActivityHistory = () => {
         </div>
       </div>
 
-      <ContentSection title="Intelligence logs" icon="manage_search">
+      <ContentSection title="Recent Activity Logs" icon="manage_search">
         <div className="space-y-4">
             {loading ? (
                 <SkeletonStructure layout={skeletonLayout} />
             ) : logs.length === 0 ? (
                 <div className="text-center py-40 bg-surface_high/30 rounded-[3.5rem] border-2 border-dashed border-on_surface/5">
                     <span className="material-symbols-outlined text-6xl opacity-10 mb-4">history</span>
-                    <p className="text-[10px] font-black uppercase tracking-widest opacity-20 italic">No historical records detected for this sector</p>
+                    <p className="text-[10px] font-black uppercase tracking-widest opacity-20 italic">No activity records found in history</p>
                 </div>
             ) : (
                 <div className="space-y-4">
@@ -140,7 +140,7 @@ const ActivityHistory = () => {
         {totalPages > 1 && (
             <div className="mt-12 flex items-center justify-between bg-surface_high/50 p-6 rounded-[2.5rem] border border-white">
                 <p className="text-[9px] font-black uppercase tracking-[0.2em] text-on_surface_variant/40">
-                    Quadrant <span className="text-primary">{page}</span> of {totalPages}
+                    Page <span className="text-primary">{page}</span> of {totalPages}
                 </p>
                 <div className="flex gap-3">
                     <button 

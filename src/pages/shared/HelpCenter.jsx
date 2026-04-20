@@ -3,31 +3,31 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const FAQS = [
   // NGO CATEGORY
-  { id: "ngo-reg", category: "NGO", q: "How does my NGO become verified?", a: "After registration, your account enters a 'Pending' state. A System Admin will review your foundation's credentials in the Administrative Hub. Once approved, you gain full access to the Marketplace and Inventory tools.", featured: true },
-  { id: "ngo-alerts", category: "NGO", q: "What are Marketplace Alerts?", a: "Alerts are AI-processed summaries of inbound resource donations received via the Sahyog Telegram Bot. You can approve, reject, or adjust quantities before syncing them into your inventory.", featured: true },
-  { id: "ngo-inv", category: "NGO", q: "Total vs Available vs Reserved stock?", a: "Total is your actual physical stock. Reserved represents items locked for an active Campaign. Available is what remains for immediate allocation (Total - Reserved = Available).", featured: true },
-  { id: "ngo-camp", category: "NGO", q: "How do I mobilize a Campaign?", a: "Go to Campaigns, define your mission objectives, select required volunteer skills, and reserve inventory. The system will then allow you to invite verified volunteers to join the mission." },
-  { id: "ngo-tech", category: "NGO", q: "Where do I report a bug or feature request?", a: "Use the 'Technical Hub' under Support. Your report is converted into a ticket for System Admins to patch. You can track the status (Active, Resolved) in real-time." },
-  { id: "ngo-vol", category: "NGO", q: "How do I verify a volunteer for field ops?", a: "NGO coordinators can validate a volunteer's identity and performance to increase their 'Trust Tier'. High-tier volunteers gain 'Field Verified' status for sensitive missions." },
-  { id: "ngo-donors", category: "NGO", q: "Can I manage donor relationships?", a: "The Marketplace records donor identities from Telegram alerts. You can view donor history and impact as part of your resource management dashboard." },
-  { id: "ngo-security", category: "NGO", q: "Is my inventory data private?", a: "Yes. All NGO inventory and operational data is siloed and only accessible by authorized personnel within your organization and the System Administration." },
+  { id: "ngo-reg", category: "NGO", q: "How does my NGO become verified?", a: "After you register, our team will review your organization's details. Once approved, you'll have full access to manage inventory and start campaigns.", featured: true },
+  { id: "ngo-alerts", category: "NGO", q: "What are Donation Alerts?", a: "Alerts are notifications about new donations received through the Sahyog Telegram Bot. You can check these donations and add them to your inventory.", featured: true },
+  { id: "ngo-inv", category: "NGO", q: "What do Total, Available, and Reserved mean?", a: "Total is everything you have in stock. Reserved items are set aside for a campaign that is already running. Available is what you have left to use for new tasks.", featured: true },
+  { id: "ngo-camp", category: "NGO", q: "How do I start a Campaign?", a: "Go to the Campaigns section, set your goals, choose the items you need from your inventory, and select the type of volunteers required. You can then invite volunteers to help.", featured: true },
+  { id: "ngo-tech", category: "NGO", q: "How do I report a problem or request a feature?", a: "You can use the 'Contact Support' page. Our team will look into your request and you can track the status of your message in your dashboard." },
+  { id: "ngo-vol", category: "NGO", q: "How do I verify a volunteer?", a: "You can review a volunteer's work and confirm their identity to help them build a better rating on the platform. This helps others know they are reliable.", featured: true },
+  { id: "ngo-donors", category: "NGO", q: "Can I see who donated items?", a: "Yes, you can see donor information from the Telegram alerts. This helps you track who is supporting your organization.", featured: true },
+  { id: "ngo-security", category: "NGO", q: "Is my inventory data private?", a: "Yes. Your inventory and campaign information can only be seen by people in your organization and the platform managers.", featured: true },
   
   // VOLUNTEER CATEGORY
-  { id: "vol-reg", category: "Volunteer", q: "Is email verification mandatory for volunteers?", a: "Yes. Verification is handled inline via OTP (One-Time Password) during registration to ensure all humanitarian operatives are reachable and authentic.", featured: true },
-  { id: "vol-missions", category: "Volunteer", q: "How do I find missions to join?", a: "You can browse active NGOs in the 'NGO Browser' or wait for direct invitations to join 'Urgent Mobilization' campaigns based on your skill set.", featured: true },
-  { id: "vol-impact", category: "Volunteer", q: "What is the Impact Score?", a: "Your Impact Score is calculated based on hours served, successful mission completions, and NGO feedback. Higher scores unlock more advanced mission opportunities." },
-  { id: "vol-otp", category: "Volunteer", q: "What is the mission handover protocol?", a: "At the delivery location, you must request an OTP from the recipient. Entering this code in the portal officially marks the mission as COMPLETED and updates the inventory.", featured: true },
-  { id: "vol-privacy", category: "Volunteer", q: "Who can see my personal data?", a: "Your identity is encrypted. Only NGO coordinators for missions you have accepted can view your contact details for operational safety." },
-  { id: "vol-skills", category: "Volunteer", q: "Can I update my humanitarian capabilities?", a: "Yes, you can manage your skills in your profile. However, advanced certifications may require validation by an NGO coordinator before they appear on your official record." },
-  { id: "vol-hours", category: "Volunteer", q: "How are my service hours calculated?", a: "Hours are tracked from the moment you accept a mission until the OTP handover is confirmed at the destination." },
-  { id: "vol-decline", category: "Volunteer", q: "Can I decline a mission invitation?", a: "Yes. Declining an invitation does not negatively impact your Trust Tier, though consistent inactivity may lower your priority for future urgent mobilizations." },
+  { id: "vol-reg", category: "Volunteer", q: "Do I need to verify my email?", a: "Yes. We send a simple code to your email during sign-up to make sure we can reach you when there's an emergency.", featured: true },
+  { id: "vol-missions", category: "Volunteer", q: "How do I find campaigns to join?", a: "You can look through the list of active NGOs or wait for an invitation to join an emergency campaign that needs your specific skills.", featured: true },
+  { id: "vol-impact", category: "Volunteer", q: "What is the Impact Score?", a: "Your score is based on the help you've provided, your completed tasks, and feedback from NGOs. A higher score shows you are an active and reliable volunteer." },
+  { id: "vol-otp", category: "Volunteer", q: "How do I finish a task?", a: "When you deliver items, you'll need to get a simple code from the person receiving them. Enter this code in the portal to mark the task as complete.", featured: true },
+  { id: "vol-privacy", category: "Volunteer", q: "Who can see my personal information?", a: "Your information is safe. Only the coordinators for the campaigns you join can see your contact details so they can coordinate with you.", featured: true },
+  { id: "vol-skills", category: "Volunteer", q: "Can I update my skills?", a: "Yes, you can add or change your skills in your profile. Some specialized skills might need to be confirmed by an NGO you've worked with." },
+  { id: "vol-hours", category: "Volunteer", q: "How are my volunteer hours tracked?", a: "We track your time from the moment you accept a task until you enter the delivery code at the final destination." },
+  { id: "vol-decline", category: "Volunteer", q: "Can I say no to an invitation?", a: "Yes. You can decline any invitation. It won't hurt your rating, though being active helps you get more opportunities in the future." },
 
   // GENERAL CATEGORY
-  { id: "gen-security", category: "General", q: "How does the platform ensure aid reaches the right place?", a: "Our dual-verification system uses AI to track inbound items and secure OTP handover protocols at the destination to ensure zero-leakage distribution." },
-  { id: "gen-reviews", category: "General", q: "How are platform reviews handled?", a: "Community feedback is prioritized for System Admins. Reviews help us calibrate the ecosystem and identify high-performing organizations or volunteers." },
-  { id: "gen-map", category: "General", q: "Can I use the map for multiple locations?", a: "Yes. Use the Interactive Map to pinpoint donation arrivals or collection hubs. NGOs use these locations to optimize logistics for the delivery fleet." },
-  { id: "gen-ai", category: "General", q: "How accurate is the platform's AI?", a: "Our AI extraction achieves 90%+ accuracy for resource types and quantities. However, NGO coordinators always review and 'Sync' alerts to ensure 100% data integrity." },
-  { id: "gen-cost", category: "General", q: "What is the cost of using SahyogSync?", a: "SahyogSync is free for registered NGOs and individual volunteers as part of our humanitarian initiative. Large-scale government integrations follow separate protocol." }
+  { id: "gen-security", category: "General", q: "How do you make sure help gets to the right person?", a: "We use a double-check system: we track items when they arrive and use secure delivery codes to make sure everything reaches its destination safely." },
+  { id: "gen-reviews", category: "General", q: "How are reviews handled?", a: "We take all feedback seriously. Reviews help us improve the platform and recognize top-performing volunteers and organizations." },
+  { id: "gen-map", category: "General", q: "Can I use the map for different tasks?", a: "Yes. The map shows where donations are coming from and where supplies are stored. NGOs use this to plan the best way to deliver help." },
+  { id: "gen-ai", category: "General", q: "Is the platform information accurate?", a: "Our system is very good at identifying donation details automatically, but NGO coordinators always double-check everything to be 100% sure the data is correct.", featured: true },
+  { id: "gen-cost", category: "General", q: "How much does it cost to use Sahyog?", a: "Sahyog is completely free for all registered NGOs and volunteers. It’s our way of supporting humanitarian work." }
 ];
 
 const HelpCenter = () => {
@@ -56,16 +56,14 @@ const HelpCenter = () => {
         }
 
         // 🎯 THE STICKY RESULT LOGIC
-        // Ensure the currently opened (expanded) FAQ is ALWAYS in the displayed list
         let displayed = [...matches];
         if (openFaq) {
             const activeFaq = FAQS.find(f => f.id === openFaq);
             if (activeFaq && !displayed.find(d => d.id === openFaq)) {
-                displayed.unshift(activeFaq); // Put the selected one at the top
+                displayed.unshift(activeFaq); 
             }
         }
 
-        // Pad with featured if not enough matches or no search
         if (displayed.length < 4) {
              const featured = FAQS.filter(f => f.featured && !displayed.find(d => d.id === f.id));
              displayed = [...displayed, ...featured.slice(0, 4 - displayed.length)];
@@ -93,7 +91,7 @@ const HelpCenter = () => {
             {/* 🔍 SEARCH HEADER */}
             <div className="relative z-40 rounded-[30px] md:rounded-[40px] bg-primaryGradient p-8 md:p-20 text-white shadow-2xl">
                 <div className="absolute top-0 right-0 p-8 md:p-12 opacity-10 rotate-12">
-                    <span className="material-symbols-outlined text-[150px] md:text-[200px]">hub</span>
+                    <span className="material-symbols-outlined text-[150px] md:text-[200px]">help</span>
                 </div>
                 <div className="relative z-10 text-center max-w-2xl mx-auto">
                     <motion.h1 
@@ -101,10 +99,10 @@ const HelpCenter = () => {
                         animate={{ opacity: 1, scale: 1 }}
                         className="text-3xl md:text-6xl font-black mb-4 md:mb-6 tracking-tighter uppercase"
                     >
-                        Intelligence Hub
+                        Help Center
                     </motion.h1>
                     <p className="text-sm md:text-xl opacity-90 font-medium leading-relaxed">
-                        Search the platform registry for tactical NGO workflows and volunteer protocols.
+                        Find answers to your questions about how to use Sahyog as an NGO or volunteer.
                     </p>
                     
                     {/* 🕵️ LIVE SEARCH BOX */}
@@ -119,7 +117,7 @@ const HelpCenter = () => {
                                     setShowSuggestions(true);
                                 }}
                                 onFocus={() => setShowSuggestions(true)}
-                                placeholder="Search protocols (e.g. OTP, Metrics, Triage)"
+                                placeholder="Search for help (e.g. NGO, volunteer, codes)"
                                 className="w-full bg-transparent py-4 md:py-6 px-6 md:px-8 outline-none text-white placeholder:text-white/60 text-sm md:text-base font-medium"
                             />
                             <div className="pr-6 opacity-60">
@@ -136,7 +134,7 @@ const HelpCenter = () => {
                                         className="absolute top-full left-0 w-full mt-3 bg-white rounded-2xl shadow-2xl overflow-hidden z-50 origin-top text-on_surface border border-primary/5"
                                     >
                                         <div className="p-3 bg-primary/5 border-b border-primary/10">
-                                            <p className="text-[9px] font-black uppercase tracking-widest text-primary opacity-60 px-2">Knowledge Base Results</p>
+                                            <p className="text-[9px] font-black uppercase tracking-widest text-primary opacity-60 px-2">Help Articles</p>
                                         </div>
                                         <div className="max-h-[300px] overflow-y-auto">
                                             {searchStats.filtered.map((faq) => (
@@ -146,7 +144,7 @@ const HelpCenter = () => {
                                                     className="w-full text-left p-4 hover:bg-primary/5 flex items-center gap-4 transition-colors group"
                                                 >
                                                     <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                                                        <span className="material-symbols-outlined text-[18px]">read_more</span>
+                                                        <span className="material-symbols-outlined text-[18px]">menu_book</span>
                                                     </div>
                                                     <div>
                                                         <p className="text-xs font-black text-on_surface_variant uppercase tracking-widest leading-none mb-1 opacity-40">{faq.category}</p>
@@ -163,46 +161,46 @@ const HelpCenter = () => {
                 </div>
             </div>
 
-            {/* 📋 WORKFLOW SYNC */}
+            {/* 📋 PROCESS SECTION */}
             <section className="space-y-8 px-2">
                 <div className="text-center px-4">
-                    <h2 className="text-[9px] md:text-[10px] uppercase font-black tracking-[0.3em] text-primary mb-2">Protocol Architecture</h2>
-                    <h3 className="text-2xl md:text-3xl font-black tracking-tight uppercase">System Efficiency Flow</h3>
+                    <h2 className="text-[9px] md:text-[10px] uppercase font-black tracking-[0.3em] text-primary mb-2">Our Process</h2>
+                    <h3 className="text-2xl md:text-3xl font-black tracking-tight uppercase">How It Works</h3>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
-                    <WorkflowStep number="1" title="Triage & Extract" desc="Resources tracked from ground source. AI extracts mission-critical data instantly." icon="emergency" />
-                    <WorkflowStep number="2" title="Inventory Activation" desc="NGOs approve arrivals in the hub, syncing virtual data with physical stock." icon="box_add" />
-                    <WorkflowStep number="3" title="Verification Protocol" desc="Campaigns conclude via OTP secure handovers, updating global trust metrics." icon="verified" />
+                    <WorkflowStep number="1" title="Receive & Process" desc="Help is tracked from the source and donation info is updated automatically." icon="emergency" />
+                    <WorkflowStep number="2" title="Manage Inventory" desc="NGOs check and approve donations in the portal to update their stock." icon="box_add" />
+                    <WorkflowStep number="3" title="Confirm Delivery" desc="Tasks are completed using secure codes to ensure help reaches the right place." icon="verified" />
                 </div>
             </section>
 
-            {/* 🛡️ ADMINISTRATIVE HUB OVERSIGHT */}
+            {/* 🛡️ PLATFORM MANAGEMENT */}
             <section className="bg-surface_high/30 backdrop-blur-xl border border-white/40 rounded-[2.5rem] p-8 md:p-12 space-y-10">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div className="max-w-xl">
-                        <h3 className="text-2xl md:text-3xl font-black mb-3 tracking-tighter uppercase leading-none">Global Governance</h3>
+                        <h3 className="text-2xl md:text-3xl font-black mb-3 tracking-tighter uppercase leading-none">Our Standards</h3>
                         <p className="text-sm md:text-base text-on_surface_variant font-medium opacity-60">
-                            Our superuser tools oversee NGO vetting, volunteer trust, and technical platform patches.
+                            Our team works behind the scenes to keep the platform safe, verified, and running smoothly.
                         </p>
                     </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-                    <AdminUnit title="Foundation Check" desc="Vetting NGOs for platform integrity." icon="account_balance" />
-                    <WorkflowIcon title="Force Oversight" desc="Global volunteer management hub." icon="safety_check" />
-                    <WorkflowIcon title="Community Pulse" desc="Sentiment and review analytics." icon="data_exploration" />
-                    <WorkflowIcon title="Technical Console" desc="Priority bug resolution center." icon="terminal" />
+                    <AdminUnit title="NGO Verification" desc="Checking organizations to ensure they are safe." icon="account_balance" />
+                    <WorkflowIcon title="Volunteer Management" desc="Helping volunteers manage their profile and score." icon="safety_check" />
+                    <WorkflowIcon title="Community Feedback" desc="Reviewing user suggestions and feedback." icon="data_exploration" />
+                    <WorkflowIcon title="Technical Support" desc="Fixing any technical issues or bugs." icon="terminal" />
                 </div>
             </section>
 
-            {/* 💎 FAQ ACCORDION SECTION */}
+            {/* 💎 FAQ SECTION */}
             <section id="faq-section" className="space-y-12 scroll-mt-20">
                 <div className="text-center px-4">
                     <h3 className="text-3xl font-black uppercase tracking-tight">
-                        {searchQuery.length > 1 ? "Tactical Results" : "Core Essentials"}
+                        {searchQuery.length > 1 ? "Found Answers" : "Common Questions"}
                     </h3>
                     <p className="text-on_surface_variant/60 font-medium tracking-wide">
-                        {searchQuery.length > 1 ? `Found ${searchStats.displayed.length} relevant protocols` : "Frequently asked humanitarian queries."}
+                        {searchQuery.length > 1 ? `Found ${searchStats.displayed.length} answers for you` : "Find help with the most common questions."}
                     </p>
                 </div>
 
@@ -230,8 +228,8 @@ const HelpCenter = () => {
                     {searchQuery.length > 1 && searchStats.displayed.length === 0 && (
                         <div className="text-center py-20 bg-surface_high/30 rounded-[2rem] border border-dashed border-on_surface/10">
                             <span className="material-symbols-outlined text-4xl opacity-20 mb-4 text-primary">search_off</span>
-                            <p className="font-bold text-on_surface_variant">No exact matches found in the registry.</p>
-                            <p className="text-xs text-on_surface_variant/60">Try searching with broader keywords like 'NGO' or 'OTP'.</p>
+                            <p className="font-bold text-on_surface_variant">No answers found for your search.</p>
+                            <p className="text-xs text-on_surface_variant/60">Try searching with simpler words like 'NGO' or 'help'.</p>
                         </div>
                     )}
                 </div>
@@ -241,11 +239,11 @@ const HelpCenter = () => {
             <div className="text-center py-20 bg-white/40 border border-white rounded-[3rem] shadow-soft relative overflow-hidden">
                 <div className="relative z-10 space-y-10">
                     <div className="max-w-xl mx-auto space-y-4">
-                        <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tighter text-on_surface leading-none">Still require support?</h2>
-                        <p className="text-sm md:text-lg text-on_surface_variant opacity-60 font-medium px-4">Contact our technical operatives for priority assistance.</p>
+                        <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tighter text-on_surface leading-none">Still need help?</h2>
+                        <p className="text-sm md:text-lg text-on_surface_variant opacity-60 font-medium px-4">Send us a message and our team will get back to you soon.</p>
                     </div>
                     <div className="flex flex-col sm:flex-row justify-center gap-4 px-6">
-                        <button className="px-10 py-5 bg-primaryGradient text-white rounded-2xl font-black uppercase tracking-widest text-[10px] md:text-xs shadow-xl shadow-primary/20 hover:scale-[1.05] active:scale-95 transition">Open Priority Ticket</button>
+                        <button className="px-10 py-5 bg-primaryGradient text-white rounded-2xl font-black uppercase tracking-widest text-[10px] md:text-xs shadow-xl shadow-primary/20 hover:scale-[1.05] active:scale-95 transition">Send a Message</button>
                         <button className="px-10 py-5 bg-white border border-on_surface/5 text-on_surface_variant rounded-2xl font-black uppercase tracking-widest text-[10px] md:text-xs">System Status</button>
                     </div>
                 </div>

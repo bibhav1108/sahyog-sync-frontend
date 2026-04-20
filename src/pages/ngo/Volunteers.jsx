@@ -132,13 +132,13 @@ const Volunteers = () => {
       <div className="grid grid-cols-12 gap-6">
         <div className="col-span-12 lg:col-span-8">
             <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-                <p className="text-primary text-[10px] sm:text-[10px] font-black uppercase tracking-[0.3em] mb-1">Resource Management</p>
-                <h1 className="text-3xl sm:text-4xl font-outfit font-black text-on_surface tracking-tight">Volunteer Force</h1>
-                <p className="text-xs font-bold text-on_surface_variant/60 mt-1">Deploying human intelligence across active operations.</p>
+                <p className="text-primary text-[10px] sm:text-[10px] font-black uppercase tracking-[0.3em] mb-1">Team Management</p>
+                <h1 className="text-3xl sm:text-4xl font-outfit font-black text-on_surface tracking-tight">Volunteer Team</h1>
+                <p className="text-xs font-bold text-on_surface_variant/60 mt-1">Managing volunteers across active campaigns and operations.</p>
             </motion.div>
         </div>
         <div className="col-span-12 lg:col-span-4 flex justify-center lg:justify-end items-center gap-4">
-             <MetricCard label="Active Personnel" value={volunteers.length} icon="groups" className="w-full max-w-[220px]" />
+             <MetricCard label="Total Volunteers" value={volunteers.length} icon="groups" className="w-full max-w-[220px]" />
         </div>
       </div>
 
@@ -178,14 +178,14 @@ const Volunteers = () => {
                 </div>
             )}
             <button onClick={() => setShowForm(true)} className="bg-primaryGradient text-white px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-105 transition-all">
-                Add Personnel
+                Add Volunteer
             </button>
         </div>
       </div>
 
       <div className="animate-fadeIn">
         {activeTab === "members" ? (
-            <ContentSection title="Personnel Registry" icon="list_alt" noPadding>
+            <ContentSection title="Volunteer List" icon="list_alt" noPadding>
                 {loading ? (
                     <div className="p-6">
                         <SkeletonStructure layout={volunteerSkeletonLayout} />
@@ -208,7 +208,7 @@ const Volunteers = () => {
                                 </div>
                                 <div className="flex items-center gap-6">
                                     <div className="text-right hidden sm:block">
-                                        <p className="text-[9px] font-black uppercase tracking-widest text-on_surface_variant/40 mb-1 leading-none">Intelligence</p>
+                                        <p className="text-[9px] font-black uppercase tracking-widest text-on_surface_variant/40 mb-1 leading-none">Trust Score</p>
                                         <p className="text-xs font-black text-on_surface">{v.trust_score}%</p>
                                     </div>
                                     <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${
@@ -216,7 +216,7 @@ const Volunteers = () => {
                                         v.status === 'ON_MISSION' ? "bg-primary/10 text-primary border-primary/20" : 
                                         "bg-surface_highest text-on_surface_variant border-white/5"
                                     }`}>
-                                        {v.status}
+                                        {v.status === 'ON_MISSION' ? "ACTIVE" : v.status}
                                     </span>
                                 </div>
                             </div>
@@ -279,18 +279,18 @@ const Volunteers = () => {
       <Modal
         isOpen={showForm}
         onClose={() => setShowForm(false)}
-        title="New Personnel"
+        title="Add Volunteer"
         maxWidth="max-w-md"
       >
         <div className="space-y-6">
-            <p className="text-xs font-bold text-on_surface_variant/60 leading-relaxed italic border-l-4 border-primary/20 pl-4">Authorize and integrate new human resources into the operational network.</p>
+            <p className="text-xs font-bold text-on_surface_variant/60 leading-relaxed italic border-l-4 border-primary/20 pl-4">Add a new volunteer to the team and assign them to the network.</p>
             <div className="space-y-4">
-                <ActionInput label="Full Operational Name" placeholder="e.g. John Wick" value={form.name} onChange={(val) => setForm({...form, name: val})} />
-                <ActionInput label="Secured Phone Number" placeholder="+91..." value={form.phone_number} onChange={(val) => setForm({...form, phone_number: val})} />
-                <ActionInput label="Deployable Zone" placeholder="e.g. Central Sector" value={form.zone} onChange={(val) => setForm({...form, zone: val})} />
+                <ActionInput label="Full Name" placeholder="e.g. John Doe" value={form.name} onChange={(val) => setForm({...form, name: val})} />
+                <ActionInput label="Phone Number" placeholder="+91..." value={form.phone_number} onChange={(val) => setForm({...form, phone_number: val})} />
+                <ActionInput label="Work Zone" placeholder="e.g. Central Lucknow" value={form.zone} onChange={(val) => setForm({...form, zone: val})} />
                 <button onClick={handleCreate} disabled={creating} className="w-full py-4 mt-4 bg-on_surface text-white rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-xl hover:-translate-y-1 transition-all flex items-center justify-center gap-3">
                     {creating && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
-                    {creating ? "Integrating..." : "Authorize Personnel"}
+                    {creating ? "Adding..." : "Add Volunteer"}
                 </button>
             </div>
         </div>
@@ -339,14 +339,14 @@ const Volunteers = () => {
                             "border-white/10 bg-white/5 text-on_surface_variant shadow-on_surface/5"
                         }`}>
                             <span className="text-[9px] font-black uppercase tracking-widest opacity-50 mb-1">Current Status</span>
-                            <span className="text-xl font-black uppercase tracking-tight">{selected.status}</span>
+                            <span className="text-xl font-black uppercase tracking-tight">{selected.status === 'ON_MISSION' ? "ACTIVE" : selected.status}</span>
                         </div>
                     </div>
 
                     <div className="grid grid-cols-3 gap-4 mt-10">
                         {[
-                            { label: "Confidence", value: `${selected.trust_score}%`, color: "text-primary" },
-                            { label: "Missions", value: selected.completions, color: "text-on_surface" },
+                            { label: "Trust Score", value: `${selected.trust_score}%`, color: "text-primary" },
+                            { label: "Campaigns", value: selected.completions, color: "text-on_surface" },
                             { label: "Service", value: `${(selected.hours_served || 0).toFixed(1)}h`, color: "text-on_surface" }
                         ].map((stat, i) => (
                             <div key={i} className="bg-white p-6 rounded-[2rem] border border-on_surface/5 text-center shadow-sm hover:shadow-md transition-shadow">
@@ -368,7 +368,7 @@ const Volunteers = () => {
                                         <span className="material-symbols-outlined text-3xl font-black">fingerprint</span>
                                     </div>
                                     <div>
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-primary mb-1">Identity Control Pending</p>
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-primary mb-1">Identity Verification Pending</p>
                                         <p className="text-sm font-bold text-on_surface">Aadhaar Key: <span className="text-primary font-black ml-1 tracking-widest">****{selected.aadhaar_last_4}</span></p>
                                     </div>
                                 </div>
@@ -377,7 +377,7 @@ const Volunteers = () => {
                                     onClick={() => handleVerifyId(selected.id)}
                                     className="w-full sm:w-auto px-10 py-4 bg-on_surface text-white text-[11px] font-black uppercase tracking-widest rounded-2xl shadow-xl hover:bg-primary transition-all disabled:opacity-50"
                                 >
-                                    {actionLoading === `verify-${selected.id}` ? "Authorizing..." : "Confirm Identity"}
+                                    {actionLoading === `verify-${selected.id}` ? "Verifying..." : "Approve ID"}
                                 </button>
                             </div>
                         </div>

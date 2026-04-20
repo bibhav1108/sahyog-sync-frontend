@@ -45,15 +45,15 @@ const ContactPage = () => {
             <div className="w-24 h-24 bg-primaryGradient text-white rounded-[2rem] flex items-center justify-center mx-auto mb-8 shadow-xl rotate-12">
                 <span className="material-symbols-outlined text-[48px]">support_agent</span>
             </div>
-            <h1 className="text-4xl font-black mb-4 tracking-tighter text-on_surface uppercase">Transmission Success</h1>
+            <h1 className="text-3xl font-black mb-4 tracking-tighter text-on_surface uppercase">Message Sent</h1>
             <p className="text-on_surface_variant mb-10 text-lg font-medium opacity-80 leading-relaxed">
-                Your report has been prioritized in the administrative queue. An operative will assess the situation soon.
+                We have received your message. A member of our support team will review your request and get back to you soon.
             </p>
             <button 
                 onClick={() => setSubmitted(false)}
                 className="px-10 py-5 bg-primaryGradient text-white rounded-2xl font-black uppercase tracking-widest text-xs transition shadow-xl shadow-primary/25"
             >
-                Return to Support
+                Back to Contact Page
             </button>
         </motion.div>
       </div>
@@ -65,20 +65,20 @@ const ContactPage = () => {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
           <div className="space-y-4">
             <div className="inline-block px-4 py-1.5 bg-red-500/5 text-red-600 rounded-full text-[10px] font-black uppercase tracking-[0.2em] border border-red-500/10">
-                Operations Status: Active
+                Status: Online
             </div>
             <h1 className="text-6xl font-black tracking-tighter text-on_surface leading-[0.9]">
-                Global <br />
-                <span className="text-transparent bg-clip-text bg-primaryGradient">Support Hub</span>
+                Contact <br />
+                <span className="text-transparent bg-clip-text bg-primaryGradient">Support</span>
             </h1>
             <p className="text-on_surface_variant text-xl font-medium opacity-60 max-w-lg">
-                Facing a technical blockade or scaling challenges? Connect with the core operations team.
+                Need help or have a question? Send us a message and we'll get back to you as soon as possible.
             </p>
           </div>
           <div className="bg-white/40 backdrop-blur-glass px-8 py-5 rounded-[2rem] border border-white/50 flex items-center gap-4 shadow-soft">
                <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
                <div className="flex flex-col">
-                   <span className="text-[9px] font-black uppercase tracking-[0.2em] opacity-40">System Response Time</span>
+                   <span className="text-[9px] font-black uppercase tracking-[0.2em] opacity-40">Average Response Time</span>
                    <span className="text-lg font-black text-on_surface">~ 120 Minutes</span>
                </div>
           </div>
@@ -88,7 +88,7 @@ const ContactPage = () => {
         {/* SOCIAL CARDS */}
         <div className="lg:col-span-2 space-y-4">
           <h2 className="text-[10px] font-black uppercase tracking-[0.3em] opacity-30 mb-6 flex items-center gap-2 ml-4">
-              Direct Channels
+              Other Ways to Reach Us
           </h2>
           <div className="grid grid-cols-1 gap-4">
             {socialLinks.map((link) => (
@@ -99,7 +99,7 @@ const ContactPage = () => {
                         <span className="material-symbols-outlined text-2xl">{link.icon}</span>
                    </div>
                    <div>
-                        <p className="text-[10px] font-black uppercase opacity-40 tracking-[0.2em] mb-1">{link.label}</p>
+                        <p className="text-[10px] font-black uppercase opacity-40 tracking-[0.2em] mb-1">{link.label === "Instagram Hub" ? "Instagram" : link.label}</p>
                         <p className="font-black text-lg text-on_surface">{link.value}</p>
                    </div>
                 </div>
@@ -120,13 +120,13 @@ const ContactPage = () => {
                 </div>
                 
                 <h2 className="text-2xl font-black mb-10 flex items-center gap-3 text-on_surface uppercase tracking-tight">
-                    <span className="material-symbols-outlined text-primary text-3xl">terminal</span>
-                    Submit Priority Ticket
+                    <span className="material-symbols-outlined text-primary text-3xl">mail</span>
+                    Send a Message
                 </h2>
 
                 <form onSubmit={handleSubmit} className="space-y-8 relative">
                     <div className="space-y-3">
-                        <label className="text-[10px] font-black uppercase tracking-[0.3em] opacity-30 ml-4">Incident Category</label>
+                        <label className="text-[10px] font-black uppercase tracking-[0.3em] opacity-30 ml-4">Category</label>
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                             {["BUG", "FEATURE", "UI", "LOGISTICS"].map(cat => (
                                 <button
@@ -146,12 +146,12 @@ const ContactPage = () => {
                     </div>
 
                     <div className="space-y-3">
-                        <label className="text-[10px] font-black uppercase tracking-[0.3em] opacity-30 ml-4">Brief Narrative</label>
+                        <label className="text-[10px] font-black uppercase tracking-[0.3em] opacity-30 ml-4">Message</label>
                         <textarea
                             required
                             rows={6}
                             className="w-full bg-surface_high/50 backdrop-blur-sm rounded-[2rem] p-8 border border-white/50 outline-none focus:border-primary/40 focus:ring-4 focus:ring-primary/5 transition-all text-lg font-medium"
-                            placeholder="Describe the technical blockade or your feature request..."
+                            placeholder="How can we help you? Describe the issue or request here..."
                             value={formData.content}
                             onChange={(e) => setFormData({...formData, content: e.target.value})}
                         />
@@ -166,8 +166,8 @@ const ContactPage = () => {
                             <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                         ) : (
                             <>
-                                Initiate Uplink
-                                <span className="material-symbols-outlined text-[20px]">shield</span>
+                                Send Message
+                                <span className="material-symbols-outlined text-[20px]">send</span>
                             </>
                         )}
                     </button>

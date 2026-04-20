@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import API from "../../services/api";
 
@@ -16,6 +17,7 @@ const MarketplaceAlerts = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [expandedId, setExpandedId] = useState(null);
   const { addToast } = useToast();
+  const navigate = useNavigate();
 
   const loadAlerts = async (init = false, silent = false) => {
     try {
@@ -24,7 +26,7 @@ const MarketplaceAlerts = () => {
       const res = await API.get("marketplace/needs/alerts");
       setAlerts(res.data || []);
     } catch {
-      addToast("Failed to sync marketplace signals", "error");
+      addToast("Failed to load donation alerts", "error");
     } finally {
       if (init) setInitialLoading(false);
       if (!init) setRefreshing(false);
@@ -71,8 +73,8 @@ const MarketplaceAlerts = () => {
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8">
         <div>
             <p className="text-primary text-[10px] font-black uppercase tracking-[0.3em] mb-1">New Donations</p>
-            <h1 className="text-5xl font-outfit font-black text-on_surface tracking-tight">Alert History</h1>
-            <p className="text-xs font-bold text-on_surface_variant/60 mt-1">Reviewing donation alerts received through the network.</p>
+            <h1 className="text-5xl font-outfit font-black text-on_surface tracking-tight">Donation Alerts</h1>
+            <p className="text-xs font-bold text-on_surface_variant/60 mt-1">Review and accept donation offers from your community.</p>
         </div>
         <div className="flex items-center gap-4">
             <MetricCard label="Active Alerts" value={alerts.length} icon="notifications_active" variant="primary" />
@@ -150,23 +152,35 @@ const MarketplaceAlerts = () => {
                                             </div>
                                         </div>
 
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                claimAlert(alert.id);
-                                            }}
-                                            disabled={loadingId === alert.id}
-                                            className="w-full md:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-on_surface text-white rounded-2xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-primary transition-all flex items-center justify-center gap-2 shadow-lg hover:-translate-y-1 active:scale-95"
-                                        >
-                                            {loadingId === alert.id ? (
-                                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                            ) : (
-                                                <>
-                                                    <span className="material-symbols-outlined text-sm">inventory</span>
-                                                    Accept Donation
-                                                </>
-                                            )}
-                                        </button>
+                                        <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    navigate("/ngo/dashboard", { state: { focusId: alert.id, focusType: 'alert' } });
+                                                }}
+                                                className="w-full sm:w-auto p-4 bg-surface_high text-on_surface_variant rounded-2xl hover:bg-black/5 transition-all flex items-center justify-center"
+                                                title="View on Map"
+                                            >
+                                                <span className="material-symbols-outlined">explore</span>
+                                            </button>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    claimAlert(alert.id);
+                                                }}
+                                                disabled={loadingId === alert.id}
+                                                className="w-full sm:w-auto px-8 py-4 bg-primaryGradient text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:scale-[1.02] transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/20 active:scale-95"
+                                            >
+                                                {loadingId === alert.id ? (
+                                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                                ) : (
+                                                    <>
+                                                        <span className="material-symbols-outlined text-sm">inventory</span>
+                                                        Accept Donation
+                                                    </>
+                                                )}
+                                            </button>
+                                        </div>
                                     </div>
 
                                     {/* EXPANDABLE DETAILS */}

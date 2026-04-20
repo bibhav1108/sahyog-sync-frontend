@@ -94,3 +94,54 @@ html {
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+/* ── Alert Marker Enhancements ────────────────────────── */
+.alert-marker-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.alert-marker-content {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid white;
+  background: #6366F1; /* Indigo for Signals/Alerts */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.5);
+  transition: transform 0.2s ease;
+}
+
+.alert-marker-content:hover {
+  transform: scale(1.15);
+}
+
+/* ── Premium Map Popups ────────────────────────── */
+.leaflet-popup-content-wrapper {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px);
+  border-radius: 1.5rem !important;
+  padding: 0 !important;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1) !important;
+  border: 1px solid rgba(255,255,255,0.2) !important;
+}
+
+.leaflet-popup-content {
+  margin: 0 !important;
+  width: auto !important;
+}
+
+.premium-popup .leaflet-popup-close-button {
+  top: 12px !important;
+  right: 12px !important;
+}
+
+.premium-popup .claim-btn {
+  background: #10B981 !important; /* Emerald/Green for visibility */
+  color: white !important;
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3) !important;
+}

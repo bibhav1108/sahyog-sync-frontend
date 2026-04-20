@@ -11,11 +11,11 @@ import { useToast } from "../../../context/ToastContext";
 
 const NAV_ITEMS = [
   { to: "/ngo/dashboard", label: "Overview", icon: "dashboard" },
-  { to: "/marketplace", label: "Marketplace", icon: "notifications_active" },
-  { to: "/collection-hub", label: "Collection Hub", icon: "move_to_inbox" },
-  { to: "/campaigns", label: "Campaigns", icon: "rocket_launch" },
-  { to: "/volunteers", label: "Volunteers", icon: "groups" },
-  { to: "/inventory", label: "Inventory", icon: "inventory_2" },
+  { to: "/marketplace", label: "Marketplace", icon: "notifications_active", restricted: true },
+  { to: "/collection-hub", label: "Collection Hub", icon: "move_to_inbox", restricted: true },
+  { to: "/campaigns", label: "Campaigns", icon: "rocket_launch", restricted: true },
+  { to: "/volunteers", label: "Volunteers", icon: "groups", restricted: true },
+  { to: "/inventory", label: "Inventory", icon: "inventory_2", restricted: true },
 ];
 
 const getInitials = (name) =>
@@ -38,11 +38,13 @@ const Layout = ({ children }) => {
   const { addToast } = useToast();
 
   const [user, setUser] = useState(null);
+  const [org, setOrg] = useState(null);
 
   const [profileOpen, setProfileOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 768);
 
   const [loadingUser, setLoadingUser] = useState(true);
+  const [loadingOrg, setLoadingOrg] = useState(true);
   const [loadingNotifications, setLoadingNotifications] = useState(true);
 
   const prevIdsRef = useRef(new Set());
@@ -55,12 +57,25 @@ const Layout = ({ children }) => {
   useEffect(() => {
     const loadProfile = async () => {
       try {
-        const userRes = await API.get("/users/me");
+        const [userRes, orgRes] = await Promise.all([
+          API.get("/users/me"),
+          API.get("/organizations/me").catch(() => ({ data: null }))
+        ]);
         setUser(userRes.data);
+        setOrg(orgRes?.data);
+
+        // STRICT REDIRECT: NGO_ADMIN without org must onboard
+        if (userRes.data.role === 'NGO_ADMIN' && !userRes.data.org_id) {
+          if (location.pathname !== '/ngo-admin/identity') {
+            navigate('/ngo-admin/identity', { replace: true });
+          }
+        }
+
       } catch (err) {
-        console.error("User profile load failed", err);
+        console.error("Profile load failed", err);
       } finally {
         setLoadingUser(false);
+        setLoadingOrg(false);
       }
     };
 
@@ -69,7 +84,8 @@ const Layout = ({ children }) => {
     const handleSync = () => loadProfile();
     window.addEventListener('user-profile-updated', handleSync);
     return () => window.removeEventListener('user-profile-updated', handleSync);
-  }, []);
+  }, [location.pathname]); // Watch path changes
+
   const loadNotifications = async () => {
     if (loadingRef.current.notifications) return;
     loadingRef.current.notifications = true;
@@ -136,26 +152,6 @@ const Layout = ({ children }) => {
 
 
   useEffect(() => {
-    const handleMove = (e) => {
-      if (!isDragging) return;
-      const newWidth = window.innerWidth - e.clientX;
-      if (newWidth > 260 && newWidth < 520) {
-        setPanelWidth(newWidth);
-      }
-    };
-
-    const stopDragging = () => setIsDragging(false);
-
-    window.addEventListener("mousemove", handleMove);
-    window.addEventListener("mouseup", stopDragging);
-
-    return () => {
-      window.removeEventListener("mousemove", handleMove);
-      window.removeEventListener("mouseup", stopDragging);
-    };
-  }, [isDragging]);
-
-  useEffect(() => {
     const handleClickOutside = (e) => {
       if (!e.target.closest("[data-profile-dropdown]")) {
         setProfileOpen(false);
@@ -173,6 +169,10 @@ const Layout = ({ children }) => {
     localStorage.clear();
     navigate("/", { replace: true });
   };
+
+  // UI STATE HELPERS
+  const storedRole = localStorage.getItem("role");
+  const isAdmin = (user?.role || storedRole) === "NGO_ADMIN";
 
   return (
     <div className="min-h-screen bg-surface text-on_surface antialiased overflow-x-hidden">
@@ -208,25 +208,41 @@ const Layout = ({ children }) => {
         <nav className="flex-1 space-y-1 text-sm">
           {NAV_ITEMS.map((item) => {
             const active = location.pathname === item.to;
+            const isAdminItem = item.adminOnly;
+            const isRestricted = item.restricted && (!org || org.status === "pending") && !isAdmin;
+            
+            // Hide admin-only items for non-admins
+            if (isAdminItem && !isAdmin) return null;
+
             return (
               <Link
-                key={item.to}
-                to={item.to}
-                onClick={() => {
+                key={item.label}
+                to={isRestricted ? "#" : item.to}
+                onClick={(e) => {
+                  if (isRestricted) {
+                    e.preventDefault();
+                    addToast("Verification Required", "info");
+                    return;
+                  }
                   if (window.innerWidth < 768) setSidebarOpen(false);
                 }}
                 className={`flex items-center gap-3 rounded-xl px-3 py-2.5 transition-all duration-200 ${
                   active
                     ? "scale-[1.02] bg-primary/15 text-primary shadow-soft"
-                    : "text-on_surface_variant hover:scale-[1.01] hover:bg-white/5 hover:text-on_surface"
+                    : isRestricted 
+                      ? "text-on_surface_variant/20 cursor-not-allowed" 
+                      : "text-on_surface_variant hover:scale-[1.01] hover:bg-white/5 hover:text-on_surface"
                 }`}
               >
-                <span className="material-symbols-outlined text-[20px]">
+                <span className={`material-symbols-outlined text-[20px] ${isRestricted ? 'opacity-20' : ''}`}>
                   {item.icon}
                 </span>
                 <span className={`${active ? "font-semibold" : "font-medium"}`}>
                   {item.label}
                 </span>
+                {isRestricted && (
+                  <span className="material-symbols-outlined text-[14px] ml-auto opacity-30">lock</span>
+                )}
               </Link>
             );
           })}
@@ -263,18 +279,37 @@ const Layout = ({ children }) => {
             <span className="text-on_surface_variant/40 text-[9px] sm:text-sm uppercase tracking-widest font-black shrink-0">NGO Dashboard</span>
             <span className="material-symbols-outlined text-[10px] sm:text-xs text-on_surface_variant/40 shrink-0">chevron_right</span>
             
-            {location.pathname !== "/ngo/dashboard" && (
-              <>
-                <Link to="/ngo/dashboard" className="text-on_surface_variant hover:text-primary text-[9px] sm:text-sm transition-colors shrink-0">Dashboard</Link>
-                <span className="material-symbols-outlined text-[10px] sm:text-xs text-on_surface_variant/40 shrink-0">chevron_right</span>
-              </>
-            )}
+            {/* Hierarchical Parent Detection */}
+            {(() => {
+                let parentPrefix = null;
+                if (["/alerts", "/needs", "/dispatches", "/marketplace-stats"].includes(location.pathname)) {
+                    parentPrefix = { to: "/marketplace", label: "Marketplace" };
+                } else if (["/activity-history"].includes(location.pathname)) {
+                    parentPrefix = { to: "/ngo/dashboard", label: "Overview" };
+                } else if (["/campaign-history"].includes(location.pathname)) {
+                    parentPrefix = { to: "/campaigns", label: "Campaigns" };
+                }
+
+                if (parentPrefix) {
+                    return (
+                        <>
+                            <Link to={parentPrefix.to} className="text-on_surface_variant hover:text-primary text-[9px] sm:text-sm transition-colors shrink-0 font-medium">{parentPrefix.label}</Link>
+                            <span className="material-symbols-outlined text-[10px] sm:text-xs text-on_surface_variant/40 shrink-0">chevron_right</span>
+                        </>
+                    );
+                }
+                return null;
+            })()}
 
             <span className="text-sm font-bold text-on_surface uppercase tracking-widest text-[11px] truncate">
                 {NAV_ITEMS.find(i => i.to === location.pathname)?.label || 
-                 (location.pathname.includes("history") ? "History" : 
+                 (location.pathname === "/alerts" ? "Alerts" :
+                  location.pathname === "/needs" ? "Needs" :
+                  location.pathname === "/dispatches" ? "History" :
+                  location.pathname === "/activity-history" ? "Activity History" :
+                  location.pathname === "/campaign-history" ? "Campaign History" :
                   location.pathname.split("/").pop().replace(/-/g, " ")) || 
-                 "NGO Dashboard"}
+                 "Overview"}
             </span>
           </div>
         </div>
@@ -431,9 +466,18 @@ const Layout = ({ children }) => {
 
                 {/* Settings & Options List */}
                 <div className="mt-2 border-t border-white/5 pt-2 space-y-1">
+                  {isAdmin && (
+                    <Link
+                       to="/ngo-admin/dashboard"
+                       onClick={() => setProfileOpen(false)}
+                       className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-black text-primary bg-primary/5 hover:bg-primary/10 transition-colors"
+                    >
+                       <span className="material-symbols-outlined text-[20px]">admin_panel_settings</span>
+                       Exit to Admin Portal
+                    </Link>
+                  )}
                   {[
                     { label: "Profile", icon: "person", to: "/profile" },
-                    { label: "Organisation", icon: "corporate_fare", to: "/organization" },
                     { label: "Review Us", icon: "star", to: "/reviews" },
                     { label: "Contact Us", icon: "support_agent", to: "/contact" },
                     { label: "Help Center", icon: "help", to: "/help" },
@@ -475,6 +519,22 @@ const Layout = ({ children }) => {
           sidebarOpen ? "md:ml-64 ml-0" : "ml-0"
         }`}
       >
+        {org?.status === "pending" && (
+          <div className="bg-primary/10 border-b border-primary/20 px-6 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span className="material-symbols-outlined text-primary text-xl">verified_user</span>
+              <p className="text-sm font-medium text-primary">
+                <b>Organization Verification Pending:</b> Some dashboard features are restricted until an administrator approves your profile.
+              </p>
+            </div>
+            <button 
+              onClick={() => window.location.reload()}
+              className="text-[10px] font-black uppercase tracking-widest bg-primary text-white px-3 py-1.5 rounded-full hover:bg-primary_container transition shadow-sm"
+            >
+              Refresh
+            </button>
+          </div>
+        )}
         <div className="p-3 sm:p-6 min-w-0">
           {children && React.cloneElement(children, { sidebarOpen })}
         </div>

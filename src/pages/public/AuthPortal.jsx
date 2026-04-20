@@ -279,6 +279,7 @@ const LoginForm = ({ email, setEmail, password, setPassword, setError, setLoadin
 
       if (data.role === "SYSTEM_ADMIN") navigate("/admin/dashboard");
       else if (data.role === "VOLUNTEER") navigate("/volunteer/dashboard");
+      else if (data.role === "NGO_ADMIN") navigate("/ngo-admin/dashboard");
       else navigate("/ngo/dashboard");
     } catch (err) {
       if (err.response?.status === 403) {
@@ -504,31 +505,59 @@ const VolunteerRegForm = ({ setError, setSuccess, setLoading, loading, switchMod
 };
 
 /**
- * 🏢 NGO REGISTRATION
+ * 🏢 NGO ADMIN REGISTRATION (OTP FLOW)
  */
 const NGORegForm = ({ setError, setSuccess, setLoading, loading, switchMode, MODES }) => {
-  const [org, setOrg] = useState({ name: "", phone: "", email: "" });
-  const [admin, setAdmin] = useState({ name: "", email: "", password: "" });
+  const [step, setStep] = useState(1); 
+  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
+  const [otp, setOtp] = useState("");
+  const [verifiedToken, setVerifiedToken] = useState("");
+  const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
 
-  const handleRegister = async (e) => {
-    e.preventDefault();
-    setError("");
-    if (!org.name || !org.phone || !org.email || !admin.name || !admin.email || !admin.password) {
-        return setError("All fields are required");
-    }
-
-    if (!validateEmail(org.email)) return setError("Invalid organization email");
-    if (!validateEmail(admin.email)) return setError("Invalid admin email");
-    if (!validatePhone(org.phone)) return setError("Invalid organization phone number");
-    if (!validatePassword(admin.password)) return setError("Admin password must be at least 8 characters with letters and numbers");
+  const handleSendOTP = async () => {
+    if (!email || !username) return setError("Email and Username required");
+    if (!validateEmail(email)) return setError("Invalid email address");
 
     try {
       setLoading(true);
-      await API.post("/organizations/register", {
-        org_name: org.name, org_phone: org.phone, org_email: org.email,
-        admin_name: admin.name, admin_email: admin.email, admin_password: admin.password
+      await API.post("/volunteers/register/send-otp", { email, username });
+      setStep(2);
+      setSuccess("Verification code sent to your email!");
+    } catch (err) {
+      setError(err.response?.data?.detail || "Failed to send OTP");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyOTP = async () => {
+    if (!otp) return setError("Enter code");
+    try {
+      setLoading(true);
+      const res = await API.post("/volunteers/register/verify-otp", { email, otp });
+      setVerifiedToken(res.data.verified_token);
+      setStep(3);
+      setSuccess("Account verified!");
+    } catch (err) {
+      setError(err.response?.data?.detail || "Invalid code");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const finishRegistration = async (e) => {
+    e.preventDefault();
+    if (!name || !password) return setError("All fields required");
+    if (!validatePassword(password)) return setError("Password too weak");
+
+    try {
+      setLoading(true);
+      await API.post("/ngo-admin/register", {
+        full_name: name, username, password, verified_token: verifiedToken
       });
-      setSuccess("NGO Registered! Check your email for next steps.");
+      setSuccess("Admin account created! Log in to set up your NGO.");
       setTimeout(() => switchMode(MODES.LOGIN), 2500);
     } catch (err) {
       setError(err.response?.data?.detail || "Registration failed");
@@ -538,31 +567,47 @@ const NGORegForm = ({ setError, setSuccess, setLoading, loading, switchMode, MOD
   };
 
   return (
-    <form onSubmit={handleRegister} className="space-y-5">
-      <div className="grid grid-cols-2 gap-3">
-        <AuthInput label="NGO Name" value={org.name} setValue={(v) => setOrg({...org, name: v})} />
-        <AuthInput label="NGO Phone" value={org.phone} setValue={(v) => setOrg({...org, phone: v})} />
-      </div>
-      <AuthInput label="NGO Email" value={org.email} setValue={(v) => setOrg({...org, email: v})} type="email" />
-      <hr className="border-on_surface/5 my-2" />
-      <div className="grid grid-cols-2 gap-3">
-        <AuthInput label="Admin Name" value={admin.name} setValue={(v) => setAdmin({...admin, name: v})} />
-        <AuthInput label="Admin Email" value={admin.email} setValue={(v) => setAdmin({...admin, email: v})} type="email" />
-      </div>
-      <AuthInput label="Admin Password" value={admin.password} setValue={(v) => setAdmin({...admin, password: v})} type="password" icon="lock" />
-      <button 
-        type="submit" 
-        disabled={loading} 
-        className="w-full py-4 bg-primaryGradient text-white font-bold rounded-2xl shadow-lg flex items-center justify-center gap-2"
-      >
-        {loading ? (
-          <>
-            <div className="auth-spinner" />
-            <span>Registering NGO...</span>
-          </>
-        ) : "Register Organization"}
-      </button>
-    </form>
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
+      {step === 1 && (
+        <div className="space-y-4">
+          <AuthInput label="Admin Username" value={username} setValue={setUsername} icon="alternate_email" />
+          <AuthInput label="Admin Email" value={email} setValue={setEmail} type="email" icon="mail" />
+          <button 
+             onClick={handleSendOTP} 
+             disabled={loading} 
+             className="w-full py-4 bg-primaryGradient text-white font-black uppercase tracking-widest rounded-2xl shadow-lg flex items-center justify-center gap-2"
+          >
+            {loading ? <div className="auth-spinner" /> : "Verify Email"}
+          </button>
+        </div>
+      )}
+      {step === 2 && (
+        <div className="space-y-4">
+          <p className="text-xs text-center text-on_surface_variant">Enter code sent to <b>{email}</b></p>
+          <AuthInput label="Verification Code" value={otp} setValue={setOtp} icon="password" />
+          <button 
+             onClick={handleVerifyOTP} 
+             disabled={loading} 
+             className="w-full py-4 bg-primaryGradient text-white font-black uppercase tracking-widest rounded-2xl shadow-lg flex items-center justify-center gap-2"
+          >
+            {loading ? <div className="auth-spinner" /> : "Confirm Code"}
+          </button>
+        </div>
+      )}
+      {step === 3 && (
+        <form onSubmit={finishRegistration} className="space-y-4">
+           <AuthInput label="Full Administrator Name" value={name} setValue={setName} icon="person" />
+           <AuthInput label="Set Secure Password" value={password} setValue={setPassword} type="password" icon="lock" />
+           <button 
+             type="submit" 
+             disabled={loading} 
+             className="w-full py-4 bg-primaryGradient text-white font-black uppercase tracking-widest rounded-2xl shadow-lg flex items-center justify-center gap-2"
+           >
+             {loading ? <div className="auth-spinner" /> : "Initialize Admin Account"}
+           </button>
+        </form>
+      )}
+    </motion.div>
   );
 };
 

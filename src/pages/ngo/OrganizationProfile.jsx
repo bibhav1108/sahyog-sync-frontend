@@ -99,32 +99,40 @@ const OrganizationProfile = () => {
                         <div className="p-10 space-y-10">
                             <div className="flex justify-between items-start">
                                 <div>
-                                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-2">Tactical Mission Statement</p>
-                                    <h2 className="text-2xl font-outfit font-black text-on_surface tracking-tight">Profile Data Overview</h2>
+                                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-2">About Organization</p>
+                                    <h2 className="text-3xl font-outfit font-black text-on_surface mb-4 tracking-tight">Organization Bio</h2>
+                                    <p className="text-sm text-on_surface_variant leading-relaxed font-medium">
+                                        {org?.about || "No summary provided yet."}
+                                    </p>
                                 </div>
                                 {!isEditing && (
                                     <button onClick={() => setIsEditing(true)} className="px-6 py-2.5 bg-primary/10 text-primary border border-primary/20 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-primary transition-all hover:text-white">
-                                        Update Mission
+                                        Update Bio
                                     </button>
                                 )}
                             </div>
 
                             {isEditing ? (
                                 <div className="space-y-8 animate-fadeIn">
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-on_surface_variant/40 ml-1">About the Organization</label>
-                                        <textarea 
-                                            rows={8}
-                                            className="w-full bg-surface_high border border-on_surface/5 rounded-3xl p-8 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all custom-scrollbar"
+                                    <h3 className="text-lg font-black text-on_surface">
+                                        Update About Summary
+                                    </h3>
+                                    <p className="text-xs font-bold text-on_surface_variant/60 mb-6">Define your organization's primary goals and community service areas.</p>
+                                    
+                                    <div className="space-y-4">
+                                        <textarea
                                             value={editData.about}
                                             onChange={(e) => setEditData({...editData, about: e.target.value})}
-                                            placeholder="Define your organization's mission and field objectives..."
+                                            className="w-full min-h-[160px] p-6 bg-surface_high border-2 border-transparent focus:border-primary/20 rounded-[2rem] text-sm font-medium outline-none transition-all shadow-inner"
+                                            placeholder="Define your organization's primary goals and local impact..."
                                         />
-                                    </div>
-                                    <ActionInput label="Official Operations Hub (Website)" placeholder="https://..." value={editData.website_url} onChange={(val) => setEditData({...editData, website_url: val})} />
-                                    <div className="flex gap-4 pt-4">
-                                        <button disabled={saving} onClick={handleSave} className="flex-1 py-4 bg-on_surface text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl hover:-translate-y-1 transition-all disabled:opacity-50">
-                                            {saving ? "Executing Update..." : "Authorize Mission Change"}
+                                        <ActionInput label="Official Operations Hub (Website)" placeholder="https://..." value={editData.website_url} onChange={(val) => setEditData({...editData, website_url: val})} />
+                                        <button 
+                                            onClick={handleSave}
+                                            disabled={saving}
+                                            className="w-full py-4 bg-on_surface text-white rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-xl hover:bg-primary transition-all flex items-center justify-center gap-3"
+                                        >
+                                            {saving ? "Updating..." : "Apply Changes"}
                                         </button>
                                         <button onClick={() => { setIsEditing(false); setEditData({ about: org?.about || "", website_url: org?.website_url || "" }); }} className="px-8 py-4 text-red-500 text-[10px] font-black uppercase tracking-widest">
                                             Cancel

@@ -140,7 +140,7 @@ const Marketplace = ({ sidebarOpen }) => {
         <ContentSection title="Recent Donation Alerts" icon="notifications_active" delay="100ms">
             <div className="flex items-center justify-between mb-4">
                 <p className="text-xs text-on_surface_variant font-medium">New requests from donors awaiting review.</p>
-                <button onClick={() => navigate("/alerts")} className="text-[10px] font-black uppercase tracking-widest text-primary hover:underline">View History</button>
+                <button onClick={() => navigate("/alerts")} className="text-[10px] font-black uppercase tracking-widest text-primary hover:underline transition-all">View All Alerts</button>
             </div>
 
             <div className="space-y-4">
@@ -178,16 +178,28 @@ const Marketplace = ({ sidebarOpen }) => {
                                             </h4>
                                             {a.donor_name && <p className="text-[10px] font-black uppercase tracking-widest text-on_surface_variant opacity-50">From {a.donor_name}</p>}
                                         </div>
-                                        <button
-                                            disabled={claimingId === a.id}
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                claimAlert(a.id);
-                                            }}
-                                            className="shrink-0 bg-on_surface text-white px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-on_surface/10 transform transition-all hover:bg-primary active:scale-95 disabled:opacity-50"
-                                        >
-                                            {claimingId === a.id ? "..." : "Accept"}
-                                        </button>
+                                        <div className="flex items-center gap-2">
+                                            <button 
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    navigate("/ngo/dashboard", { state: { focusId: a.id, focusType: 'alert' } });
+                                                }}
+                                                className="p-2 transition-all duration-200 hover:bg-black/5 rounded-xl text-on_surface_variant hover:text-primary"
+                                                title="View on Map"
+                                            >
+                                                <span className="material-symbols-outlined text-[18px]">explore</span>
+                                            </button>
+                                            <button
+                                                disabled={claimingId === a.id}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    claimAlert(a.id);
+                                                }}
+                                                className="shrink-0 bg-primaryGradient text-white px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/10 transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50 border-t border-white/20"
+                                            >
+                                                {claimingId === a.id ? "..." : "Accept"}
+                                            </button>
+                                        </div>
                                     </div>
 
                                     <AnimatePresence>
@@ -244,6 +256,10 @@ const Marketplace = ({ sidebarOpen }) => {
       <div className="col-span-12 lg:col-span-4">
         <ContentSection title="Urgent Needs" icon="bolt" delay="200ms" className="h-full">
             <div className="mb-6">
+                <div className="flex items-center justify-between mb-4 px-1">
+                    <p className="text-[10px] text-on_surface_variant font-bold uppercase tracking-widest opacity-50">Filtered View</p>
+                    <button onClick={() => navigate("/needs")} className="text-[10px] font-black uppercase tracking-widest text-primary hover:underline transition-all">View All</button>
+                </div>
                 <div className="flex gap-2 p-1 bg-surface_highest rounded-xl mb-4">
                     {["OPEN", "DISPATCHED"].map((f) => (
                         <button
@@ -283,6 +299,16 @@ const Marketplace = ({ sidebarOpen }) => {
                                 }`}>
                                     {n.urgency}
                                 </span>
+                                <button 
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        navigate("/ngo/dashboard", { state: { focusId: n.id, focusType: 'need' } });
+                                    }}
+                                    className="p-1.5 transition-all duration-200 hover:bg-black/5 rounded-lg text-on_surface_variant hover:text-primary"
+                                    title="View on Map"
+                                >
+                                    <span className="material-symbols-outlined text-[16px]">explore</span>
+                                </button>
                             </div>
                             <p className="text-xs text-on_surface_variant line-clamp-2 mb-4 leading-relaxed">{n.description}</p>
                             
@@ -295,7 +321,7 @@ const Marketplace = ({ sidebarOpen }) => {
                                 {n.status === "OPEN" ? (
                                     <button
                                         onClick={() => setDispatchModal({ open: true, needId: n.id })}
-                                        className="shrink-0 bg-primary text-white px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest hover:-translate-y-0.5 transition-all shadow-lg shadow-primary/20"
+                                        className="shrink-0 bg-primaryGradient text-white px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest hover:scale-[1.02] transition-all shadow-lg shadow-primary/20"
                                     >
                                         Dispatch
                                     </button>

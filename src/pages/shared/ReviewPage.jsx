@@ -42,16 +42,16 @@ const ReviewPage = () => {
                 <span className="material-symbols-outlined text-[40px] md:text-[56px] leading-none">task_alt</span>
             </div>
             
-            <h1 className="text-2xl md:text-4xl font-black mb-4 tracking-tight text-on_surface uppercase">Response Logged</h1>
+            <h1 className="text-2xl md:text-3xl font-black mb-4 tracking-tight text-on_surface uppercase">Review Submitted</h1>
             <p className="text-sm md:text-lg text-on_surface_variant mb-8 md:mb-10 font-medium leading-relaxed opacity-80">
-                Your intelligence record has been transmitted to the core team. We appreciate your contribution to platform integrity.
+                Your feedback has been received. Thank you for helping us improve our platform and serve the community better.
             </p>
             
             <button 
                 onClick={() => setSubmitted(false)}
                 className="w-full py-4 md:py-5 bg-on_surface text-white rounded-2xl font-black uppercase tracking-widest text-[10px] md:text-xs hover:bg-on_surface/90 transition shadow-xl"
             >
-                Submit New Report
+                Write Another Review
             </button>
         </motion.div>
       </div>
@@ -65,14 +65,14 @@ const ReviewPage = () => {
       
       <header className="text-center space-y-2 md:space-y-4">
           <div className="inline-block px-4 py-1 bg-primary/5 text-primary rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] border border-primary/10">
-              Community Intelligence
+              User Feedback
           </div>
           <h1 className="text-3xl md:text-5xl font-black tracking-tighter text-on_surface leading-tight md:leading-[0.9]">
             Share Your <br />
             <span className="text-transparent bg-clip-text bg-primaryGradient">Experience</span>
           </h1>
           <p className="text-sm md:text-lg text-on_surface_variant max-w-lg mx-auto font-medium opacity-60">
-            Help us calibrate the Sahyog ecosystem for maximum impact and efficiency.
+            Help us improve the Sahyog platform to better serve our volunteers and partners.
           </p>
       </header>
 
@@ -88,7 +88,7 @@ const ReviewPage = () => {
         <form onSubmit={handleSubmit} className="space-y-10 md:space-y-12 relative">
           {/* STAR RATING */}
           <div className="flex flex-col items-center gap-4 md:gap-6">
-            <h4 className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] opacity-30">Global Metric</h4>
+            <h4 className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] opacity-30">Your Rating</h4>
             <div className="flex gap-1 md:gap-3">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
@@ -114,12 +114,12 @@ const ReviewPage = () => {
 
           {/* TEXT AREA */}
           <div className="space-y-2 md:space-y-3">
-            <label className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] opacity-30 ml-2 md:ml-4">Transmission Content</label>
+            <label className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] opacity-30 ml-2 md:ml-4">Your Experience</label>
             <textarea
               required
               rows={5}
               className="w-full bg-surface_high/50 backdrop-blur-sm rounded-[1.5rem] md:rounded-[2rem] p-5 md:p-8 border border-white/50 outline-none focus:border-primary/40 focus:ring-4 focus:ring-primary/5 transition-all text-sm md:text-lg font-medium"
-              placeholder="What could we optimize? Share your ground insights..."
+              placeholder="What could we improve? Let us know what you think..."
               value={content}
               onChange={(e) => setContent(e.target.value)}
             />
@@ -130,7 +130,7 @@ const ReviewPage = () => {
                     <span className="material-symbols-outlined text-xl">shield_person</span>
                </div>
                <p className="text-[11px] md:text-sm text-on_surface_variant leading-relaxed font-medium">
-                   <b>Secure Encryption:</b> Your report is prioritized for technical assessment. By submitting, you help strengthen the network.
+                   <b>Privacy:</b> Your feedback is reviewed by our team to help us improve the platform and make it safer for everyone.
                </p>
           </div>
 
@@ -143,7 +143,7 @@ const ReviewPage = () => {
                  <div className="w-4 h-4 md:w-5 md:h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             ) : (
                 <>
-                    Finalize Submission
+                    Submit Review
                     <span className="material-symbols-outlined text-[18px] md:text-[20px]">send</span>
                 </>
             )}
