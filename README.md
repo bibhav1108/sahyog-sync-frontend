@@ -1,17 +1,27 @@
-# React + Vite
+# Sahyog Sync — Powering Collective Compassion
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Sahyog Sync is a community-first platform designed to bridge the gap between people who have resources and the non-profits (NGOs) that know where they are needed most. We believe that when local groups and helpful people work together, we can solve community problems faster and more transparently.
 
-Currently, two official plugins are available:
+## 🌟 What we do
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Live Community Insights**: We show real-time numbers of NGOs registered, volunteers ready to help, and work successfully finished. This ensures everyone can see the actual impact being made today.
+- **NGO Network**: A clean, verified directory of local organizations. Whether you need medical support or food aid, you can find the right group to help here.
+- **Volunteer Hub**: We make it easy for "Heroes" (volunteers) to sign up and join projects in their area using simple, direct language.
+- **Transparent Work**: We track help items (kits, medicines, meals) shared with the community, so nothing gets lost and everyone knows where the support went.
 
-## React Compiler
+## 🎨 Design Philosophy
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Simple for Everyone**: We use plain language so that anyone, regardless of their technical background, can navigate the site and find help.
+- **Premium Experience**: Helping others is a high-honor task. We built a beautiful, high-fidelity interface to reflect that importance.
+- **Fast & Reliable**: From smooth page transitions to real-time status updates, the platform is built to be as dependable as the people using it.
 
-## Expanding the ESLint configuration
+## 🚀 Getting Started
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
-# frontend
+If you are a developer looking to run this locally:
+
+1. **Install dependencies**: `npm install`
+2. **Setup environment**: Ensure your API connection is set in `src/services/api.js`.
+3. **Launch**: `npm run dev`
+
+---
+*Built for the community, by the community.*
