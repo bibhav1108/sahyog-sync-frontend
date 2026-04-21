@@ -62,15 +62,15 @@ const MarketplaceInventory = () => {
             await API.post(`marketplace/inventory/${transferringId}/transfer`, {
                 inventory_id: selectedTargetId
             });
-            addToast("Asset successfully integrated into stock! 📦", "success");
+            addToast("Item successfully added to inventory! 📦", "success");
             setTransferringId(null);
             fetchRecoveries();
         } catch (err) {
             setTransferStatus({ 
                 loading: false, 
-                error: err.response?.data?.detail || "Transfer protocol breach. Please retry." 
+                error: err.response?.data?.detail || "Something went wrong. Please try again." 
             });
-            addToast("Failed to sort inventory asset", "error");
+            addToast("Failed to add item to inventory", "error");
         }
     };
 
@@ -85,12 +85,12 @@ const MarketplaceInventory = () => {
             {/* HEADER */}
             <div className="flex flex-col lg:flex-row justify-between items-center lg:items-center gap-8 text-center lg:text-left">
                 <div>
-                    <p className="text-primary text-[10px] sm:text-[10px] font-black uppercase tracking-[0.3em] mb-1">Campaign Resource Logistics</p>
+                    <p className="text-primary text-[10px] sm:text-[10px] font-black uppercase tracking-[0.3em] mb-1">Incoming Supplies</p>
                     <h1 className="text-3xl sm:text-4xl font-outfit font-black text-on_surface tracking-tight">Collection Hub</h1>
-                    <p className="text-xs font-bold text-on_surface_variant/60 mt-1">Sorting assets collected from marketplace theaters onto verified stock.</p>
+                    <p className="text-xs font-bold text-on_surface_variant/60 mt-1">Move items collected from the marketplace into your main inventory.</p>
                 </div>
                 <div className="flex justify-center w-full lg:w-auto">
-                    <MetricCard label="Pending Sorting" value={items.length} icon="inventory_2" />
+                    <MetricCard label="Items to Process" value={items.length} icon="inventory_2" />
                 </div>
             </div>
 
@@ -99,17 +99,17 @@ const MarketplaceInventory = () => {
             ) : items.length === 0 ? (
                 <div className="text-center py-40 bg-surface_high/60 rounded-[3.5rem] border-2 border-dashed border-white/20 shadow-inner">
                     <span className="material-symbols-outlined text-6xl opacity-10 mb-4">move_to_inbox</span>
-                    <p className="text-sm font-bold opacity-30 uppercase tracking-widest">Registry Clear: No new recoveries detected</p>
+                    <p className="text-sm font-bold opacity-30 uppercase tracking-widest">All clear: No new items found to process</p>
                 </div>
             ) : (
                 <div className="bg-surface_high/20 backdrop-blur-md rounded-[3.5rem] border border-white/40 overflow-hidden shadow-soft">
                     {/* TABLE HEAD (Desktop) */}
                     <div className="hidden lg:grid grid-cols-12 gap-4 p-8 border-b border-on_surface/5 bg-on_surface/[0.02]">
-                        <div className="col-span-1 text-[10px] font-black uppercase tracking-widest opacity-40">Ref ID</div>
-                        <div className="col-span-4 text-[10px] font-black uppercase tracking-widest opacity-40">Asset Descriptor</div>
+                        <div className="col-span-1 text-[10px] font-black uppercase tracking-widest opacity-40">ID</div>
+                        <div className="col-span-4 text-[10px] font-black uppercase tracking-widest opacity-40">Item Name</div>
                         <div className="col-span-2 text-[10px] font-black uppercase tracking-widest opacity-40">Quantity</div>
-                        <div className="col-span-2 text-[10px] font-black uppercase tracking-widest opacity-40">Timeline</div>
-                        <div className="col-span-3 text-right text-[10px] font-black uppercase tracking-widest opacity-40">Operational Logic</div>
+                        <div className="col-span-2 text-[10px] font-black uppercase tracking-widest opacity-40">Date Collected</div>
+                        <div className="col-span-3 text-right text-[10px] font-black uppercase tracking-widest opacity-40">Action</div>
                     </div>
 
                     <div className="divide-y divide-on_surface/5">
@@ -170,7 +170,7 @@ const MarketplaceInventory = () => {
                                             className="w-full lg:w-auto px-5 py-3 bg-primaryGradient text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 ml-auto"
                                         >
                                             <span className="material-symbols-outlined text-sm">swap_horiz</span>
-                                            Sort to Stock
+                                            Add to Inventory
                                         </button>
                                     </div>
                                 </motion.div>
@@ -184,22 +184,22 @@ const MarketplaceInventory = () => {
             <Modal
                 isOpen={!!transferringId}
                 onClose={() => !transferStatus.loading && setTransferringId(null)}
-                title="Intelligence Sorting"
+                title="Process Item"
                 maxWidth="max-w-2xl"
             >
                 <div className="space-y-10">
-                    <p className="text-sm font-bold text-on_surface_variant/60 ml-1">Define merge parameters for tactical inventory integration.</p>
+                    <p className="text-sm font-bold text-on_surface_variant/60 ml-1">Choose how to add this item to your main inventory.</p>
 
                     <div className="space-y-10">
                         <div>
-                            <label className="text-[10px] font-black uppercase tracking-widest text-primary mb-4 block ml-1">Smart Merge Suggestions</label>
+                            <label className="text-[10px] font-black uppercase tracking-widest text-primary mb-4 block ml-1">Match with Existing Items</label>
                             {loadingSuggestions ? (
                                 <div className="space-y-3">
                                     <SkeletonStructure layout={[{type: 'stack', gap: 3, items: Array(2).fill({type: 'rect', height: 80, className: "rounded-3xl"})}]} />
                                 </div>
                             ) : suggestions.length === 0 ? (
                                 <div className="p-10 bg-surface_high/30 rounded-[2.5rem] text-center border-2 border-dashed border-on_surface/5">
-                                    <p className="text-[10px] font-black uppercase tracking-widest opacity-30 italic">No similar identifiers in current stock registry</p>
+                                    <p className="text-[10px] font-black uppercase tracking-widest opacity-30 italic">No similar items found in inventory</p>
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-1 gap-3 max-h-[300px] overflow-y-auto custom-scrollbar pr-2">
@@ -219,7 +219,7 @@ const MarketplaceInventory = () => {
                                                 </div>
                                                 <div className="text-left">
                                                     <div className="text-sm font-black text-on_surface uppercase">{s.item_name}</div>
-                                                    <div className="text-[10px] font-bold text-primary tracking-widest">Similarity Probability: {Math.round(s.score * 100)}%</div>
+                                                    <div className="text-[10px] font-bold text-primary tracking-widest">Match Confidence: {Math.round(s.score * 100)}%</div>
                                                 </div>
                                             </div>
                                             {selectedTargetId === s.id && <span className="material-symbols-outlined text-primary font-black">check_circle</span>}
@@ -241,8 +241,8 @@ const MarketplaceInventory = () => {
                                 <span className="material-symbols-outlined">add_box</span>
                             </div>
                             <div className="text-left flex-1">
-                                <div className="text-sm font-black text-on_surface uppercase">Tactical Deployment as New Product</div>
-                                <div className="text-[10px] font-bold text-on_surface_variant/40 tracking-widest">Initialize separate registry entry for this asset</div>
+                                <div className="text-sm font-black text-on_surface uppercase">Add as a New Item</div>
+                                <div className="text-[10px] font-bold text-on_surface_variant/40 tracking-widest">Create a new entry in your inventory for this item</div>
                             </div>
                             {selectedTargetId === null && <span className="material-symbols-outlined text-primary font-black">check_circle</span>}
                         </button>
@@ -250,7 +250,7 @@ const MarketplaceInventory = () => {
                         {transferStatus.error && (
                             <div className="p-5 bg-red-50 text-red-600 text-[10px] font-black uppercase tracking-widest rounded-3xl border border-red-100 flex items-center gap-3">
                                 <span className="material-symbols-outlined text-sm font-black">error</span>
-                                Protocol Breach: {transferStatus.error}
+                                Error: {transferStatus.error}
                             </div>
                         )}
 
@@ -260,7 +260,7 @@ const MarketplaceInventory = () => {
                                 onClick={() => setTransferringId(null)}
                                 className="flex-1 py-5 bg-surface_high text-on_surface text-[10px] font-black uppercase tracking-widest rounded-[2rem] hover:bg-surface_highest transition-all"
                             >
-                                Abort Sort
+                                Cancel
                             </button>
                             <button
                                 disabled={transferStatus.loading}
@@ -272,7 +272,7 @@ const MarketplaceInventory = () => {
                                 ) : (
                                     <>
                                         <span className="material-symbols-outlined text-lg">check</span>
-                                        Authorize Stock Integration
+                                        Add to Inventory
                                     </>
                                 )}
                             </button>

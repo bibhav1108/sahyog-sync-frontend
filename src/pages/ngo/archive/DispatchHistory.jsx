@@ -77,9 +77,9 @@ const DispatchHistory = () => {
             {/* HEADER */}
             <div className="flex flex-col lg:flex-row justify-between items-center lg:items-center gap-8 text-center lg:text-left">
                 <div>
-                    <p className="text-primary text-[10px] font-black uppercase tracking-[0.3em] mb-1">Execution Intelligence</p>
-                    <h1 className="text-4xl font-outfit font-black text-on_surface tracking-tight">Dispatch Timeline</h1>
-                    <p className="text-xs font-bold text-on_surface_variant/60 mt-1">Archived logs of completed tactical deployments and resource transfers.</p>
+                    <p className="text-primary text-[10px] font-black uppercase tracking-[0.3em] mb-1">Delivery Records</p>
+                    <h1 className="text-4xl font-outfit font-black text-on_surface tracking-tight">Dispatch History</h1>
+                    <p className="text-xs font-bold text-on_surface_variant/60 mt-1">A timeline of all successfully completed dispatches and resource deliveries.</p>
                 </div>
                 <div className="flex flex-col md:flex-row items-center gap-4 w-full lg:w-auto">
                     <button 
@@ -89,7 +89,7 @@ const DispatchHistory = () => {
                         <span className="material-symbols-outlined text-sm">archive</span>
                         Download Full History
                     </button>
-                    <MetricCard label="Archived Ops" value={dispatches.length} icon="history" variant="primary" />
+                    <MetricCard label="Total Dispatches" value={dispatches.length} icon="history" variant="primary" />
                 </div>
             </div>
 
@@ -122,7 +122,7 @@ const DispatchHistory = () => {
             ) : dispatches.length === 0 ? (
                 <div className="text-center py-40 bg-surface_high/30 rounded-[3.5rem] border-2 border-dashed border-white/20">
                     <span className="material-symbols-outlined text-6xl opacity-10 mb-4">history</span>
-                    <p className="text-sm font-bold opacity-30 uppercase tracking-widest">No completed logs found in current sector</p>
+                    <p className="text-sm font-bold opacity-30 uppercase tracking-widest">No completed dispatch records found</p>
                 </div>
             ) : (
                 <div className="relative pl-8 md:pl-12">
@@ -156,7 +156,7 @@ const DispatchHistory = () => {
                                             className="flex items-center gap-2 p-2 hover:bg-primary/5 text-primary rounded-lg transition-colors border border-primary/5"
                                         >
                                             <span className="material-symbols-outlined text-sm">picture_as_pdf</span>
-                                            <span className="text-[8px] font-black uppercase tracking-widest">Period Log</span>
+                                            <span className="text-[8px] font-black uppercase tracking-widest">Download PDF</span>
                                         </button>
                                     </div>
 
@@ -176,12 +176,12 @@ const DispatchHistory = () => {
                                                             <div className="flex-1 space-y-2">
                                                                 <div className="flex items-center gap-3">
                                                                     <p className="text-sm font-black text-on_surface uppercase tracking-tight">
-                                                                        {d.description || `${d.item_type} deployment`}
+                                                                        {d.description || `${d.item_type} delivery`}
                                                                     </p>
                                                                     <span className="px-2 py-0.5 bg-green-500/10 text-green-600 text-[8px] font-black uppercase tracking-widest rounded-md border border-green-500/10">COMPLETED</span>
                                                                 </div>
                                                                 <div className="flex items-center gap-4 opacity-40">
-                                                                    <span className="text-[9px] font-black uppercase tracking-widest">OP-ID #{d.id}</span>
+                                                                    <span className="text-[9px] font-black uppercase tracking-widest">Ref ID #{d.id}</span>
                                                                     <span className="text-[9px] font-black uppercase tracking-widest flex items-center gap-1">
                                                                         <span className="material-symbols-outlined text-[10px]">person</span> {d.volunteer_name}
                                                                     </span>
@@ -192,7 +192,7 @@ const DispatchHistory = () => {
                                                                     <p className="text-[10px] font-black text-on_surface uppercase tracking-tight">{new Date(d.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                                                                 </div>
                                                                 <button 
-                                                                    onClick={() => generateDispatchReport(d, `Operation: #${d.id}`)}
+                                                                    onClick={() => generateDispatchReport(d, `Dispatch: #${d.id}`)}
                                                                     className="p-2 bg-white border border-on_surface/5 rounded-xl hover:bg-primaryGradient hover:text-white hover:border-transparent transition-all shadow-sm"
                                                                     title="Download PDF Log"
                                                                 >

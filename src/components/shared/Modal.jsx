@@ -39,7 +39,7 @@ const Modal = ({
           >
             {/* Header (Optional) */}
             {(title || showClose) && (
-              <div className="flex items-center justify-between p-5 sm:p-8 pb-4 shrink-0">
+              <div className="flex items-center justify-between p-5 sm:p-8 pb-1 shrink-0">
                 {title ? (
                   <div>
                     <h2 className="font-outfit font-black text-xl sm:text-2xl text-on_surface tracking-tight leading-none">{title}</h2>
@@ -58,7 +58,7 @@ const Modal = ({
             )}
 
             {/* Scrollable Body */}
-            <div className={`flex-1 overflow-y-auto ${bodyPadding ? 'p-5 sm:p-8 pt-4' : ''} custom-scrollbar`}>
+            <div className={`flex-1 overflow-y-auto ${bodyPadding ? 'p-5 sm:p-8 pt-1' : ''} custom-scrollbar`}>
               {children}
             </div>
           </motion.div>

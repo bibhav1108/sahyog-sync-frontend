@@ -74,9 +74,9 @@ const CampaignHistory = () => {
       {/* HEADER */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8">
         <div>
-            <p className="text-primary text-[10px] font-black uppercase tracking-[0.3em] mb-1">Operational Archives</p>
+            <p className="text-primary text-[10px] font-black uppercase tracking-[0.3em] mb-1">Campaign Archives</p>
             <h1 className="text-5xl font-outfit font-black text-on_surface tracking-tight">Campaign History</h1>
-            <p className="text-xs font-bold text-on_surface_variant/60 mt-1">Full chronological mapping of successful humanitarian activities and resource distribution campaigns.</p>
+            <p className="text-xs font-bold text-on_surface_variant/60 mt-1">A complete timeline of your finished campaigns and resource distributions.</p>
         </div>
         
         <div className="flex bg-surface_high p-1.5 rounded-2xl border border-on_surface/5 shadow-inner">
@@ -97,7 +97,7 @@ const CampaignHistory = () => {
 
         <button 
           onClick={() => generateCampaignReport(campaigns, "Full History")}
-          className="flex items-center gap-2 px-6 py-2.5 bg-on_surface text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg hover:shadow-black/20 hover:scale-105 active:scale-95 transition-all outline-none"
+          className="flex items-center gap-2 px-6 py-2.5 bg-primaryGradient text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all outline-none"
         >
           <span className="material-symbols-outlined text-sm">archive</span>
           Download Full History
@@ -112,7 +112,7 @@ const CampaignHistory = () => {
             {campaigns.length === 0 ? (
                 <div className="text-center py-40 bg-surface_high/30 rounded-[3.5rem] border-2 border-dashed border-on_surface/5 ml-0 md:ml-12">
                     <span className="material-symbols-outlined text-6xl opacity-10 mb-4">history_toggle_off</span>
-                    <p className="text-[10px] font-black uppercase tracking-widest opacity-20 italic">No historical timeline data available</p>
+                    <p className="text-[10px] font-black uppercase tracking-widest opacity-20 italic">No previous campaigns found</p>
                 </div>
             ) : (
                 groupKeys.map((group) => {
@@ -127,11 +127,11 @@ const CampaignHistory = () => {
                                     onClick={() => toggleGroup(group)}
                                     className="flex items-center gap-4 cursor-pointer group select-none"
                                 >
-                                    <div className="z-10 w-4 h-4 rounded-full bg-surface_highest border-2 border-on_surface/5 group-hover:bg-primary transition-colors flex items-center justify-center">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-on_surface_variant opacity-40" />
+                                    <div className="z-10 w-4 h-4 rounded-full bg-surface_highest border-2 border-primary/20 group-hover:bg-primary transition-colors flex items-center justify-center shadow-sm">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-primary opacity-40" />
                                     </div>
                                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-on_surface_variant/60 group-hover:text-primary transition-colors">
-                                        {group} ({items.length} units)
+                                        {group} ({items.length} campaigns)
                                     </span>
                                     <span className="material-symbols-outlined text-sm opacity-20 group-hover:opacity-100 transition-opacity">
                                         {collapsed ? "keyboard_arrow_down" : "keyboard_arrow_up"}
@@ -161,7 +161,7 @@ const CampaignHistory = () => {
                                                 <div className="group bg-white/60 backdrop-blur-md p-8 rounded-[2.5rem] border border-on_surface/5 hover:bg-white hover:border-primary/20 hover:shadow-2xl transition-all duration-500">
                                                     <div className="flex flex-col md:flex-row items-center justify-between gap-8">
                                                         <div className="flex items-center gap-6 flex-1">
-                                                            <div className="w-16 h-16 bg-surface_high group-hover:bg-primaryGradient group-hover:text-white rounded-[1.5rem] flex items-center justify-center transition-all duration-500 shadow-sm shrink-0">
+                                                            <div className="w-16 h-16 bg-primary/5 text-primary group-hover:bg-primaryGradient group-hover:text-white rounded-[1.5rem] flex items-center justify-center transition-all duration-500 shadow-sm border border-primary/10 shrink-0">
                                                                 <span className="material-symbols-outlined text-2xl">verified</span>
                                                             </div>
                                                             <div className="space-y-1">
@@ -169,7 +169,7 @@ const CampaignHistory = () => {
                                                                 <div className="flex flex-wrap gap-4 pt-1">
                                                                     <div className="flex items-center gap-1.5 opacity-40">
                                                                         <span className="material-symbols-outlined text-sm font-black text-primary">location_on</span>
-                                                                        <span className="text-[9px] font-black uppercase tracking-widest">{c.location_address || "Classified Sector"}</span>
+                                                                        <span className="text-[9px] font-black uppercase tracking-widest">{c.location_address || "Location Hidden"}</span>
                                                                     </div>
                                                                     <div className="flex items-center gap-1.5 opacity-40">
                                                                         <span className="material-symbols-outlined text-sm font-black text-primary">category</span>
@@ -191,7 +191,7 @@ const CampaignHistory = () => {
                                                                 <button 
                                                                     onClick={() => generateCampaignReport(c, `Campaign: ${c.name}`)}
                                                                     className="p-2.5 bg-white border border-on_surface/5 rounded-xl hover:bg-primaryGradient hover:text-white hover:border-transparent transition-all shadow-sm group/btn"
-                                                                    title="Download PDF Analysis"
+                                                                    title="Download PDF Summary"
                                                                 >
                                                                     <span className="material-symbols-outlined text-[18px]">download</span>
                                                                 </button>

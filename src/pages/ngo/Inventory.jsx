@@ -146,19 +146,19 @@ const Inventory = () => {
     <div className="space-y-10 selection:bg-primary/10">
       {/* 🔹 STATS GRID */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <MetricCard label="Total Units" value={total} icon="inventory_2" delay="100ms" />
-        <MetricCard label="Reserved Count" value={reserved} icon="lock" delay="200ms" />
-        <MetricCard label="Net Available" value={total - reserved} icon="check_circle" highlight delay="300ms" />
+        <MetricCard label="Total Items" value={total} icon="inventory_2" delay="100ms" />
+        <MetricCard label="Reserved Items" value={reserved} icon="lock" delay="200ms" />
+        <MetricCard label="Available Now" value={total - reserved} icon="check_circle" highlight delay="300ms" />
       </div>
 
       {/* 🔹 HEADER & CONTROLS */}
       <div className="flex flex-col lg:flex-row justify-between lg:items-end gap-6 animate-fadeIn pb-2">
         <div className="space-y-4 flex-1">
           <div>
-            <p className="text-primary text-[10px] font-black uppercase tracking-[0.3em] mb-1">Stock Management</p>
+            <p className="text-primary text-[10px] font-black uppercase tracking-[0.3em] mb-1">Inventory Management</p>
             <h1 className="text-3xl sm:text-4xl font-outfit font-black text-on_surface tracking-tight">NGO Inventory</h1>
           </div>
-          <ActionInput placeholder="Filter inventory by name..." value={search} onChange={setSearch} className="max-w-md" />
+          <ActionInput placeholder="Search inventory by name..." value={search} onChange={setSearch} className="max-w-md" />
         </div>
 
         <motion.button
@@ -168,7 +168,7 @@ const Inventory = () => {
           className="bg-primaryGradient text-white px-8 py-4 rounded-[1.5rem] font-bold shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
         >
           <span className="material-symbols-outlined font-black">add</span>
-          Add New Stock Item
+          Add New Item
         </motion.button>
       </div>
 
@@ -191,10 +191,10 @@ const Inventory = () => {
       </div>
 
       {/* 🔹 INVENTORY TABLE */}
-      <ContentSection title="Current Stock Levels" icon="database" delay="500ms">
+      <ContentSection title="Available Inventory" icon="database" delay="500ms">
         <div className="bg-surface_high/60 rounded-[2rem] overflow-hidden border border-white/20 shadow-inner">
           <div className="hidden md:grid grid-cols-7 gap-4 px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-on_surface_variant border-b border-white opacity-60">
-            <div className="col-span-2">Resource Name</div>
+            <div className="col-span-2">Item Name</div>
             <div>Category</div>
             <div className="text-center">Total</div>
             <div className="text-center">Reserved</div>
@@ -280,7 +280,7 @@ const Inventory = () => {
                   </div>
 
                   {/* Manage Actions */}
-                  <div className="flex justify-end gap-2 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex justify-end gap-2 opacity-30 md:group-hover:opacity-100 transition-opacity">
                     <button
                       onClick={() => { setEditingId(i.id); setEditValue(i.quantity); }}
                       className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-primary/5 md:bg-transparent hover:bg-primary/10 text-primary rounded-xl transition-colors border border-primary/10 md:border-none"
@@ -315,19 +315,19 @@ const Inventory = () => {
       <Modal
         isOpen={showForm}
         onClose={() => setShowForm(false)}
-        title="Register New Stock"
-        maxWidth="max-w-md"
+        title="Add New Item"
+        maxWidth="max-w-xl"
       >
-        <form onSubmit={handleAddItem} className="space-y-8 mt-2">
-            <p className="text-xs font-bold text-on_surface_variant/60 leading-relaxed italic border-l-4 border-primary/20 pl-4 py-1">Initialize new resource assets into the global ledger. Ensure categorization accuracy for logistical precision.</p>
+        <form onSubmit={handleAddItem} className="space-y-6">
+            <p className="text-xs font-bold text-on_surface_variant/60 leading-relaxed italic border-l-4 border-primary/20 pl-4 py-1">Add new supplies to your inventory. Choose a category and unit to keep your stock organized.</p>
 
             <div className="space-y-6">
-                <ActionInput label="Item Designation" type="text" placeholder="e.g. Paracetamol, Rice Bags..." value={newItem.item_name} onChange={(v) => setNewItem({ ...newItem, item_name: v })} />
+                <ActionInput label="Item Name" bgClassName="bg-white" type="text" placeholder="e.g. Paracetamol, Rice Bags..." value={newItem.item_name} onChange={(v) => setNewItem({ ...newItem, item_name: v })} />
 
                 <div className="grid grid-cols-2 gap-6">
-                    <ActionInput label="Quantity" type="number" placeholder="0.00" value={newItem.quantity} onChange={(v) => setNewItem({ ...newItem, quantity: v })} />
+                    <ActionInput label="Quantity" bgClassName="bg-white" type="number" placeholder="0.00" value={newItem.quantity} onChange={(v) => setNewItem({ ...newItem, quantity: v })} />
                     <div className="flex flex-col gap-2">
-                        <label className="text-[9px] font-black uppercase tracking-widest text-on_surface_variant/40 ml-1">Asset Unit</label>
+                        <label className="text-[9px] font-black uppercase tracking-widest text-on_surface_variant/40 ml-1">Unit</label>
                         <select className="px-5 py-3.5 rounded-2xl bg-white border border-on_surface/5 shadow-sm focus:ring-2 focus:ring-primary/20 outline-none text-xs font-black uppercase tracking-widest cursor-pointer" value={newItem.unit} onChange={(e) => setNewItem({ ...newItem, unit: e.target.value })}>
                             <option value="kilogram">Kilograms (kg)</option>
                             <option value="litre">Litres (L)</option>
@@ -338,7 +338,7 @@ const Inventory = () => {
                 </div>
 
                 <div>
-                    <label className="text-[9px] font-black uppercase tracking-widest text-on_surface_variant/40 ml-1 mb-3 block">Tactical Category</label>
+                    <label className="text-[9px] font-black uppercase tracking-widest text-on_surface_variant/40 ml-1 mb-3 block">Category</label>
                     <div className="flex gap-2 flex-wrap">
                         {["FOOD", "MEDICAL", "WATER", "OTHERS"].map((cat) => (
                             <button 
@@ -369,7 +369,7 @@ const Inventory = () => {
                     <button type="button" onClick={() => setShowForm(false)} className="flex-1 px-4 py-4 rounded-2xl bg-surface_high text-on_surface_variant/60 font-black text-[10px] uppercase tracking-widest hover:bg-surface_highest transition-all">Discard</button>
                     <button type="submit" disabled={adding} className="flex-[2] px-4 py-4 rounded-2xl bg-primaryGradient text-white font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-primary/20 disabled:opacity-50 hover:-translate-y-1 transition-all flex items-center justify-center gap-3">
                         {adding ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <span className="material-symbols-outlined text-sm">inventory_2</span>}
-                        {adding ? "Initializing..." : "Authorize Stock"}
+                        {adding ? "Adding..." : "Add to Inventory"}
                     </button>
                 </div>
             </div>
@@ -380,7 +380,7 @@ const Inventory = () => {
       <Modal
         isOpen={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
-        title="Sanitize Stock?"
+        title="Delete Item?"
         maxWidth="max-w-sm"
         showClose={false}
       >
@@ -390,7 +390,7 @@ const Inventory = () => {
                     <span className="material-symbols-outlined text-5xl font-black">delete_forever</span>
                 </div>
                 <div>
-                    <p className="text-sm font-medium text-on_surface_variant/70 leading-relaxed mb-1">Are you sure you want to permanently purge</p>
+                    <p className="text-sm font-medium text-on_surface_variant/70 leading-relaxed mb-1">Are you sure you want to permanently delete</p>
                     <p className="text-xl font-black text-on_surface tracking-tight uppercase">{deleteTarget.item_name}</p>
                     <p className="text-[10px] font-black uppercase text-error tracking-[0.2em] mt-3 bg-error/5 py-1 px-4 rounded-full inline-block">This action is irreversible</p>
                 </div>
@@ -403,9 +403,9 @@ const Inventory = () => {
                 )}
 
                 <div className="flex gap-4 pt-6">
-                    <button onClick={() => setDeleteTarget(null)} className="flex-1 px-4 py-4 rounded-2xl bg-surface_high text-on_surface_variant/60 font-black text-[10px] uppercase tracking-widest hover:bg-surface_highest transition-all">Abort</button>
+                    <button onClick={() => setDeleteTarget(null)} className="flex-1 px-4 py-4 rounded-2xl bg-surface_high text-on_surface_variant/60 font-black text-[10px] uppercase tracking-widest hover:bg-surface_highest transition-all">Cancel</button>
                     <button onClick={handleDeleteConfirm} disabled={deleting} className="flex-1 px-4 py-4 rounded-2xl bg-error text-white font-black text-[10px] uppercase tracking-widest shadow-xl shadow-error/20 hover:scale-105 transition-all disabled:opacity-50">
-                        {deleting ? "Purging..." : "Confirm Purge"}
+                        {deleting ? "Deleting..." : "Confirm Delete"}
                     </button>
                 </div>
             </div>

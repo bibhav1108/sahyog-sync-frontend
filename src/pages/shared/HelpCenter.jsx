@@ -1,10 +1,11 @@
 import React, { useState, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Link, useLocation } from "react-router-dom";
 
 const FAQS = [
   // NGO CATEGORY
   { id: "ngo-reg", category: "NGO", q: "How does my NGO become verified?", a: "After you register, our team will review your organization's details. Once approved, you'll have full access to manage inventory and start campaigns.", featured: true },
-  { id: "ngo-alerts", category: "NGO", q: "What are Donation Alerts?", a: "Alerts are notifications about new donations received through the Sahyog Telegram Bot. You can check these donations and add them to your inventory.", featured: true },
+  { id: "ngo-alerts", category: "NGO", q: "What are Donation Alerts?", a: "Alerts are notifications about new donations received through the Sahyog Sync Telegram Bot. You can check these donations and add them to your inventory.", featured: true },
   { id: "ngo-inv", category: "NGO", q: "What do Total, Available, and Reserved mean?", a: "Total is everything you have in stock. Reserved items are set aside for a campaign that is already running. Available is what you have left to use for new tasks.", featured: true },
   { id: "ngo-camp", category: "NGO", q: "How do I start a Campaign?", a: "Go to the Campaigns section, set your goals, choose the items you need from your inventory, and select the type of volunteers required. You can then invite volunteers to help.", featured: true },
   { id: "ngo-tech", category: "NGO", q: "How do I report a problem or request a feature?", a: "You can use the 'Contact Support' page. Our team will look into your request and you can track the status of your message in your dashboard." },
@@ -27,10 +28,11 @@ const FAQS = [
   { id: "gen-reviews", category: "General", q: "How are reviews handled?", a: "We take all feedback seriously. Reviews help us improve the platform and recognize top-performing volunteers and organizations." },
   { id: "gen-map", category: "General", q: "Can I use the map for different tasks?", a: "Yes. The map shows where donations are coming from and where supplies are stored. NGOs use this to plan the best way to deliver help." },
   { id: "gen-ai", category: "General", q: "Is the platform information accurate?", a: "Our system is very good at identifying donation details automatically, but NGO coordinators always double-check everything to be 100% sure the data is correct.", featured: true },
-  { id: "gen-cost", category: "General", q: "How much does it cost to use Sahyog?", a: "Sahyog is completely free for all registered NGOs and volunteers. It’s our way of supporting humanitarian work." }
+  { id: "gen-cost", category: "General", q: "How much does it cost to use Sahyog Sync?", a: "Sahyog Sync is completely free for all registered NGOs and volunteers. It’s our way of supporting humanitarian work." }
 ];
 
 const HelpCenter = () => {
+    const location = useLocation();
     const [searchQuery, setSearchQuery] = useState("");
     const [openFaq, setOpenFaq] = useState(null);
     const [showSuggestions, setShowSuggestions] = useState(false);
@@ -102,7 +104,7 @@ const HelpCenter = () => {
                         Help Center
                     </motion.h1>
                     <p className="text-sm md:text-xl opacity-90 font-medium leading-relaxed">
-                        Find answers to your questions about how to use Sahyog as an NGO or volunteer.
+                        Find answers to your questions about how to use Sahyog Sync as an NGO or volunteer.
                     </p>
                     
                     {/* 🕵️ LIVE SEARCH BOX */}
@@ -243,8 +245,12 @@ const HelpCenter = () => {
                         <p className="text-sm md:text-lg text-on_surface_variant opacity-60 font-medium px-4">Send us a message and our team will get back to you soon.</p>
                     </div>
                     <div className="flex flex-col sm:flex-row justify-center gap-4 px-6">
-                        <button className="px-10 py-5 bg-primaryGradient text-white rounded-2xl font-black uppercase tracking-widest text-[10px] md:text-xs shadow-xl shadow-primary/20 hover:scale-[1.05] active:scale-95 transition">Send a Message</button>
-                        <button className="px-10 py-5 bg-white border border-on_surface/5 text-on_surface_variant rounded-2xl font-black uppercase tracking-widest text-[10px] md:text-xs">System Status</button>
+                        <Link 
+                            to={location.pathname.includes('/volunteer') ? '/volunteer/contact' : '/contact'}
+                            className="px-10 py-5 bg-primaryGradient text-white rounded-2xl font-black uppercase tracking-widest text-[10px] md:text-xs shadow-xl shadow-primary/20 hover:scale-[1.05] active:scale-95 transition text-center"
+                        >
+                            Send a Message
+                        </Link>
                     </div>
                 </div>
             </div>

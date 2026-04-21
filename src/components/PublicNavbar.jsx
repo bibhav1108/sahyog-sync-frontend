@@ -15,9 +15,8 @@ const PublicNavbar = () => {
   }, []);
 
   const navLinks = [
-    { name: "Live Insights", path: "/#features" },
-    { name: "NGO Network", path: "/#network" },
-    { name: "About Us", path: "/#about" },
+    { name: "Live Insights", path: "/live-insights" },
+    { name: "NGO Network", path: "/ngo-network" },
   ];
 
   return (

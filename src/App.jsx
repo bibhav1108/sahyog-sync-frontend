@@ -35,6 +35,8 @@ import ReviewPage from "./pages/shared/ReviewPage";
 import ContactPage from "./pages/shared/ContactPage";
 import HelpCenter from "./pages/shared/HelpCenter";
 import PickLocation from "./pages/public/PickLocation";
+import NGONetwork from "./pages/public/NGONetwork";
+import LiveInsight from "./pages/public/LiveInsight";
 
 // NGO Admin Portal
 import NGOAdminLayout from "./components/NGOAdminLayout";
@@ -56,6 +58,9 @@ function App() {
           <Route path="/missions/:campaign_id" element={<MissionResponse />} />
           <Route path="/alert-location/:alert_id" element={<PickLocation />} />
           <Route path="/register-volunteer" element={<AuthPortal />} />
+          <Route path="/ngo-network" element={<NGONetwork />} />
+          <Route path="/live-insights" element={<LiveInsight />} />
+          <Route path="/contact" element={<ContactPage />} />
           
 
           {/* ================= ORG ROUTES ================= */}
@@ -208,16 +213,7 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/contact"
-            element={
-              <ProtectedRoute allowedRoles={["NGO_COORDINATOR", "NGO_ADMIN"]}>
-                <Layout>
-                  <ContactPage />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
+
           <Route
             path="/help"
             element={

@@ -301,7 +301,7 @@ const Campaigns = () => {
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
         <div>
           <p className="text-primary text-[10px] sm:text-[10px] font-black uppercase tracking-[0.3em] mb-1">NGO Operations</p>
-          <h1 className="text-3xl sm:text-4xl font-outfit font-black text-on_surface tracking-tight">Campaign Control</h1>
+          <h1 className="text-3xl sm:text-4xl font-outfit font-black text-on_surface tracking-tight">Campaign Management</h1>
           <p className="text-xs font-bold text-on_surface_variant/60 mt-1">Manage your active campaigns and volunteer coordination.</p>
         </div>
         <div className="flex flex-wrap gap-2 sm:gap-3">
@@ -350,7 +350,7 @@ const Campaigns = () => {
             ) : campaignList.length === 0 ? (
                 <div className="text-center py-20 bg-surface_high/30 rounded-3xl border border-dashed border-white/20">
                     <span className="material-symbols-outlined text-5xl opacity-10 mb-2">dashboard_customize</span>
-                    <p className="text-sm font-bold opacity-30">No active operations in sector</p>
+                    <p className="text-sm font-bold opacity-30">No active campaigns found</p>
                 </div>
             ) : (
                 <div className="space-y-4">
@@ -417,7 +417,7 @@ const Campaigns = () => {
 
             {/* Quick Actions */}
             <div className="grid gap-3">
-                <Link to="/inventory" className="flex items-center justify-between p-4 bg-on_surface text-white rounded-2xl group hover:-translate-x-1 transition-all">
+                <Link to="/inventory" className="flex items-center justify-between p-4 bg-primaryGradient text-white rounded-2xl group hover:-translate-x-1 transition-all shadow-lg shadow-primary/10">
                     <div className="flex items-center gap-3">
                         <span className="material-symbols-outlined text-sm">inventory_2</span>
                         <span className="text-[10px] font-black uppercase tracking-widest">Global Inventory</span>
@@ -445,138 +445,193 @@ const Campaigns = () => {
         maxWidth="max-w-5xl"
       >
         {selectedCampaign && (
-          <div className="space-y-8">
-            <div className="pr-10">
-                <p className="mt-2 text-sm text-on_surface_variant opacity-80 leading-relaxed italic border-l-4 border-primary/20 pl-4 py-1 bg-primary/5 rounded-r-xl">
-                  {selectedCampaign.description}
-                </p>
+          <div className="space-y-8 relative overflow-hidden">
+            {/* 🎭 BACKGROUND DECORATION */}
+            <div className="absolute -top-10 -right-10 opacity-[0.03] pointer-events-none rotate-12">
+                <span className="material-symbols-outlined text-[300px]">
+                    {selectedCampaign.type === 'HEALTH' ? 'medical_services' : 
+                     selectedCampaign.type === 'EDUCATION' ? 'menu_book' :
+                     selectedCampaign.type === 'EMERGENCY' ? 'emergency' : 'campaign'}
+                </span>
             </div>
 
-            <div className="grid gap-6 lg:grid-cols-2">
-              <div className="space-y-5">
-                <div className="rounded-3xl bg-surface_high/50 p-6 border border-white/20">
-                  <div className="flex flex-wrap items-center gap-2 mb-6">
-                    <span className="rounded-full bg-primary/10 border border-primary/20 px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-primary">
-                      {selectedCampaign.status}
-                    </span>
-                    <span className="rounded-full bg-surface_high border border-white/20 px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-on_surface">
-                      {selectedCampaign.type?.replaceAll("_", " ") || "OTHER"}
-                    </span>
-                  </div>
-
-                  <div className="grid gap-6 md:grid-cols-2">
-                    <div>
-                      <p className="text-[9px] font-black uppercase tracking-widest opacity-40 mb-1 leading-none">Location</p>
-                      <p className="text-sm font-black text-on_surface">{selectedCampaign.location_address || "TBD Area"}</p>
-                    </div>
-                    <div>
-                      <p className="text-[9px] font-black uppercase tracking-widest opacity-40 mb-1 leading-none">Target Goal</p>
-                      <p className="text-sm font-black text-on_surface">{selectedCampaign.target_quantity || "N/A"}</p>
-                    </div>
-                    <div>
-                      <p className="text-[9px] font-black uppercase tracking-widest opacity-40 mb-1 leading-none">Volunteers Needed</p>
-                      <p className="text-sm font-black text-on_surface">{selectedCampaign.volunteers_required || 0} People</p>
-                    </div>
-                    <div>
-                      <p className="text-[9px] font-black uppercase tracking-widest opacity-40 mb-1 leading-none">Required Skills</p>
-                      <p className="text-sm font-black text-on_surface">
-                        {selectedCampaign?.required_skills?.length ? selectedCampaign.required_skills.join(", ") : "General Help"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="rounded-3xl border border-white/20 bg-surface_high/50 p-6 flex flex-col">
-                  <div className="mb-6 flex items-center justify-between">
-                    <h3 className="font-outfit font-black text-lg tracking-tight">Required Items</h3>
-                    <span className="text-[9px] font-black uppercase tracking-widest opacity-40">
-                      {selectedCampaign.items ? Object.keys(selectedCampaign.items).length : 0} Items
-                    </span>
-                  </div>
-
-                  {selectedCampaign.items && Object.keys(selectedCampaign.items).length > 0 ? (
-                    <div className="grid grid-cols-1 gap-2">
-                      {Object.entries(selectedCampaign.items).map(([k, v]) => (
-                        <div key={k} className="flex items-center justify-between rounded-2xl bg-white px-5 py-4 border border-on_surface/5 shadow-sm group hover:scale-[1.02] transition-transform">
-                          <span className="text-xs font-black text-on_surface uppercase tracking-tight">{k}</span>
-                          <span className="text-sm font-black text-primary bg-primary/5 px-4 py-1.5 rounded-xl border border-primary/10">{v} Units</span>
+            <div className="relative z-10 space-y-10">
+                <div className="flex flex-col md:flex-row gap-6 md:items-center justify-between">
+                    <div className="space-y-1">
+                        <div className="flex items-center gap-3 mb-2">
+                             <span className={`px-3 py-1 rounded-full text-[9px] font-black tracking-widest uppercase border ${
+                                 selectedCampaign.status === 'ACTIVE' 
+                                    ? "bg-green-500/10 text-green-600 border-green-500/20" 
+                                    : "bg-primary/10 text-primary border-primary/20"
+                             }`}>
+                                {selectedCampaign.status}
+                             </span>
+                             <span className="text-[10px] font-black uppercase tracking-widest text-on_surface_variant/40 flex items-center gap-2">
+                                <span className="material-symbols-outlined text-sm">category</span>
+                                {selectedCampaign.type?.replaceAll("_", " ")}
+                             </span>
                         </div>
-                      ))}
+                        <h2 className="text-3xl font-outfit font-black text-on_surface tracking-tight leading-tight max-w-2xl">
+                            {selectedCampaign.name}
+                        </h2>
                     </div>
-                  ) : (
-                    <p className="text-xs font-bold opacity-30 text-center py-10 italic">No specific items required</p>
-                  )}
                 </div>
-              </div>
 
-              <div className="space-y-5">
-                <div className="rounded-3xl border border-white/20 bg-surface_high/50 p-6 flex flex-col min-h-[400px]">
-                  <div className="mb-6 flex items-center justify-between">
-                    <h3 className="font-outfit font-black text-lg tracking-tight">Volunteer List</h3>
-                    <div className="flex gap-2">
-                         <span className="px-3 py-1 bg-surface_high text-on_surface_variant/60 rounded-lg text-[9px] font-black border border-white/20 tracking-widest uppercase">
-                            {pool.length} Applicants
-                         </span>
-                    </div>
-                  </div>
-
-                  {loadingPool ? (
-                    <div className="space-y-3 p-4">
-                      <SkeletonStructure layout={Array(3).fill({ type: 'rect', height: 80, className: "rounded-2xl" })} />
-                    </div>
-                  ) : pool.length === 0 ? (
-                    <div className="flex-1 flex flex-col items-center justify-center opacity-20 py-10 border-2 border-dashed border-on_surface/5 rounded-[2rem] mx-4 mb-4">
-                      <span className="material-symbols-outlined text-5xl mb-3">groups</span>
-                      <p className="text-xs font-black uppercase tracking-widest">No volunteers have applied</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-3 px-4 max-h-[500px] overflow-y-auto custom-scrollbar">
-                      {pool.map((v) => (
-                        <div key={v.volunteer_id} className="group rounded-2xl border border-white bg-white p-5 hover:border-primary/40 hover:shadow-xl transition-all">
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="min-w-0">
-                              <p className="font-outfit font-black text-on_surface tracking-tight truncate">{v.volunteer_name}</p>
-                              <p className="text-[10px] font-bold text-on_surface_variant/40 line-clamp-1 mb-3">{v.skills?.length ? v.skills.join(", ") : "General Support"}</p>
-                              <span className={`px-2 py-1 rounded text-[8px] font-black uppercase tracking-widest border ${
-                                  v.status === 'APPROVED' ? "bg-green-500/10 text-green-600 border-green-500/20" : 
-                                  v.status === 'REJECTED' ? "bg-red-500/10 text-red-600 border-red-500/20" : 
-                                  "bg-primary/10 text-primary border-primary/20"
-                              }`}>
-                                {v.status}
-                              </span>
+                <div className="grid gap-8 lg:grid-cols-2">
+                    <div className="space-y-8">
+                        {/* 📝 DESCRIPTION CARD */}
+                        <div className="bg-white/40 backdrop-blur-md rounded-[2rem] border border-white p-8 shadow-soft relative group overflow-hidden">
+                            <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:scale-110 transition-transform">
+                                <span className="material-symbols-outlined text-4xl">description</span>
                             </div>
+                            <h3 className="text-xs font-black uppercase tracking-widest text-primary mb-4">Campaign Description</h3>
+                            <p className="text-sm md:text-base text-on_surface_variant leading-relaxed font-medium italic">
+                                "{selectedCampaign.description}"
+                            </p>
+                        </div>
 
-                            {v.status === "PENDING" && (
-                              <button
-                                onClick={() => approve(selectedCampaign.id, v.volunteer_id)}
-                                className="shrink-0 rounded-xl bg-on_surface px-4 py-2.5 text-[10px] font-black uppercase tracking-widest text-white shadow-lg shadow-on_surface/20 transition-all hover:bg-primary active:scale-95"
-                              >
-                                Approve
-                              </button>
+                        {/* 📍 CORE METRICS GRID */}
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="bg-white p-6 rounded-3xl border border-on_surface/5 shadow-sm space-y-3">
+                                <div className="w-10 h-10 rounded-xl bg-azure/10 text-azure flex items-center justify-center">
+                                    <span className="material-symbols-outlined text-xl">location_on</span>
+                                </div>
+                                <div>
+                                    <p className="text-[9px] font-black uppercase tracking-widest opacity-30">Location</p>
+                                    <p className="text-sm font-black text-on_surface truncate">{selectedCampaign.location_address || "TBD Area"}</p>
+                                </div>
+                            </div>
+                            <div className="bg-white p-6 rounded-3xl border border-on_surface/5 shadow-sm space-y-3">
+                                <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                                    <span className="material-symbols-outlined text-xl">flag</span>
+                                </div>
+                                <div>
+                                    <p className="text-[9px] font-black uppercase tracking-widest opacity-30">Target Goal</p>
+                                    <p className="text-sm font-black text-on_surface">{selectedCampaign.target_quantity || "N/A"}</p>
+                                </div>
+                            </div>
+                            <div className="bg-white p-6 rounded-3xl border border-on_surface/5 shadow-sm space-y-3">
+                                <div className="w-10 h-10 rounded-xl bg-green-500/10 text-green-600 flex items-center justify-center">
+                                    <span className="material-symbols-outlined text-xl">groups</span>
+                                </div>
+                                <div>
+                                    <p className="text-[9px] font-black uppercase tracking-widest opacity-30">Volunteers Needed</p>
+                                    <p className="text-sm font-black text-on_surface">{selectedCampaign.volunteers_required || 0} Volunteers</p>
+                                </div>
+                            </div>
+                            <div className="bg-white p-6 rounded-3xl border border-on_surface/5 shadow-sm space-y-3">
+                                <div className="w-10 h-10 rounded-xl bg-orange-500/10 text-orange-600 flex items-center justify-center">
+                                    <span className="material-symbols-outlined text-xl">handyman</span>
+                                </div>
+                                <div>
+                                    <p className="text-[9px] font-black uppercase tracking-widest opacity-30">Skills Needed</p>
+                                    <p className="text-sm font-black text-on_surface truncate">
+                                        {selectedCampaign?.required_skills?.length ? selectedCampaign.required_skills[0] : "General Help"}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* 📦 ITEMS CARD */}
+                        <div className="bg-surface_high/40 rounded-[2.5rem] border border-white p-8">
+                            <div className="flex items-center justify-between mb-6">
+                                <h3 className="font-outfit font-black text-lg tracking-tight uppercase">Needed Items</h3>
+                                <div className="p-2 bg-white rounded-lg border border-on_surface/5">
+                                    <span className="material-symbols-outlined text-sm opacity-40">inventory_2</span>
+                                </div>
+                            </div>
+                            
+                            {selectedCampaign.items && Object.keys(selectedCampaign.items).length > 0 ? (
+                                <div className="space-y-2">
+                                    {Object.entries(selectedCampaign.items).map(([k, v]) => (
+                                        <div key={k} className="flex items-center justify-between bg-white px-5 py-4 rounded-2xl border border-on_surface/5 group hover:border-primary/30 transition-colors shadow-sm">
+                                            <span className="text-xs font-black text-on_surface uppercase tracking-tight">{k}</span>
+                                            <span className="text-[10px] font-black text-primary bg-primary/5 px-4 py-1.5 rounded-xl border border-primary/10">{v} Units</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-center py-10 opacity-30 italic text-xs font-bold">No items defined</div>
                             )}
-                          </div>
-
-                          {v.match_score != null && (
-                            <div className="mt-4 pt-4 border-t border-on_surface/5">
-                              <div className="mb-2 flex items-center justify-between text-[8px] font-black uppercase tracking-[0.2em] opacity-40">
-                                <span>Skill Match</span>
-                                <span>{v.match_score}%</span>
-                              </div>
-                              <div className="h-1.5 rounded-full bg-surface_high overflow-hidden border border-on_surface/5">
-                                <motion.div
-                                  initial={{ width: 0 }}
-                                  animate={{ width: `${v.match_score}%` }}
-                                  className="h-full bg-primaryGradient rounded-full"
-                                />
-                              </div>
-                            </div>
-                          )}
                         </div>
-                      ))}
                     </div>
-                  )}
+
+                    {/* 👤 VOLUNTEER ROSTER CARD */}
+                    <div className="bg-white/80 rounded-[2.5rem] border border-white shadow-xl shadow-on_surface/5 flex flex-col max-h-[700px]">
+                        <div className="p-8 border-b border-on_surface/5 flex items-center justify-between shrink-0">
+                             <div>
+                                <h3 className="font-outfit font-black text-xl tracking-tight uppercase leading-none">Volunteer List</h3>
+                                <p className="text-[10px] font-bold text-on_surface_variant/40 mt-1 uppercase tracking-widest">Managing {pool.length} Applicants</p>
+                             </div>
+                             <div className="w-12 h-12 rounded-2xl bg-primaryGradient text-white flex items-center justify-center shadow-lg shadow-primary/20">
+                                <span className="material-symbols-outlined">person_add</span>
+                             </div>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+                            {loadingPool ? (
+                                <SkeletonStructure layout={Array(4).fill({ type: 'rect', height: 100, className: "rounded-[2rem]" })} />
+                            ) : pool.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center py-20 opacity-20 italic">
+                                    <span className="material-symbols-outlined text-5xl mb-4">groups_3</span>
+                                    <p className="text-xs font-black uppercase tracking-widest text-center">No active applications<br/>for this campaign</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    {pool.map((v) => (
+                                        <div key={v.volunteer_id} className="p-6 rounded-[2rem] bg-surface_high/30 border border-white hover:bg-white hover:shadow-lg transition-all group">
+                                            <div className="flex justify-between items-start mb-4">
+                                                <div className="flex gap-4 items-center">
+                                                    <div className="w-10 h-10 rounded-full bg-primaryGradient text-white flex items-center justify-center text-xs font-black shadow-md uppercase">
+                                                        {v.volunteer_name.charAt(0)}
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-outfit font-black text-on_surface tracking-tight leading-none">{v.volunteer_name}</p>
+                                                        <p className="text-[10px] font-bold text-on_surface_variant/40 mt-1 uppercase truncate max-w-[150px]">
+                                                            {v.skills?.join(", ") || "General Aid"}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border ${
+                                                    v.status === 'APPROVED' ? "bg-green-500/10 text-green-600 border-green-500/20" : 
+                                                    v.status === 'REJECTED' ? "bg-red-500/10 text-red-600 border-red-500/20" : 
+                                                    "bg-azure/10 text-azure border-azure/20"
+                                                }`}>
+                                                    {v.status}
+                                                </div>
+                                            </div>
+
+                                            {v.status === "PENDING" && (
+                                                <button
+                                                  onClick={() => approve(selectedCampaign.id, v.volunteer_id)}
+                                                  className="w-full py-3 bg-primaryGradient text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all mb-4"
+                                                >
+                                                  Approve Volunteer
+                                                </button>
+                                            )}
+
+                                            {v.match_score != null && (
+                                                <div className="pt-4 border-t border-on_surface/5">
+                                                    <div className="flex justify-between items-center text-[9px] font-black uppercase tracking-widest mb-2">
+                                                        <span className="opacity-40">Skill Match</span>
+                                                        <span className="text-primary">{v.match_score}%</span>
+                                                    </div>
+                                                    <div className="h-1.5 rounded-full bg-on_surface/5 overflow-hidden">
+                                                        <motion.div 
+                                                            initial={{ width: 0 }}
+                                                            animate={{ width: `${v.match_score}%` }}
+                                                            className="h-full bg-primaryGradient rounded-full"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
-              </div>
             </div>
           </div>
         )}
@@ -600,7 +655,7 @@ const Campaigns = () => {
             )}
 
             <textarea
-              className="min-h-[200px] w-full rounded-2xl border border-on_surface/5 bg-white p-5 text-sm font-medium text-on_surface placeholder-on_surface/30 shadow-inner outline-none transition focus:ring-2 focus:ring-primary/20"
+              className="min-h-[200px] w-full rounded-2xl border-2 border-transparent bg-white p-5 text-sm font-medium text-on_surface placeholder-on_surface/30 shadow-sm outline-none transition focus:border-primary/20 focus:ring-4 focus:ring-primary/5"
               placeholder="e.g. Distribute 100 food packets in Varanasi this Sunday. Need 5 volunteers for 2 hours..."
               value={aiPrompt}
               onChange={(e) => setAiPrompt(e.target.value)}
@@ -644,12 +699,12 @@ const Campaigns = () => {
 
             <div className="grid gap-8 lg:grid-cols-2">
               <div className="space-y-6">
-                <ActionInput label="Campaign Name" placeholder="e.g. Community Meal Drive" value={name} onChange={setName} />
+                <ActionInput label="Campaign Name" bgClassName="bg-white" placeholder="e.g. Community Meal Drive" value={name} onChange={setName} />
                 
                 <div className="space-y-2">
                     <label className="text-[9px] font-black uppercase tracking-widest text-on_surface_variant/40 ml-1">Campaign Description</label>
                     <textarea
-                        className="min-h-[140px] w-full rounded-2xl border border-on_surface/5 bg-white p-5 text-sm font-medium text-on_surface placeholder-on_surface/30 shadow-inner outline-none transition focus:ring-2 focus:ring-primary/20"
+                        className="min-h-[140px] w-full rounded-2xl border-2 border-transparent bg-white p-5 text-sm font-medium text-on_surface placeholder-on_surface/30 shadow-sm outline-none transition focus:border-primary/20 focus:ring-4 focus:ring-primary/5"
                         placeholder="Brief description of what you want to achieve..."
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
@@ -662,26 +717,26 @@ const Campaigns = () => {
                     <select
                       value={type}
                       onChange={(e) => setType(e.target.value)}
-                      className="w-full rounded-2xl border border-on_surface/5 bg-white px-5 py-3.5 text-xs font-black uppercase tracking-widest shadow-sm outline-none cursor-pointer focus:ring-2 focus:ring-primary/20"
+                      className="w-full rounded-2xl border-2 border-transparent bg-white px-5 py-3.5 text-xs font-black uppercase tracking-widest shadow-sm outline-none cursor-pointer focus:border-primary/20 focus:ring-4 focus:ring-primary/5 transition-all"
                     >
                       {TYPE_OPTIONS.map((opt) => (
                         <option key={opt} value={opt}>{opt.replaceAll("_", " ")}</option>
                       ))}
                     </select>
                   </div>
-                  <ActionInput label="Target Goal" placeholder="e.g. 100 meals" value={targetQuantity} onChange={setTargetQuantity} />
+                  <ActionInput label="Target Goal" bgClassName="bg-white" placeholder="e.g. 100 meals" value={targetQuantity} onChange={setTargetQuantity} />
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
-                  <ActionInput label="Start Date" type="datetime-local" value={startTime} onChange={setStartTime} />
-                  <ActionInput label="End Date" type="datetime-local" value={endTime} onChange={setEndTime} />
+                  <ActionInput label="Start Date" bgClassName="bg-white" type="datetime-local" value={startTime} onChange={setStartTime} />
+                  <ActionInput label="End Date" bgClassName="bg-white" type="datetime-local" value={endTime} onChange={setEndTime} />
                 </div>
 
-                <ActionInput label="Location" placeholder="e.g. Ward 12, City Hospital" value={location} onChange={setLocation} />
+                <ActionInput label="Location" bgClassName="bg-white" placeholder="e.g. Ward 12, City Hospital" value={location} onChange={setLocation} />
 
                 <div className="grid gap-4 md:grid-cols-2">
-                   <ActionInput label="Required Skills" placeholder="medical, logistics" value={skills} onChange={setSkills} />
-                   <ActionInput label="Volunteers Needed" type="number" placeholder="e.g. 5" value={volunteersRequired} onChange={setVolunteersRequired} />
+                   <ActionInput label="Required Skills" bgClassName="bg-white" placeholder="medical, logistics" value={skills} onChange={setSkills} />
+                   <ActionInput label="Volunteers Needed" bgClassName="bg-white" type="number" placeholder="e.g. 5" value={volunteersRequired} onChange={setVolunteersRequired} />
                 </div>
               </div>
 
@@ -734,7 +789,7 @@ const Campaigns = () => {
                     <button
                         disabled={creating}
                         onClick={createCampaign}
-                        className="flex-[2] rounded-2xl bg-on_surface py-4 text-[10px] font-black uppercase tracking-[0.2em] text-white shadow-2xl hover:bg-primary transition-all disabled:opacity-50 flex items-center justify-center gap-3"
+                        className="flex-[2] rounded-2xl bg-primaryGradient py-4 text-[10px] font-black uppercase tracking-[0.2em] text-white shadow-xl shadow-primary/20 hover:scale-[1.02] transition-all disabled:opacity-50 flex items-center justify-center gap-3"
                     >
                         {creating ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <span className="material-symbols-outlined text-lg">check_circle</span>}
                         {creating ? "Creating..." : "Create Campaign"}
