@@ -652,7 +652,8 @@ const ForgotPassForm = ({ email, setEmail, setError, setSuccess, setLoading, loa
   };
 
   const handleReset = async () => {
-    if (!validatePassword(newPass)) return setError("New password must be at least 8 characters with letters and numbers");
+    const passError = validatePassword(newPass);
+    if (passError) return setError(passError);
     const isEmail = validateEmail(email);
     
     try {
