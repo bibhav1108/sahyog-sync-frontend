@@ -6,6 +6,7 @@ import { useToast } from "../../../context/ToastContext";
 import SkeletonStructure from "../../../components/shared/SkeletonStructure";
 import ActionInput from "../../../components/shared/ActionInput";
 import { resolveProfileImage } from "../../../utils/imageUtils";
+import { formatExternalUrl } from "../../../utils/urlUtils";
 
 const STEPS = {
     BASIC: 1,
@@ -342,7 +343,7 @@ const OrgIdentityPage = () => {
                                                 placeholder="https://yourwebsite.org"
                                             />
                                         ) : (
-                                            <a href={org?.website_url} target="_blank" rel="noreferrer" className="text-sm font-black text-primary hover:underline flex items-center gap-2">
+                                            <a href={formatExternalUrl(org?.website_url)} target="_blank" rel="noreferrer" className="text-sm font-black text-primary hover:underline flex items-center gap-2">
                                                 <span className="material-symbols-outlined text-xs">link</span>
                                                 {org?.website_url || "Not added yet"}
                                             </a>

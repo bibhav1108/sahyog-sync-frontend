@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import API from "../../services/api";
+import { formatExternalUrl } from "../../utils/urlUtils";
 
 // Shared UI Components
 import PublicNavbar from "../../components/PublicNavbar";
@@ -145,7 +146,7 @@ const NGONetwork = () => {
                                             {org.website_url && (
                                                 <div className="flex items-center gap-3">
                                                     <span className="material-symbols-outlined text-xs text-primary">public</span>
-                                                    <a href={org.website_url} target="_blank" rel="noopener noreferrer" className="text-[10px] font-black uppercase tracking-widest text-primary hover:underline">Official Site</a>
+                                                    <a href={formatExternalUrl(org.website_url)} target="_blank" rel="noopener noreferrer" className="text-[10px] font-black uppercase tracking-widest text-primary hover:underline">Official Site</a>
                                                 </div>
                                             )}
                                         </div>

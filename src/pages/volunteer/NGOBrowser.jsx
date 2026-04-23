@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import API from "../../services/api";
 import { resolveProfileImage, handleImageError } from "../../utils/imageUtils";
+import { formatExternalUrl } from "../../utils/urlUtils";
 
 // Shared UI Components
 import MetricCard from "../../components/shared/MetricCard";
@@ -202,7 +203,7 @@ const NGOBrowser = () => {
                                             {/* Website */}
                                             <div className="col-span-1 lg:col-span-3 flex flex-col justify-center">
                                                 {org.website_url ? (
-                                                    <a href={org.website_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary hover:underline">
+                                                    <a href={formatExternalUrl(org.website_url)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary hover:underline">
                                                         <span className="material-symbols-outlined text-sm">language</span>
                                                         Visit Website
                                                     </a>
