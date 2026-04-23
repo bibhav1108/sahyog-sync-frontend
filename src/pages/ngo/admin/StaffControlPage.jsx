@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import API from "../../../services/api";
 import { useToast } from "../../../context/ToastContext";
+import { formatErrorMessage } from "../../../utils/errorUtils";
 import SkeletonStructure from "../../../components/shared/SkeletonStructure";
 
 const StaffControlPage = () => {
@@ -49,7 +50,7 @@ const StaffControlPage = () => {
             const usersRes = await API.get("/users/");
             setCoordinators(usersRes.data.filter(u => u.role === "NGO_COORDINATOR"));
         } catch (err) {
-            addToast(err.response?.data?.detail || "Failed to add member", "error");
+            addToast(formatErrorMessage(err), "error");
         } finally {
             setAdding(false);
         }

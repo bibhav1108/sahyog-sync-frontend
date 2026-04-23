@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import API from "../../services/api";
 import SkeletonStructure from "../../components/shared/SkeletonStructure";
@@ -11,6 +12,7 @@ const AdminOrganizations = () => {
   const [actionLoading, setActionLoading] = useState(null);
   const [selectedOrg, setSelectedOrg] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [checks, setChecks] = useState({ docs: false, identity: false });
 
   useEffect(() => {
     fetchOrgs();
@@ -75,7 +77,7 @@ const AdminOrganizations = () => {
 
   return (
     <div className="space-y-8 animate-[fadeIn_0.4s_ease]">
-      {/* 🚀 HEADER & SEARCH */}
+      {/* HEADER & SEARCH */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-outfit font-black tracking-tight">Organization Hub</h1>
@@ -96,7 +98,7 @@ const AdminOrganizations = () => {
         </div>
       </div>
 
-      {/* 📑 TABS */}
+      {/* TABS */}
       <div className="flex p-1.5 bg-surface_lowest rounded-2xl w-fit border border-surface_highest shadow-inner overflow-x-auto max-w-full">
         {[
           { id: "VERIFICATION_REQUESTED", label: "Verification Requested", icon: "pending_actions" },
@@ -119,7 +121,7 @@ const AdminOrganizations = () => {
         ))}
       </div>
 
-      {/* 🏢 CONTENT */}
+      {/* CONTENT */}
       <div className="bg-white rounded-[2rem] border border-surface_highest shadow-soft overflow-hidden">
         {loading ? (
             <div className="p-10">
@@ -184,96 +186,172 @@ const AdminOrganizations = () => {
         )}
       </div>
 
-      {/* 🔍 DETAIL MODAL */}
-      <AnimatePresence>
-        {showDetailModal && selectedOrg && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8">
-            <motion.div 
-               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-               onClick={() => setShowDetailModal(false)}
-               className="absolute inset-0 bg-on_surface/20 backdrop-blur-sm"
-            />
-            <motion.div 
-               initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
-               className="relative w-full max-w-4xl bg-white rounded-[3rem] shadow-2xl overflow-hidden flex flex-col max-h-full"
-            >
-              <div className="p-8 md:p-10 overflow-y-auto custom-scrollbar flex-1">
-                  <div className="flex justify-between items-start mb-8">
-                      <div>
-                          <h2 className="text-3xl font-black text-on_surface">{selectedOrg.name}</h2>
-                          <p className="text-on_surface_variant font-medium mt-1 uppercase tracking-widest text-[10px]">{selectedOrg.ngo_type} • ID: #{selectedOrg.id}</p>
-                      </div>
-                      <button onClick={() => setShowDetailModal(false)} className="w-10 h-10 rounded-full bg-surface_lowest flex items-center justify-center hover:bg-surface_high transition-colors">
-                          <span className="material-symbols-outlined">close</span>
-                      </button>
-                  </div>
+      {/* DETAIL MODAL (PORTALED) */}
+      {showDetailModal && selectedOrg && createPortal(
+        <AnimatePresence>
+            <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 md:p-8 font-outfit">
+                <motion.div 
+                    initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                    onClick={() => {
+                        setShowDetailModal(false);
+                        setChecks({ docs: false, identity: false });
+                    }}
+                    className="absolute inset-0 bg-black/70 backdrop-blur-md"
+                />
+                <motion.div 
+                    initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                    className="relative w-[95vw] max-w-7xl h-[92vh] bg-white rounded-[3rem] shadow-2xl overflow-hidden flex flex-col"
+                >
+                <div className="p-8 md:p-12 overflow-y-auto custom-scrollbar flex-1 space-y-12">
+                    <div className="flex justify-between items-center bg-surface_high/30 p-8 rounded-[2.5rem] border border-on_surface/5">
+                        <div className="flex items-center gap-8">
+                            <div className="w-20 h-20 rounded-3xl bg-primaryGradient text-white flex items-center justify-center shadow-lg shadow-primary/20">
+                                <span className="material-symbols-outlined text-4xl">corporate_fare</span>
+                            </div>
+                            <div>
+                                <div className="flex items-center gap-3 mb-1">
+                                    <h2 className="text-4xl font-black text-on_surface tracking-tight">{selectedOrg.name}</h2>
+                                    <span className="px-3 py-1 bg-amber-500 text-white text-[10px] font-black rounded-full uppercase tracking-widest">{selectedOrg.status.replace('_', ' ')}</span>
+                                </div>
+                                <p className="text-on_surface_variant font-bold uppercase tracking-widest text-xs opacity-60">NGO Application Profile • ID #{selectedOrg.id}</p>
+                            </div>
+                        </div>
+                        <button 
+                            onClick={() => {
+                                setShowDetailModal(false);
+                                setChecks({ docs: false, identity: false });
+                            }} 
+                            className="w-12 h-12 rounded-2xl bg-white border border-on_surface/5 flex items-center justify-center hover:bg-surface_high transition-all shadow-sm"
+                        >
+                            <span className="material-symbols-outlined">close</span>
+                        </button>
+                    </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                      {/* NGO INFO */}
-                      <div className="space-y-6">
-                          <h3 className="text-xs font-black uppercase tracking-widest text-primary">Organizational Details</h3>
-                          <DetailField label="Registration Number" value={selectedOrg.registration_number} />
-                          <DetailField label="PAN Number" value={selectedOrg.pan_number} />
-                          <DetailField label="Darpan ID" value={selectedOrg.ngo_darpan_id} />
-                          <DetailField label="Office Address" value={selectedOrg.office_address} />
-                      </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+                        {/* NGO INFO */}
+                        <div className="space-y-8">
+                            <div className="flex items-center gap-3">
+                                <span className="material-symbols-outlined text-primary">info</span>
+                                <h3 className="text-xs font-black uppercase tracking-[0.3em] text-primary/60">NGO Details</h3>
+                            </div>
+                            <div className="space-y-6">
+                                <DetailField label="Type of NGO" value={selectedOrg.ngo_type} />
+                                <DetailField label="Registration #" value={selectedOrg.registration_number} />
+                                <DetailField label="PAN Card Number" value={selectedOrg.pan_number} />
+                                <DetailField label="Darpan ID" value={selectedOrg.ngo_darpan_id || "Not Provided"} />
+                            </div>
+                        </div>
 
-                      {/* ADMIN INFO */}
-                      <div className="space-y-6">
-                          <h3 className="text-xs font-black uppercase tracking-widest text-primary">Administrator Identity</h3>
-                          <DetailField label="Full Name" value={selectedOrg.admin_name} />
-                          <DetailField label="Contact Phone" value={selectedOrg.admin_phone} />
-                          <DetailField label="ID Proof Type" value={selectedOrg.id_proof_type} />
-                          <DetailField label="ID Proof Number" value={selectedOrg.id_proof_number} />
-                      </div>
-                  </div>
+                        {/* ADMIN INFO */}
+                        <div className="space-y-8">
+                            <div className="flex items-center gap-3">
+                                <span className="material-symbols-outlined text-primary">person</span>
+                                <h3 className="text-xs font-black uppercase tracking-[0.3em] text-primary/60">Main Admin Person</h3>
+                            </div>
+                            <div className="space-y-6">
+                                <DetailField label="Full Name" value={selectedOrg.admin_name} />
+                                <DetailField label="Phone Number" value={selectedOrg.admin_phone} />
+                                <DetailField label="ID Proof Type" value={selectedOrg.id_proof_type} />
+                                <DetailField label="ID Card Number" value={selectedOrg.id_proof_number} />
+                            </div>
+                        </div>
 
-                  <div className="mt-10">
-                      <h3 className="text-xs font-black uppercase tracking-widest text-primary mb-6">Verification Documents</h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                          {selectedOrg.documents?.map(doc => (
-                              <a 
-                                key={doc.id} 
-                                href={doc.document_url} 
-                                target="_blank" 
-                                rel="noreferrer"
-                                className="p-4 bg-surface_lowest rounded-2xl border border-surface_highest hover:border-primary transition-all flex items-center gap-3 group"
-                              >
-                                  <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-on_surface_variant group-hover:text-primary transition-colors shadow-sm">
-                                      <span className="material-symbols-outlined text-sm">description</span>
-                                  </div>
-                                  <div className="min-w-0">
-                                      <p className="text-[10px] font-black uppercase tracking-tight text-on_surface truncate">{doc.document_type.replace('_', ' ')}</p>
-                                      <p className="text-[9px] font-medium text-on_surface_variant">View File</p>
-                                  </div>
-                              </a>
-                          ))}
-                          {(!selectedOrg.documents || selectedOrg.documents.length === 0) && (
-                              <p className="text-xs text-on_surface_variant italic">No documents uploaded.</p>
-                          )}
-                      </div>
-                  </div>
-              </div>
+                        {/* ADDRESS */}
+                        <div className="space-y-8">
+                            <div className="flex items-center gap-3">
+                                <span className="material-symbols-outlined text-primary">location_on</span>
+                                <h3 className="text-xs font-black uppercase tracking-[0.3em] text-primary/60">Office Location</h3>
+                            </div>
+                            <div className="space-y-6">
+                                <DetailField label="Address" value={selectedOrg.office_address} />
+                                <div className="p-6 bg-surface_high rounded-3xl border border-on_surface/5 space-y-4 shadow-inner">
+                                    <p className="text-xs font-medium text-on_surface_variant leading-relaxed italic">
+                                        Check all the details carefully. Once you approve, they can start using the portal.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-              {/* MODAL ACTIONS */}
-              <div className="p-8 bg-surface_lowest border-t border-surface_highest flex gap-4">
-                  <button 
-                    onClick={() => handleReject(selectedOrg.id)}
-                    className="flex-1 py-4 bg-white text-red-500 border border-red-50 text-[11px] font-black uppercase tracking-widest rounded-2xl hover:bg-red-50 transition-all"
-                  >
-                    Reject Application
-                  </button>
-                  <button 
-                    onClick={() => handleApprove(selectedOrg.id)}
-                    className="flex-[2] py-4 bg-primaryGradient text-white text-[11px] font-black uppercase tracking-widest rounded-2xl shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all"
-                  >
-                    Approve Organization
-                  </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+                    <div className="mt-6 pt-10 border-t border-on_surface/5">
+                        <div className="flex items-center gap-3 mb-8">
+                            <span className="material-symbols-outlined text-primary">file_present</span>
+                            <h3 className="text-xs font-black uppercase tracking-[0.3em] text-primary/60">Uploaded Documents</h3>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                            {selectedOrg.documents?.map(doc => (
+                                <a 
+                                    key={doc.id} 
+                                    href={doc.document_url} 
+                                    target="_blank" 
+                                    rel="noreferrer"
+                                    className="p-6 bg-surface_lowest rounded-[2rem] border border-surface_highest hover:border-primary transition-all flex flex-col gap-4 group shadow-sm hover:shadow-lg"
+                                >
+                                    <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-on_surface_variant group-hover:bg-primary group-hover:text-white transition-all shadow-inner">
+                                        <span className="material-symbols-outlined text-2xl">description</span>
+                                    </div>
+                                    <div className="min-w-0">
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-on_surface leading-tight mb-1">{doc.document_type.replace('_', ' ')}</p>
+                                        <p className="text-[9px] font-bold text-primary flex items-center gap-1 uppercase">Open File</p>
+                                    </div>
+                                </a>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                {/* MODAL ACTIONS */}
+                <div className="p-10 bg-surface_lowest border-t border-surface_highest flex flex-col md:flex-row items-center gap-10 shrink-0 shadow-inner">
+                    <div className="flex flex-col gap-4 flex-1">
+                        <label className="flex items-center gap-4 cursor-pointer group">
+                            <input 
+                                type="checkbox" 
+                                checked={checks.docs}
+                                onChange={e => setChecks({...checks, docs: e.target.checked})}
+                                className="w-6 h-6 rounded-lg border-2 border-primary/20 text-primary focus:ring-primary/20 transition-all cursor-pointer"
+                            />
+                            <span className="text-sm font-bold text-on_surface group-hover:text-primary transition-colors">I have checked all the uploaded documents</span>
+                        </label>
+                        <label className="flex items-center gap-4 cursor-pointer group">
+                            <input 
+                                type="checkbox" 
+                                checked={checks.identity}
+                                onChange={e => setChecks({...checks, identity: e.target.checked})}
+                                className="w-6 h-6 rounded-lg border-2 border-primary/20 text-primary focus:ring-primary/20 transition-all cursor-pointer"
+                            />
+                            <span className="text-sm font-bold text-on_surface group-hover:text-primary transition-colors">I confirm all the information is correct</span>
+                        </label>
+                    </div>
+
+                    <div className="flex gap-4 w-full md:w-auto">
+                        <button 
+                            onClick={() => {
+                                handleReject(selectedOrg.id);
+                                setChecks({ docs: false, identity: false });
+                            }}
+                            className="px-8 py-5 bg-white text-red-500 border-2 border-red-500/10 text-xs font-black uppercase tracking-widest rounded-2xl hover:bg-red-50 transition-all flex items-center justify-center gap-2"
+                        >
+                            <span className="material-symbols-outlined">cancel</span>
+                            Reject
+                        </button>
+                        <button 
+                            onClick={() => {
+                                handleApprove(selectedOrg.id);
+                                setChecks({ docs: false, identity: false });
+                            }}
+                            disabled={!checks.docs || !checks.identity || (actionLoading === selectedOrg.id)}
+                            className="px-12 py-5 bg-primaryGradient text-white text-xs font-black uppercase tracking-widest rounded-2xl shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-30 disabled:grayscale disabled:scale-100 disabled:cursor-not-allowed"
+                        >
+                            <span className="material-symbols-outlined">verified</span>
+                            {actionLoading === selectedOrg.id ? "Working..." : "Approve NGO"}
+                        </button>
+                    </div>
+                </div>
+                </motion.div>
+            </div>
+        </AnimatePresence>,
+        document.body
+      )}
     </div>
   );
 };

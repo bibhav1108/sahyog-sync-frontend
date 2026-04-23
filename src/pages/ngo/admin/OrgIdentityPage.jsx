@@ -7,6 +7,7 @@ import SkeletonStructure from "../../../components/shared/SkeletonStructure";
 import ActionInput from "../../../components/shared/ActionInput";
 import { resolveProfileImage } from "../../../utils/imageUtils";
 import { formatExternalUrl } from "../../../utils/urlUtils";
+import { formatErrorMessage } from "../../../utils/errorUtils";
 
 const STEPS = {
     BASIC: 1,
@@ -84,6 +85,75 @@ const OrgIdentityPage = () => {
         id_proof_type: "AADHAAR",
         id_proof_number: ""
     });
+
+    const [errors, setErrors] = useState({});
+
+    const validateField = (name, value) => {
+        let error = "";
+        
+        if (["name", "phone", "email", "registration_number", "pan_number", "office_address", "admin_phone", "id_proof_number"].includes(name)) {
+            if (!value || value.trim() === "") {
+                error = "This field is required";
+            }
+        }
+
+        if (name === "email" && value) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(value)) {
+                error = "Invalid email format";
+            }
+        }
+
+        if (["phone", "admin_phone"].includes(name) && value) {
+            const phoneRegex = /^\+?[\d\s-]{10,}$/;
+            if (!phoneRegex.test(value)) {
+                error = "Invalid phone number (min 10 digits)";
+            }
+        }
+
+        if (name === "pan_number" && value) {
+            const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+            if (!panRegex.test(value.toUpperCase())) {
+                error = "Invalid PAN (e.g. ABCDE1234F)";
+            }
+        }
+
+        if (name === "id_proof_number" && value) {
+            if (formData.id_proof_type === "AADHAAR") {
+                const aadhaarClean = value.replace(/[\s-]/g, "");
+                if (!/^\d{12}$/.test(aadhaarClean)) {
+                    error = "Aadhaar must be 12 digits";
+                }
+            } else if (formData.id_proof_type === "PAN") {
+                if (!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(value.toUpperCase())) {
+                    error = "Invalid PAN Format";
+                }
+            } else if (!value || value.length < 5) {
+                error = "Invalid ID number";
+            }
+        }
+
+        if (name === "id_proof_type") {
+            // Re-validate ID number if type changes
+            setTimeout(() => validateField("id_proof_number", formData.id_proof_number), 0);
+        }
+
+        if (name === "website_url" && value) {
+            try {
+                new URL(value.startsWith('http') ? value : `https://${value}`);
+            } catch (_) {
+                error = "Invalid website URL";
+            }
+        }
+
+        setErrors(prev => ({ ...prev, [name]: error }));
+        return error === "";
+    };
+
+    const updateField = (name, value) => {
+        setFormData(prev => ({ ...prev, [name]: value }));
+        validateField(name, value);
+    };
 
     const [documents, setDocuments] = useState([]); // [{type, name, file, url, isMandatory}]
 
@@ -183,7 +253,7 @@ const OrgIdentityPage = () => {
             await fetchOrg();
             return true;
         } catch (err) {
-            if (!quiet) addToast(err.response?.data?.detail || "Failed to save draft", "error");
+            if (!quiet) addToast(formatErrorMessage(err), "error");
             return false;
         } finally {
             if (!quiet) setSaving(false);
@@ -197,19 +267,38 @@ const OrgIdentityPage = () => {
             addToast("Verification request submitted successfully!", "success");
             await fetchOrg();
         } catch (err) {
-            addToast(err.response?.data?.detail || "Submission failed", "error");
+            addToast(formatErrorMessage(err), "error");
         } finally {
             setSaving(false);
         }
     };
 
     const handleNextStep = async () => {
-        // Auto-save when leaving Step 3 to ensure org exists for Step 4 uploads
-        if (step === STEPS.ADMIN) {
-            const success = await saveOnboardingDraft();
-            if (!success) return;
+        setSaving(true);
+        let stepIsValid = true;
+        
+        if (step === STEPS.BASIC) {
+            stepIsValid = validateField("name", formData.name) && 
+                         validateField("email", formData.email) && 
+                         validateField("phone", formData.phone);
+        } else if (step === STEPS.LEGAL) {
+            stepIsValid = validateField("registration_number", formData.registration_number) && 
+                         validateField("pan_number", formData.pan_number) &&
+                         validateField("office_address", formData.office_address);
+        } else if (step === STEPS.ADMIN) {
+            stepIsValid = validateField("admin_phone", formData.admin_phone) && 
+                         validateField("id_proof_number", formData.id_proof_number);
         }
-        setStep(step + 1);
+
+        if (!stepIsValid) {
+            addToast("Please correct the errors before proceeding", "error");
+            setSaving(false);
+            return;
+        }
+
+        const success = await saveOnboardingDraft(true);
+        if (success) setStep(s => s + 1);
+        setSaving(false);
     };
 
     if (loading) return (
@@ -458,10 +547,10 @@ const OrgIdentityPage = () => {
                                 <span className="w-10 h-10 bg-primary/10 text-primary rounded-xl flex items-center justify-center text-lg font-black">1</span>
                                 NGO Fundamentals
                             </h2>
-                            <ActionInput label="Organization Legal Name" value={formData.name} onChange={v => setFormData({...formData, name: v})} placeholder="Helping Hands Foundation" />
+                            <ActionInput label="Organization Legal Name" value={formData.name} onChange={v => updateField('name', v)} error={errors.name} placeholder="Helping Hands Foundation" />
                             <div className="grid grid-cols-2 gap-6">
-                                <ActionInput label="Contact Email" type="email" value={formData.email} onChange={v => setFormData({...formData, email: v})} placeholder="admin@org.org" />
-                                <ActionInput label="Contact Phone" value={formData.phone} onChange={v => setFormData({...formData, phone: v})} placeholder="+91..." />
+                                <ActionInput label="Contact Email" type="email" value={formData.email} onChange={v => updateField('email', v)} error={errors.email} placeholder="admin@org.org" />
+                                <ActionInput label="Contact Phone" value={formData.phone} onChange={v => updateField('phone', v)} error={errors.phone} placeholder="+91..." />
                             </div>
                             <div className="space-y-1.5">
                                 <label className="text-[10px] font-black uppercase tracking-[0.3em] text-on_surface_variant/40 ml-4">NGO Type</label>
@@ -485,18 +574,21 @@ const OrgIdentityPage = () => {
                                 Legal Identity
                             </h2>
                             <div className="grid grid-cols-2 gap-6">
-                                <ActionInput label="Registration Number" value={formData.registration_number} onChange={v => setFormData({...formData, registration_number: v})} placeholder="REG/..." />
-                                <ActionInput label="NGO PAN Number" value={formData.pan_number} onChange={v => setFormData({...formData, pan_number: v})} placeholder="ABCDE1234F" />
+                                <ActionInput label="Registration Number" value={formData.registration_number} onChange={v => updateField('registration_number', v)} error={errors.registration_number} placeholder="REG/..." />
+                                <ActionInput label="NGO PAN Number" value={formData.pan_number} onChange={v => updateField('pan_number', v)} error={errors.pan_number} placeholder="ABCDE1234F" />
                             </div>
-                            <ActionInput label="NGO Darpan ID" value={formData.ngo_darpan_id} onChange={v => setFormData({...formData, ngo_darpan_id: v})} placeholder="KA/..." />
+                            <ActionInput label="NGO Darpan ID" value={formData.ngo_darpan_id} onChange={v => updateField('ngo_darpan_id', v)} error={errors.ngo_darpan_id} placeholder="KA/..." />
                             <div className="space-y-1.5">
-                                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-on_surface_variant/40 ml-4">Registered Office Address</label>
+                                <label className={`text-[10px] font-black uppercase tracking-[0.3em] ml-4 ${errors.office_address ? 'text-red-500' : 'text-on_surface_variant/40'}`}>Registered Office Address</label>
                                 <textarea 
-                                    className="w-full px-6 py-4 bg-surface_high text-sm font-bold border-2 border-transparent focus:border-primary/20 focus:outline-none rounded-2xl min-h-[100px]"
+                                    className={`w-full px-6 py-4 bg-surface_high text-sm font-bold border-2 transition-all rounded-2xl min-h-[100px] outline-none ${
+                                        errors.office_address ? 'border-red-500/50 focus:border-red-500' : 'border-transparent focus:border-primary/20'
+                                    }`}
                                     value={formData.office_address}
-                                    onChange={e => setFormData({...formData, office_address: e.target.value})}
+                                    onChange={e => updateField('office_address', e.target.value)}
                                     placeholder="Complete address as per registration docs..."
                                 />
+                                {errors.office_address && <p className="text-[10px] font-bold text-red-500 ml-4">{errors.office_address}</p>}
                             </div>
                         </motion.div>
                     )}
@@ -507,7 +599,7 @@ const OrgIdentityPage = () => {
                                 <span className="w-10 h-10 bg-primary/10 text-primary rounded-xl flex items-center justify-center text-lg font-black">3</span>
                                 Admin Verification
                             </h2>
-                            <ActionInput label="Admin Personal Phone" value={formData.admin_phone} onChange={v => setFormData({...formData, admin_phone: v})} placeholder="+91..." />
+                            <ActionInput label="Admin Personal Phone" value={formData.admin_phone} onChange={v => updateField('admin_phone', v)} error={errors.admin_phone} placeholder="+91..." />
                             
                             <div className="grid grid-cols-2 gap-6">
                                 <div className="space-y-1.5">
@@ -515,7 +607,7 @@ const OrgIdentityPage = () => {
                                     <select 
                                         className="w-full px-6 py-4 bg-surface_high text-sm font-bold border-2 border-transparent focus:border-primary/20 outline-none rounded-2xl appearance-none"
                                         value={formData.id_proof_type}
-                                        onChange={e => setFormData({...formData, id_proof_type: e.target.value})}
+                                        onChange={e => updateField('id_proof_type', e.target.value)}
                                     >
                                         <option value="AADHAAR">Aadhaar Card</option>
                                         <option value="PAN">PAN Card</option>
@@ -523,7 +615,7 @@ const OrgIdentityPage = () => {
                                         <option value="VOTER_ID">Voter ID</option>
                                     </select>
                                 </div>
-                                <ActionInput label="ID Proof Number" value={formData.id_proof_number} onChange={v => setFormData({...formData, id_proof_number: v})} placeholder="XXXX-XXXX-XXXX" />
+                                <ActionInput label="ID Proof Number" value={formData.id_proof_number} onChange={v => updateField('id_proof_number', v)} error={errors.id_proof_number} placeholder="XXXX-XXXX-XXXX" />
                             </div>
                         </motion.div>
                     )}
@@ -610,19 +702,37 @@ const OrgIdentityPage = () => {
                         <button 
                             disabled={saving}
                             onClick={handleNextStep}
-                            className="px-10 py-4 bg-primary text-white text-[11px] font-black uppercase tracking-widest rounded-full shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+                            className="px-10 py-4 bg-primary text-white text-[11px] font-black uppercase tracking-widest rounded-full shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2 disabled:bg-primary/40 disabled:scale-100 disabled:cursor-not-allowed"
                         >
-                            Continue
-                            <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+                            {saving ? (
+                                <>
+                                    <span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                                    <span>Saving...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <span>Continue</span>
+                                    <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+                                </>
+                            )}
                         </button>
                     ) : (
                         <button 
                             disabled={saving}
                             onClick={handleFinalSubmit}
-                            className="px-12 py-4 bg-primaryGradient text-white text-[11px] font-black uppercase tracking-widest rounded-full shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+                            className="px-12 py-4 bg-primaryGradient text-white text-[11px] font-black uppercase tracking-widest rounded-full shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center gap-2 disabled:opacity-50 disabled:scale-100 disabled:cursor-not-allowed"
                         >
-                            {saving ? "Processing..." : "Submit for Verification"}
-                            <span className="material-symbols-outlined text-[18px]">verified</span>
+                            {saving ? (
+                                <>
+                                    <span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                                    <span>Processing...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <span>Submit for Verification</span>
+                                    <span className="material-symbols-outlined text-[18px]">verified</span>
+                                </>
+                            )}
                         </button>
                     )}
                 </div>
