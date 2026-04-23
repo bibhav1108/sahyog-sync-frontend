@@ -12,6 +12,7 @@ const NGOBrowser = () => {
     const [myRequests, setMyRequests] = useState([]);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(null);
+    const [expandedOrg, setExpandedOrg] = useState(null);
 
     const fetchData = async () => {
         try {
@@ -166,82 +167,127 @@ const NGOBrowser = () => {
                                 const isMember = myCurrentNGO && myCurrentNGO.org_id === org.id;
                                 
                                 return (
-                                    <motion.div
-                                        key={org.id}
-                                        layout
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: i * 0.03 }}
-                                        className={`grid grid-cols-1 lg:grid-cols-12 gap-4 items-center px-6 sm:px-10 py-6 hover:bg-white/80 transition-all group ${
-                                            isMember ? "bg-primary/5" : ""
-                                        }`}
-                                    >
-                                        {/* Name & Icon */}
-                                        <div className="col-span-1 lg:col-span-4 flex items-center gap-5">
-                                            <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-on_surface_variant shadow-sm border border-on_surface/5 group-hover:bg-primaryGradient group-hover:text-white transition-all duration-500 shrink-0">
-                                                <span className="material-symbols-outlined text-xl">volunteer_activism</span>
+                                    <div key={org.id} className="flex flex-col">
+                                        <motion.div
+                                            layout
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: i * 0.03 }}
+                                            onClick={() => setExpandedOrg(expandedOrg === org.id ? null : org.id)}
+                                            className={`grid grid-cols-1 lg:grid-cols-12 gap-4 items-center px-6 sm:px-10 py-6 hover:bg-white transition-all group cursor-pointer ${
+                                                isMember ? "bg-primary/5" : "bg-transparent"
+                                            }`}
+                                        >
+                                            {/* Name & Icon */}
+                                            <div className="col-span-1 lg:col-span-4 flex items-center gap-5">
+                                                <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-on_surface_variant shadow-sm border border-on_surface/5 group-hover:bg-primaryGradient group-hover:text-white transition-all duration-500 shrink-0">
+                                                    <span className="material-symbols-outlined text-xl">{expandedOrg === org.id ? 'expand_less' : 'volunteer_activism'}</span>
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <h3 className="text-base font-black text-on_surface group-hover:text-primary transition-colors truncate">{org.name}</h3>
+                                                    <p className="text-[9px] font-bold text-on_surface_variant/40 uppercase tracking-widest truncate">Sector: {org.ngo_type || "General Logistics"}</p>
+                                                </div>
                                             </div>
-                                            <div className="min-w-0">
-                                                <h3 className="text-base font-black text-on_surface group-hover:text-primary transition-colors truncate">{org.name}</h3>
-                                                <p className="text-[9px] font-bold text-on_surface_variant/40 uppercase tracking-widest truncate">Sector: General Logistics</p>
+
+                                            {/* Website/Intel */}
+                                            <div className="col-span-1 lg:col-span-3 flex flex-col justify-center">
+                                                {org.website_url ? (
+                                                    <a href={org.website_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary hover:underline">
+                                                        <span className="material-symbols-outlined text-sm">public</span>
+                                                        View Intel
+                                                    </a>
+                                                ) : (
+                                                    <span className="text-[10px] font-bold text-on_surface_variant/30 uppercase italic">No External Data</span>
+                                                )}
                                             </div>
-                                        </div>
 
-                                        {/* Website/Intel */}
-                                        <div className="col-span-1 lg:col-span-3 flex flex-col justify-center">
-                                            {org.website_url ? (
-                                                <a href={org.website_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary hover:underline">
-                                                    <span className="material-symbols-outlined text-sm">public</span>
-                                                    View Intel
-                                                </a>
-                                            ) : (
-                                                <span className="text-[10px] font-bold text-on_surface_variant/30 uppercase italic">No External Data</span>
-                                            )}
-                                        </div>
+                                            {/* Status (Desktop Centered, Mobile Inline) */}
+                                            <div className="col-span-1 lg:col-span-2 flex items-center lg:justify-center">
+                                                {request?.status === "PENDING" && (
+                                                    <span className="px-3 py-1 bg-yellow-500/10 text-yellow-600 text-[8px] font-black uppercase tracking-[0.2em] rounded-lg border border-yellow-500/20">Pending</span>
+                                                )}
+                                                {isMember && (
+                                                    <span className="px-3 py-1 bg-green-500/10 text-green-600 text-[8px] font-black uppercase tracking-[0.2em] rounded-lg border border-green-500/20 flex items-center gap-1.5">
+                                                        <span className="w-1 h-1 bg-green-500 rounded-full animate-pulse"></span>
+                                                        Active
+                                                    </span>
+                                                )}
+                                                {!request && (
+                                                    <span className="px-3 py-1 bg-surface_high text-on_surface_variant/40 text-[8px] font-black uppercase tracking-[0.2em] rounded-lg border border-on_surface/5">Standby</span>
+                                                )}
+                                            </div>
 
-                                        {/* Status (Desktop Centered, Mobile Inline) */}
-                                        <div className="col-span-1 lg:col-span-2 flex items-center lg:justify-center">
-                                            {request?.status === "PENDING" && (
-                                                <span className="px-3 py-1 bg-yellow-500/10 text-yellow-600 text-[8px] font-black uppercase tracking-[0.2em] rounded-lg border border-yellow-500/20">Pending</span>
-                                            )}
-                                            {isMember && (
-                                                <span className="px-3 py-1 bg-green-500/10 text-green-600 text-[8px] font-black uppercase tracking-[0.2em] rounded-lg border border-green-500/20 flex items-center gap-1.5">
-                                                    <span className="w-1 h-1 bg-green-500 rounded-full animate-pulse"></span>
-                                                    Active
-                                                </span>
-                                            )}
-                                            {!request && (
-                                                <span className="px-3 py-1 bg-surface_high text-on_surface_variant/40 text-[8px] font-black uppercase tracking-[0.2em] rounded-lg border border-on_surface/5">Standby</span>
-                                            )}
-                                        </div>
+                                            {/* Action Button */}
+                                            <div className="col-span-1 lg:col-span-3 text-right flex items-center justify-end gap-4">
+                                                {request?.status === "PENDING" ? (
+                                                    <button 
+                                                        onClick={(e) => { e.stopPropagation(); handleCancel(request.id); }}
+                                                        disabled={actionLoading === `cancel-${request.id}`}
+                                                        className="w-full lg:w-auto px-6 py-2.5 text-red-500 text-[9px] font-black uppercase tracking-widest rounded-xl hover:bg-red-500 hover:text-white transition-all border border-red-500/20"
+                                                    >
+                                                        {actionLoading === `cancel-${request.id}` ? "Aborting..." : "Revoke Request"}
+                                                    </button>
+                                                ) : isMember ? (
+                                                    <span className="text-[9px] font-black text-primary/40 uppercase tracking-widest mr-4 hidden lg:inline-block italic">Operational Presence Confirmed</span>
+                                                ) : (
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); handleApply(org.id); }}
+                                                        disabled={actionLoading === org.id || hasActiveEngagement}
+                                                        className={`w-full lg:w-auto px-8 py-3 text-[9px] font-black uppercase tracking-widest rounded-xl shadow-lg transition-all active:scale-95 ${
+                                                            hasActiveEngagement 
+                                                                ? "bg-surface_high text-on_surface_variant/20 cursor-not-allowed" 
+                                                                : "bg-on_surface text-white hover:bg-primaryGradient hover:-translate-y-0.5"
+                                                        }`}
+                                                    >
+                                                        {actionLoading === org.id ? "Integrating..." : "Join Unit"}
+                                                    </button>
+                                                )}
+                                                <span className={`material-symbols-outlined transition-transform duration-300 opacity-20 ${expandedOrg === org.id ? 'rotate-180' : ''}`}>expand_more</span>
+                                            </div>
+                                        </motion.div>
 
-                                        {/* Action Button */}
-                                        <div className="col-span-1 lg:col-span-3 text-right">
-                                            {request?.status === "PENDING" ? (
-                                                <button 
-                                                    onClick={() => handleCancel(request.id)}
-                                                    disabled={actionLoading === `cancel-${request.id}`}
-                                                    className="w-full lg:w-auto px-6 py-2.5 text-red-500 text-[9px] font-black uppercase tracking-widest rounded-xl hover:bg-red-500 hover:text-white transition-all border border-red-500/20"
+                                        {/* DROPDOWN DETAILS */}
+                                        <AnimatePresence>
+                                            {expandedOrg === org.id && (
+                                                <motion.div
+                                                    initial={{ height: 0, opacity: 0 }}
+                                                    animate={{ height: "auto", opacity: 1 }}
+                                                    exit={{ height: 0, opacity: 0 }}
+                                                    className="overflow-hidden bg-on_surface/[0.01] border-x border-on_surface/5"
                                                 >
-                                                    {actionLoading === `cancel-${request.id}` ? "Aborting..." : "Revoke Request"}
-                                                </button>
-                                            ) : isMember ? (
-                                                <span className="text-[9px] font-black text-primary/40 uppercase tracking-widest mr-4 hidden lg:inline-block italic">Operational Presence Confirmed</span>
-                                            ) : (
-                                                <button
-                                                    onClick={() => handleApply(org.id)}
-                                                    disabled={actionLoading === org.id || hasActiveEngagement}
-                                                    className={`w-full lg:w-auto px-8 py-3 text-[9px] font-black uppercase tracking-widest rounded-xl shadow-lg transition-all active:scale-95 ${
-                                                        hasActiveEngagement 
-                                                            ? "bg-surface_high text-on_surface_variant/20 cursor-not-allowed" 
-                                                            : "bg-on_surface text-white hover:bg-primaryGradient hover:-translate-y-0.5"
-                                                    }`}
-                                                >
-                                                    {actionLoading === org.id ? "Integrating..." : "Join Unit"}
-                                                </button>
+                                                    <div className="px-10 py-8 grid grid-cols-1 md:grid-cols-2 gap-10">
+                                                        <div className="space-y-4">
+                                                            <div className="flex items-center gap-2 text-primary">
+                                                                <span className="material-symbols-outlined text-sm">info</span>
+                                                                <h4 className="text-[10px] font-black uppercase tracking-widest">About Organization</h4>
+                                                            </div>
+                                                            <p className="text-sm text-on_surface_variant leading-relaxed">
+                                                                {org.about || "This organization has not provided a detailed mission brief yet. They are active in the network and coordinating logistics resources."}
+                                                            </p>
+                                                        </div>
+                                                        <div className="grid grid-cols-2 gap-6">
+                                                            <div className="space-y-1">
+                                                                <p className="text-[9px] font-black uppercase tracking-widest opacity-40">Registration Type</p>
+                                                                <p className="text-sm font-bold text-on_surface">{org.ngo_type || "N/A"}</p>
+                                                            </div>
+                                                            <div className="space-y-1">
+                                                                <p className="text-[9px] font-black uppercase tracking-widest opacity-40">Operational Base</p>
+                                                                <p className="text-sm font-bold text-on_surface truncate">{org.office_address || "Generic Field Office"}</p>
+                                                            </div>
+                                                            <div className="space-y-1">
+                                                                <p className="text-[9px] font-black uppercase tracking-widest opacity-40">Contact Channel</p>
+                                                                <p className="text-sm font-bold text-primary">{org.contact_email}</p>
+                                                            </div>
+                                                            <div className="space-y-1">
+                                                                <p className="text-[9px] font-black uppercase tracking-widest opacity-40">Intel Source</p>
+                                                                <p className="text-sm font-bold text-on_surface">Official Verification</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </motion.div>
                                             )}
-                                        </div>
-                                    </motion.div>
+                                        </AnimatePresence>
+                                    </div>
                                 );
                             })}
                         </AnimatePresence>
