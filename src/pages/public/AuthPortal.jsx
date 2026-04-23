@@ -226,7 +226,7 @@ const AuthPortal = () => {
             <div className="relative">
               <AnimatePresence mode="wait">
                 {mode === MODES.LOGIN && (
-                  <LoginForm key="login" setEmail={setEmail} setPassword={setPassword} email={email} password={password} setError={setError} setLoading={setLoading} loading={loading} setMode={setMode} MODES={MODES} />
+                  <LoginForm key="login" setEmail={setEmail} setPassword={setPassword} email={email} password={password} setError={setError} setSuccess={setSuccess} setLoading={setLoading} loading={loading} setMode={setMode} MODES={MODES} />
                 )}
                 {mode === MODES.PICK_ROLE && (
                   <RolePicker key="roles" setMode={setMode} MODES={MODES} />
@@ -268,7 +268,7 @@ const AuthPortal = () => {
 /**
  * 🔑 LOGIN VIEW
  */
-const LoginForm = ({ email, setEmail, password, setPassword, setError, setLoading, loading, setMode, MODES }) => {
+const LoginForm = ({ email, setEmail, password, setPassword, setError, setSuccess, setLoading, loading, setMode, MODES }) => {
   const navigate = useNavigate();
   const [fieldErrors, setFieldErrors] = useState({});
 
