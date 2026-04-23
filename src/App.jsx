@@ -30,7 +30,6 @@ import AdminLayout from "./components/AdminLayout";
 import ActivityHistory from "./pages/ngo/archive/ActivityHistory";
 import MarketplaceInventory from "./pages/ngo/MarketplaceInventory";
 import CoordinatorProfile from "./pages/ngo/CoordinatorProfile";
-import OrganizationProfile from "./pages/ngo/OrganizationProfile";
 import ReviewPage from "./pages/shared/ReviewPage";
 import ContactPage from "./pages/shared/ContactPage";
 import HelpCenter from "./pages/shared/HelpCenter";
@@ -252,6 +251,16 @@ function App() {
               <ProtectedRoute allowedRoles={["NGO_ADMIN"]}>
                 <NGOAdminLayout>
                   <StaffControlPage />
+                </NGOAdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/ngo-admin/profile"
+            element={
+              <ProtectedRoute allowedRoles={["NGO_ADMIN"]}>
+                <NGOAdminLayout>
+                  <CoordinatorProfile />
                 </NGOAdminLayout>
               </ProtectedRoute>
             }
