@@ -22,29 +22,29 @@ const Landing = () => {
   return (
     <div className="min-h-screen bg-surface text-on_surface font-inter overflow-hidden">
       <PublicNavbar />
+
+        <div className="w-full bg-primary text-white mt-20 md:mt-24">
+        <div className="max-w-7xl mx-auto px-6 md:px-16 h-12 flex items-center justify-between gap-4">
+      
+          <p className="text-sm font-medium truncate">
+            💙 Support verified causes through our Telegram donation bot
+          </p>
+      
+          <a
+            href="https://t.me/SahyogSyncBot#"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-white text-primary px-4 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap hover:scale-105 transition-all duration-300"
+          >
+            Donate Now
+          </a>
+      
+        </div>
+      </div>
+
+
+      
       <main>
-
-        {/* ================= TOP DONATION BAR ================= */}
-          <div className="w-full bg-primary text-white">
-            <div className="max-w-7xl mx-auto px-6 md:px-16 h-12 flex items-center justify-between gap-4">
-          
-              <p className="text-sm font-medium truncate">
-                💙 Support verified causes through our Telegram donation bot
-              </p>
-          
-              <a
-                href="https://t.me/SahyogSyncBot#"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-white text-primary px-4 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap hover:scale-105 transition-all duration-300"
-              >
-                Donate Now
-              </a>
-          
-            </div>
-          </div>
-
-
         
         {/* ================= HERO ================= */}
         <section className="relative min-h-[90vh] flex items-center px-6 md:px-16 pt-32 pb-12 md:pt-40 md:pb-16">
