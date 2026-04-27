@@ -22,13 +22,49 @@ const Landing = () => {
   return (
     <div className="min-h-screen bg-surface text-on_surface font-inter overflow-hidden">
       <PublicNavbar />
-
       <main>
         {/* ================= HERO ================= */}
         <section className="relative min-h-[90vh] flex items-center px-6 md:px-16 pt-32 pb-12 md:pt-40 md:pb-16">
           <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-primary/10 blur-[100px] rounded-full -z-10" />
           <div className="absolute bottom-[-10%] left-[-5%] w-[400px] h-[400px] bg-azure/10 blur-[100px] rounded-full -z-10" />
 
+
+
+
+
+
+          {/* ================= TELEGRAM DONATION BANNER ================= */}
+          <div className="w-full bg-gradient-to-r from-[#0088cc] to-[#00a2ff] text-white">
+          <div className="max-w-7xl mx-auto px-6 md:px-16 py-3 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+
+              <div>
+                <p className="font-bold text-sm md:text-base">
+                  💙 Support real causes directly through our Telegram donation bot
+                </p>
+                <p className="text-xs md:text-sm text-white/80">
+                  Fast, secure and simple donations that reach where help is needed.
+                </p>
+              </div>
+          
+              <a
+                href="https://t.me/SahyogSyncBot#"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-white text-[#0088cc] px-5 py-2 rounded-xl font-bold hover:scale-105 transition-all shadow-md"
+              >
+                Donate Now →
+              </a>
+          
+            </div>
+          </div>
+
+
+
+
+
+
+
+          
           <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
             <motion.div
               initial="hidden"
