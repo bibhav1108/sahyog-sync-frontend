@@ -23,22 +23,23 @@ const Landing = () => {
     <div className="min-h-screen bg-surface text-on_surface font-inter overflow-hidden">
       <PublicNavbar />
 
-        <div className="w-full bg-primary text-white mt-20 md:mt-24">
+        {/* ================= DONATION BAR ================= */}
+      <div className="w-full bg-primary text-white mt-24 md:mt-28 mb-4">
         <div className="max-w-7xl mx-auto px-6 md:px-16 h-12 flex items-center justify-between gap-4">
-      
+
           <p className="text-sm font-medium truncate">
             💙 Support verified causes through our Telegram donation bot
           </p>
-      
+
           <a
-            href="https://t.me/SahyogSyncBot#"
+            href="https://t.me/SahyogSyncBot"
             target="_blank"
             rel="noopener noreferrer"
             className="bg-white text-primary px-4 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap hover:scale-105 transition-all duration-300"
           >
             Donate Now
           </a>
-      
+
         </div>
       </div>
 
@@ -47,7 +48,7 @@ const Landing = () => {
       <main>
         
         {/* ================= HERO ================= */}
-        <section className="relative min-h-[90vh] flex items-center px-6 md:px-16 pt-32 pb-12 md:pt-40 md:pb-16">
+        <section className="relative min-h-[90vh] flex items-center px-6 md:px-16 pt-20 pb-12 md:pt-24 md:pb-16">
           <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-primary/10 blur-[100px] rounded-full -z-10" />
           <div className="absolute bottom-[-10%] left-[-5%] w-[400px] h-[400px] bg-azure/10 blur-[100px] rounded-full -z-10" />
 
